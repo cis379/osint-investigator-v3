@@ -1,0 +1,16 @@
+{
+  "skills": {
+    "investigate": {
+      "path": "skills/investigate.md",
+      "description": "Launch an OSINT investigation from a seed selector"
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python *osint-investigator-v3*)",
+      "Bash(pip install sherlock-project)",
+      "Bash(pip install maigret)",
+      "Bash(pip install holehe)"
+    ]
+  }
+}

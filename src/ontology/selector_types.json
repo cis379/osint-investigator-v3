@@ -1,0 +1,1750 @@
+{
+  "selector_types": {
+    "xbox_gamertag": {
+      "description": "Xbox gamertag",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "telegram_export": {
+      "description": "Auto-discovered: telegram_export",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "chat_data"
+      ]
+    },
+    "credential": {
+      "description": "Auto-discovered: credential",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "breach_data",
+        "breach_record"
+      ]
+    },
+    "gpx_file": {
+      "description": "Auto-discovered: gpx_file",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "gpx_file",
+        "map_data"
+      ]
+    },
+    "ip_v6": {
+      "description": "IPv6 address",
+      "category": "infrastructure",
+      "tool_count": 7,
+      "yields_to": [
+        "asn",
+        "banners",
+        "carrier",
+        "company",
+        "domain",
+        "geolocation",
+        "ip_data",
+        "ip_v4",
+        "ports",
+        "services",
+        "threat_report",
+        "vulnerabilities"
+      ]
+    },
+    "onlyfans_handle": {
+      "description": "OnlyFans username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "whatsapp_number": {
+      "description": "WhatsApp phone number",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "lei_number": {
+      "description": "Auto-discovered: lei_number",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "snapchat_handle": {
+      "description": "Snapchat username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "audio_file": {
+      "description": "Audio file for analysis",
+      "category": "media",
+      "tool_count": 2,
+      "yields_to": [
+        "transcript"
+      ]
+    },
+    "vk_id": {
+      "description": "VK (VKontakte) user ID",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "bin_number": {
+      "description": "Auto-discovered: bin_number",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "url": {
+      "description": "Full URL",
+      "category": "infrastructure",
+      "tool_count": 145,
+      "yields_to": [
+        "analytics",
+        "archives",
+        "asin",
+        "audio",
+        "audio_file",
+        "camera_info",
+        "channel_analytics",
+        "channels",
+        "charts",
+        "chat_data",
+        "code",
+        "comment_data",
+        "comments",
+        "comparisons",
+        "connections",
+        "conversations",
+        "date",
+        "deleted_content",
+        "dns",
+        "document",
+        "documents",
+        "domain",
+        "domain_data",
+        "downloads",
+        "duplicates",
+        "duration",
+        "email",
+        "emails",
+        "exif",
+        "facebook_id",
+        "file",
+        "files",
+        "frames",
+        "friends",
+        "geolocation",
+        "github_profile",
+        "google_analytics_id",
+        "hash_md5",
+        "hash_sha256",
+        "history",
+        "image",
+        "images",
+        "instagram_profile",
+        "ip_v4",
+        "malware_analysis",
+        "media",
+        "messages",
+        "metadata",
+        "mood",
+        "name",
+        "playlist_analytics",
+        "playlists",
+        "post_data",
+        "posts",
+        "product",
+        "profiles",
+        "screenshots",
+        "social_accounts",
+        "social_media_profile",
+        "subtitles",
+        "summary",
+        "technologies",
+        "text",
+        "timestamp",
+        "timestamps",
+        "traffic",
+        "transcript",
+        "trends",
+        "tweet_data",
+        "tweets",
+        "ui_enhancements",
+        "url",
+        "urls",
+        "user_id",
+        "user_ids",
+        "username",
+        "usernames",
+        "validation",
+        "video",
+        "video_file",
+        "video_frames",
+        "videos",
+        "visualizations",
+        "vulnerability",
+        "warc_file",
+        "whois",
+        "youtube_tags"
+      ]
+    },
+    "tiktok_handle": {
+      "description": "TikTok username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "bssid": {
+      "description": "WiFi access point MAC (BSSID)",
+      "category": "infrastructure",
+      "tool_count": 3,
+      "yields_to": [
+        "coordinates",
+        "email",
+        "location",
+        "name",
+        "phone",
+        "social_media_profile"
+      ]
+    },
+    "vessel_mmsi": {
+      "description": "Ship MMSI or IMO number",
+      "category": "transport",
+      "tool_count": 1,
+      "yields_to": [
+        "vessel_data"
+      ]
+    },
+    "mac_address": {
+      "description": "Network MAC address",
+      "category": "infrastructure",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "iban": {
+      "description": "Auto-discovered: iban",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "credit_card_number": {
+      "description": "Auto-discovered: credit_card_number",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "google_dork": {
+      "description": "Auto-discovered: google_dork",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "url"
+      ]
+    },
+    "crypto_eth": {
+      "description": "Ethereum wallet address",
+      "category": "financial",
+      "tool_count": 7,
+      "yields_to": [
+        "addresses",
+        "balances",
+        "connections",
+        "contracts",
+        "crypto_btc",
+        "crypto_eth",
+        "name",
+        "tokens",
+        "transactions",
+        "visualizations"
+      ]
+    },
+    "location": {
+      "description": "Auto-discovered: location",
+      "category": "unknown",
+      "tool_count": 8,
+      "yields_to": [
+        "audio",
+        "document",
+        "email",
+        "iot_device",
+        "ip_data",
+        "location",
+        "name",
+        "phone",
+        "search_results",
+        "url"
+      ]
+    },
+    "eml_file": {
+      "description": "Auto-discovered: eml_file",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "email",
+        "metadata",
+        "threat_report",
+        "url"
+      ]
+    },
+    "twitter_archive": {
+      "description": "Auto-discovered: twitter_archive",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "documents",
+        "media",
+        "tweet_data",
+        "tweets"
+      ]
+    },
+    "video": {
+      "description": "Auto-discovered: video",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "video"
+      ]
+    },
+    "discord_id": {
+      "description": "Discord user/server ID",
+      "category": "identity",
+      "tool_count": 2,
+      "yields_to": [
+        "chat_data",
+        "discord_id",
+        "documents",
+        "messages",
+        "profiles",
+        "servers"
+      ]
+    },
+    "telegram_handle": {
+      "description": "Telegram username",
+      "category": "identity",
+      "tool_count": 12,
+      "yields_to": [
+        "activity",
+        "analytics",
+        "channel_analytics",
+        "channel_id",
+        "channels",
+        "chat_data",
+        "groups",
+        "messages",
+        "metadata",
+        "name",
+        "name_history",
+        "online_status",
+        "phone",
+        "posts",
+        "profiles",
+        "telegram_group",
+        "telegram_handle"
+      ]
+    },
+    "mbox_file": {
+      "description": "Auto-discovered: mbox_file",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "email",
+        "url"
+      ]
+    },
+    "domain": {
+      "description": "Domain name",
+      "category": "infrastructure",
+      "tool_count": 70,
+      "yields_to": [
+        "analytics",
+        "archives",
+        "asn",
+        "banners",
+        "breaches",
+        "certificate",
+        "certificates",
+        "company",
+        "competitors",
+        "connections",
+        "crypto_btc",
+        "crypto_ton",
+        "dataset",
+        "dates",
+        "dns",
+        "dns_history",
+        "document",
+        "documents",
+        "domain",
+        "domain_data",
+        "domains",
+        "email",
+        "emails",
+        "file",
+        "github_profile",
+        "hash_md5",
+        "hash_sha256",
+        "history",
+        "image",
+        "ip_data",
+        "ip_v4",
+        "ip_v6",
+        "leaks",
+        "malware_analysis",
+        "map_data",
+        "name",
+        "nft_data",
+        "nft_token",
+        "password",
+        "passwords",
+        "personal_data",
+        "phone",
+        "port",
+        "ports",
+        "post_data",
+        "profiles",
+        "registrar",
+        "repositories",
+        "reverse_ip",
+        "services",
+        "social_accounts",
+        "social_media_profile",
+        "subdomains",
+        "technologies",
+        "text",
+        "tool_links",
+        "traffic",
+        "url",
+        "urls",
+        "username",
+        "validation",
+        "visualizations",
+        "vulnerabilities",
+        "vulnerability",
+        "whois"
+      ]
+    },
+    "twitch_handle": {
+      "description": "Twitch username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "ssn": {
+      "description": "Auto-discovered: ssn",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "location",
+        "name"
+      ]
+    },
+    "lei": {
+      "description": "Auto-discovered: lei",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "github_username": {
+      "description": "GitHub username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "asin": {
+      "description": "Auto-discovered: asin",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "keyword"
+      ]
+    },
+    "twitter_id": {
+      "description": "Twitter/X numeric user ID",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "group_id": {
+      "description": "Auto-discovered: group_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "connections",
+        "profiles",
+        "username"
+      ]
+    },
+    "image": {
+      "description": "Image file or URL for reverse search",
+      "category": "media",
+      "tool_count": 25,
+      "yields_to": [
+        "age",
+        "analytics",
+        "camera_info",
+        "dates",
+        "duplicates",
+        "exif",
+        "face_attributes",
+        "fonts",
+        "forensics",
+        "gender",
+        "geolocation",
+        "image",
+        "images",
+        "map_data",
+        "maps",
+        "metadata",
+        "nft_data",
+        "nft_token",
+        "post_data",
+        "products",
+        "profiles",
+        "similar_images",
+        "social_accounts",
+        "url",
+        "urls",
+        "username"
+      ]
+    },
+    "cve_id": {
+      "description": "CVE vulnerability identifier",
+      "category": "security",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "whatsapp_export": {
+      "description": "Auto-discovered: whatsapp_export",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "chat_data"
+      ]
+    },
+    "serial_number": {
+      "description": "Auto-discovered: serial_number",
+      "category": "unknown",
+      "tool_count": 3,
+      "yields_to": [
+        "device_data",
+        "device_info",
+        "product",
+        "warranty"
+      ]
+    },
+    "node_id": {
+      "description": "Auto-discovered: node_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "name",
+        "profiles",
+        "sysop_info"
+      ]
+    },
+    "bin": {
+      "description": "Auto-discovered: bin",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "ssid": {
+      "description": "WiFi network SSID name",
+      "category": "infrastructure",
+      "tool_count": 1,
+      "yields_to": [
+        "coordinates"
+      ]
+    },
+    "hash_sha256": {
+      "description": "SHA256 file hash",
+      "category": "malware",
+      "tool_count": 6,
+      "yields_to": [
+        "dns",
+        "domain",
+        "hash_md5",
+        "hash_sha256",
+        "hash_type",
+        "ip_v4",
+        "malware_analysis",
+        "nft_data",
+        "nft_token",
+        "password",
+        "url",
+        "whois"
+      ]
+    },
+    "container_number": {
+      "description": "Auto-discovered: container_number",
+      "category": "unknown",
+      "tool_count": 3,
+      "yields_to": [
+        "shipping_data"
+      ]
+    },
+    "license_plate": {
+      "description": "Vehicle license/number plate",
+      "category": "transport",
+      "tool_count": 3,
+      "yields_to": [
+        "email",
+        "image",
+        "name",
+        "phone",
+        "vehicle_data"
+      ]
+    },
+    "name": {
+      "description": "Real name or alias",
+      "category": "identity",
+      "tool_count": 58,
+      "yields_to": [
+        "address",
+        "addresses",
+        "analytics",
+        "breaches",
+        "carrier",
+        "channel_analytics",
+        "company",
+        "connections",
+        "dns",
+        "document",
+        "document_id",
+        "domain",
+        "email",
+        "emails",
+        "facebook_id",
+        "genealogy_record",
+        "groups",
+        "location",
+        "mastodon_profile",
+        "name",
+        "password",
+        "passwords",
+        "personal_data",
+        "phone",
+        "posts",
+        "profiles",
+        "property_address",
+        "social_accounts",
+        "social_media_posts",
+        "social_media_profile",
+        "ssn",
+        "streaming_stats",
+        "sysop_info",
+        "url",
+        "username",
+        "validation",
+        "visualizations"
+      ]
+    },
+    "certificate": {
+      "description": "SSL/TLS certificate hash or serial",
+      "category": "infrastructure",
+      "tool_count": 1,
+      "yields_to": [
+        "certificate",
+        "domain",
+        "domain_data",
+        "ip_data",
+        "ip_v4",
+        "port"
+      ]
+    },
+    "crypto_tx": {
+      "description": "Cryptocurrency transaction hash",
+      "category": "financial",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "video_file": {
+      "description": "Video file for analysis",
+      "category": "media",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "file": {
+      "description": "Auto-discovered: file",
+      "category": "unknown",
+      "tool_count": 3,
+      "yields_to": [
+        "dns",
+        "documents",
+        "exif",
+        "malware_analysis",
+        "media",
+        "metadata",
+        "tweet_data",
+        "tweets",
+        "whois"
+      ]
+    },
+    "steam_id": {
+      "description": "Steam profile ID or vanity URL",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "spotify_user": {
+      "description": "Spotify username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "crypto_wallet": {
+      "description": "Generic cryptocurrency wallet address",
+      "category": "financial",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "hashtag": {
+      "description": "Social media hashtag",
+      "category": "social",
+      "tool_count": 15,
+      "yields_to": [
+        "analytics",
+        "demographics",
+        "documents",
+        "hashtag_analytics",
+        "instagram_profile",
+        "mastodon_profile",
+        "metadata",
+        "post_data",
+        "posts",
+        "profiles",
+        "sentiment",
+        "sentiment_data",
+        "trend_data",
+        "trends",
+        "tweet_data",
+        "tweets",
+        "twitter_profile",
+        "username",
+        "video_file",
+        "videos",
+        "visualizations"
+      ]
+    },
+    "ip_v4": {
+      "description": "IPv4 address",
+      "category": "infrastructure",
+      "tool_count": 29,
+      "yields_to": [
+        "asn",
+        "banners",
+        "breaches",
+        "carrier",
+        "certificate",
+        "certificates",
+        "company",
+        "connections",
+        "dns",
+        "dns_history",
+        "documents",
+        "domain",
+        "domain_data",
+        "email",
+        "geolocation",
+        "hash_md5",
+        "hash_sha256",
+        "ip_data",
+        "ip_v4",
+        "leaks",
+        "location",
+        "malware_analysis",
+        "name",
+        "password",
+        "passwords",
+        "personal_data",
+        "phone",
+        "port",
+        "ports",
+        "profiles",
+        "reverse_ip",
+        "services",
+        "social_accounts",
+        "social_media_profile",
+        "subdomains",
+        "threat_report",
+        "tool_links",
+        "url",
+        "urls",
+        "username",
+        "visualizations",
+        "vulnerabilities",
+        "vulnerability",
+        "whois"
+      ]
+    },
+    "app_id": {
+      "description": "Auto-discovered: app_id",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "metadata",
+        "url"
+      ]
+    },
+    "api_key": {
+      "description": "Auto-discovered: api_key",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "chat_data",
+        "credentials",
+        "files",
+        "messages",
+        "url"
+      ]
+    },
+    "slack_workspace": {
+      "description": "Slack workspace URL or name",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "code": {
+      "description": "Auto-discovered: code",
+      "category": "unknown",
+      "tool_count": 10,
+      "yields_to": [
+        "code",
+        "text"
+      ]
+    },
+    "property_address": {
+      "description": "Physical/real estate address",
+      "category": "geospatial",
+      "tool_count": 4,
+      "yields_to": [
+        "address",
+        "email",
+        "location",
+        "map_data",
+        "name",
+        "phone",
+        "social_media_profile",
+        "url"
+      ]
+    },
+    "http_status_code": {
+      "description": "Auto-discovered: http_status_code",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "image"
+      ]
+    },
+    "instagram_handle": {
+      "description": "Instagram handle",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "reddit_username": {
+      "description": "Reddit username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "keyword": {
+      "description": "Search keyword or phrase",
+      "category": "search",
+      "tool_count": 326,
+      "yields_to": [
+        "aircraft_data",
+        "alerts",
+        "analytics",
+        "articles",
+        "asin",
+        "audio",
+        "audio_file",
+        "banners",
+        "bots",
+        "breach_data",
+        "breach_record",
+        "buckets",
+        "certificate",
+        "channel_analytics",
+        "channels",
+        "code",
+        "comment_data",
+        "comments",
+        "company",
+        "connections",
+        "coordinates",
+        "crypto_btc",
+        "dataset",
+        "demographics",
+        "device_data",
+        "document",
+        "document_id",
+        "documents",
+        "domain",
+        "edit_history",
+        "edits",
+        "email",
+        "facebook_id",
+        "files",
+        "flight_data",
+        "geolocation",
+        "github_profile",
+        "google_dork",
+        "groups",
+        "hash_md5",
+        "hash_sha256",
+        "history",
+        "image",
+        "images",
+        "incident_report",
+        "instagram_profile",
+        "instances",
+        "iocs",
+        "iot_device",
+        "ip_data",
+        "ip_v4",
+        "keyword",
+        "leaks",
+        "lists",
+        "location",
+        "locations",
+        "map_data",
+        "mastodon_instance",
+        "mastodon_profile",
+        "media",
+        "messages",
+        "metadata",
+        "name",
+        "nft_data",
+        "nft_token",
+        "onion_urls",
+        "organizations",
+        "page_content",
+        "password",
+        "phone",
+        "port",
+        "ports",
+        "post_data",
+        "posts",
+        "product",
+        "profiles",
+        "pronunciations",
+        "property_address",
+        "rankings",
+        "repositories",
+        "rooms",
+        "schedule_data",
+        "search_results",
+        "sentiment",
+        "sentiment_data",
+        "servers",
+        "services",
+        "shipment_record",
+        "shipping_data",
+        "social_accounts",
+        "stories",
+        "streams",
+        "subreddit_data",
+        "subreddits",
+        "subtitles",
+        "summary",
+        "sysop_info",
+        "tables",
+        "tags",
+        "telegram_handle",
+        "text",
+        "threads",
+        "threat_intel",
+        "timestamps",
+        "traffic",
+        "transcript",
+        "trend_data",
+        "trends",
+        "tweet_data",
+        "tweets",
+        "twitter_list",
+        "twitter_profile",
+        "url",
+        "urls",
+        "username",
+        "video",
+        "videos",
+        "visualizations",
+        "vulnerabilities",
+        "vulnerability",
+        "youtube_channel_id",
+        "youtube_tags"
+      ]
+    },
+    "minecraft_username": {
+      "description": "Minecraft username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "username": {
+      "description": "Social media or platform username/handle",
+      "category": "identity",
+      "tool_count": 189,
+      "yields_to": [
+        "activity",
+        "activity_pattern",
+        "addresses",
+        "analytics",
+        "audiences",
+        "ban_status",
+        "behavior_patterns",
+        "bot_detection",
+        "bot_score",
+        "breaches",
+        "channel_analytics",
+        "channels",
+        "chat_data",
+        "comment_data",
+        "comments",
+        "comparisons",
+        "connections",
+        "crypto_btc",
+        "crypto_ton",
+        "dates",
+        "deleted_content",
+        "discord_id",
+        "dns",
+        "documents",
+        "domain",
+        "domains",
+        "earnings_estimate",
+        "edits",
+        "email",
+        "emails",
+        "engagement",
+        "facebook_id",
+        "feed_control",
+        "financial",
+        "follow_status",
+        "followers",
+        "following",
+        "friends",
+        "gaming_profile",
+        "geolocation",
+        "github_profile",
+        "groups",
+        "history",
+        "image",
+        "images",
+        "instagram_followers",
+        "instagram_profile",
+        "ip_v4",
+        "languages",
+        "lists",
+        "location",
+        "locations",
+        "logs",
+        "map_data",
+        "mastodon_profile",
+        "media",
+        "messages",
+        "metadata",
+        "name",
+        "nft_data",
+        "nft_token",
+        "online_status",
+        "password",
+        "passwords",
+        "personal_data",
+        "phone",
+        "post_data",
+        "posts",
+        "profiles",
+        "rankings",
+        "reddit_profile",
+        "relationship",
+        "removed_content",
+        "repositories",
+        "scores",
+        "servers",
+        "skype_id",
+        "social_accounts",
+        "social_media_posts",
+        "social_media_profile",
+        "stories",
+        "subscriptions",
+        "timeline",
+        "times",
+        "tool_links",
+        "topic_data",
+        "topics",
+        "trend_data",
+        "trends",
+        "tweet_data",
+        "tweets",
+        "twitch_followers",
+        "twitter_connections",
+        "twitter_followers",
+        "twitter_list",
+        "twitter_profile",
+        "url",
+        "urls",
+        "user_id",
+        "username",
+        "validation",
+        "verification_status",
+        "video",
+        "video_file",
+        "videos",
+        "visualizations",
+        "youtube_subscriptions",
+        "youtube_tags"
+      ]
+    },
+    "company": {
+      "description": "Company or organization name",
+      "category": "identity",
+      "tool_count": 31,
+      "yields_to": [
+        "company",
+        "connections",
+        "device_data",
+        "document",
+        "document_id",
+        "domain",
+        "edit_history",
+        "edits",
+        "email",
+        "emails",
+        "employees",
+        "name",
+        "organizations",
+        "phone",
+        "profiles",
+        "shipment_record",
+        "shipping_data",
+        "social_media_profile",
+        "url",
+        "username",
+        "validation",
+        "visualizations"
+      ]
+    },
+    "har_file": {
+      "description": "Auto-discovered: har_file",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "warc_file"
+      ]
+    },
+    "password": {
+      "description": "Password or password hash for breach search",
+      "category": "security",
+      "tool_count": 2,
+      "yields_to": [
+        "breaches",
+        "domain",
+        "email",
+        "password",
+        "passwords",
+        "personal_data",
+        "username"
+      ]
+    },
+    "email": {
+      "description": "Email address",
+      "category": "identity",
+      "tool_count": 58,
+      "yields_to": [
+        "address",
+        "addresses",
+        "breach_data",
+        "breach_record",
+        "breaches",
+        "connections",
+        "coordinates",
+        "dns",
+        "document",
+        "documents",
+        "domain",
+        "domains",
+        "email",
+        "emails",
+        "facebook_id",
+        "geolocation",
+        "google_profile",
+        "image",
+        "languages",
+        "leaks",
+        "location",
+        "locations",
+        "metadata",
+        "name",
+        "password",
+        "passwords",
+        "personal_data",
+        "pgp_key",
+        "phone",
+        "photos",
+        "profiles",
+        "skype_id",
+        "social_accounts",
+        "social_media_posts",
+        "social_media_profile",
+        "tool_links",
+        "url",
+        "urls",
+        "username",
+        "validation",
+        "visualizations"
+      ]
+    },
+    "regex": {
+      "description": "Auto-discovered: regex",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "subtitles",
+        "timestamps",
+        "transcript"
+      ]
+    },
+    "national_id": {
+      "description": "Auto-discovered: national_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "location",
+        "name"
+      ]
+    },
+    "vessel_name": {
+      "description": "Ship/vessel name",
+      "category": "transport",
+      "tool_count": 3,
+      "yields_to": [
+        "map_data",
+        "shipping_data",
+        "vessel_data"
+      ]
+    },
+    "coordinates": {
+      "description": "Lat/lon coordinate pair",
+      "category": "geospatial",
+      "tool_count": 151,
+      "yields_to": [
+        "audio",
+        "company",
+        "coordinates",
+        "environmental_data",
+        "flight_data",
+        "geotagged_content",
+        "image",
+        "incident_report",
+        "keyword",
+        "locations",
+        "map_data",
+        "phone",
+        "schedule_data",
+        "shipping_data",
+        "social_media_posts",
+        "tweet_data",
+        "tweets",
+        "url",
+        "vessel_data"
+      ]
+    },
+    "skype_id": {
+      "description": "Skype username",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "warc_file": {
+      "description": "Auto-discovered: warc_file",
+      "category": "unknown",
+      "tool_count": 3,
+      "yields_to": [
+        "file",
+        "metadata",
+        "url"
+      ]
+    },
+    "crypto_btc": {
+      "description": "Bitcoin wallet address",
+      "category": "financial",
+      "tool_count": 13,
+      "yields_to": [
+        "addresses",
+        "balances",
+        "connections",
+        "crypto_btc",
+        "crypto_eth",
+        "documents",
+        "incident_report",
+        "leaks",
+        "threat_report",
+        "transactions",
+        "url",
+        "urls",
+        "visualizations",
+        "wallet_clusters"
+      ]
+    },
+    "flight_number": {
+      "description": "Flight number (e.g., AA123)",
+      "category": "transport",
+      "tool_count": 7,
+      "yields_to": [
+        "flight_data",
+        "incident_report",
+        "map_data"
+      ]
+    },
+    "email_header": {
+      "description": "Auto-discovered: email_header",
+      "category": "unknown",
+      "tool_count": 3,
+      "yields_to": [
+        "email",
+        "ip_v4",
+        "metadata",
+        "routing"
+      ]
+    },
+    "youtube_channel_id": {
+      "description": "YouTube channel ID",
+      "category": "identity",
+      "tool_count": 3,
+      "yields_to": [
+        "analytics",
+        "channel_analytics",
+        "comment_data",
+        "comments",
+        "comparisons",
+        "media",
+        "playlists",
+        "subtitles",
+        "transcript",
+        "url",
+        "video_file",
+        "videos"
+      ]
+    },
+    "youtube_video_id": {
+      "description": "YouTube video ID",
+      "category": "media",
+      "tool_count": 5,
+      "yields_to": [
+        "analytics",
+        "comment_data",
+        "comments",
+        "documents",
+        "geolocation",
+        "metadata",
+        "playlists",
+        "subtitles",
+        "text",
+        "transcript",
+        "url",
+        "videos"
+      ]
+    },
+    "geolocation": {
+      "description": "GPS coordinates or location",
+      "category": "geospatial",
+      "tool_count": 15,
+      "yields_to": [
+        "documents",
+        "facebook_id",
+        "geolocation",
+        "groups",
+        "image",
+        "location_ids",
+        "locations",
+        "posts",
+        "profiles",
+        "rankings",
+        "social_media_posts",
+        "telegram_handle",
+        "trend_data",
+        "trends",
+        "tweet_data",
+        "tweets",
+        "url",
+        "username",
+        "videos",
+        "visualizations"
+      ]
+    },
+    "vin": {
+      "description": "Vehicle Identification Number",
+      "category": "transport",
+      "tool_count": 1,
+      "yields_to": [
+        "email",
+        "name",
+        "phone"
+      ]
+    },
+    "device_model": {
+      "description": "Auto-discovered: device_model",
+      "category": "unknown",
+      "tool_count": 3,
+      "yields_to": [
+        "ip_v4",
+        "password",
+        "username"
+      ]
+    },
+    "token_id": {
+      "description": "Auto-discovered: token_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "nft_data",
+        "nft_token"
+      ]
+    },
+    "hs_code": {
+      "description": "Auto-discovered: hs_code",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company",
+        "shipping_data"
+      ]
+    },
+    "snapchat_bitmoji_id": {
+      "description": "Auto-discovered: snapchat_bitmoji_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "avatars",
+        "image",
+        "images"
+      ]
+    },
+    "fdic_cert": {
+      "description": "Auto-discovered: fdic_cert",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "pgp_key": {
+      "description": "PGP/GPG key fingerprint or ID",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "hash_md5": {
+      "description": "MD5 file hash",
+      "category": "malware",
+      "tool_count": 8,
+      "yields_to": [
+        "dns",
+        "domain",
+        "domains",
+        "hash_md5",
+        "hash_sha256",
+        "hash_type",
+        "ip_v4",
+        "malware_analysis",
+        "password",
+        "url",
+        "whois"
+      ]
+    },
+    "cell_tower_id": {
+      "description": "Auto-discovered: cell_tower_id",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "coordinates",
+        "map_data"
+      ]
+    },
+    "fcc_id": {
+      "description": "Auto-discovered: fcc_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company",
+        "device_data"
+      ]
+    },
+    "doi": {
+      "description": "Auto-discovered: doi",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "document",
+        "url"
+      ]
+    },
+    "mastodon_handle": {
+      "description": "Mastodon handle (user@instance)",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "phone": {
+      "description": "Phone number",
+      "category": "identity",
+      "tool_count": 44,
+      "yields_to": [
+        "address",
+        "addresses",
+        "breaches",
+        "carrier",
+        "company",
+        "connections",
+        "coordinates",
+        "crypto_btc",
+        "crypto_ton",
+        "dns",
+        "documents",
+        "email",
+        "facebook_id",
+        "geolocation",
+        "image",
+        "leaks",
+        "location",
+        "name",
+        "nft_data",
+        "nft_token",
+        "online_status",
+        "password",
+        "passwords",
+        "personal_data",
+        "phone",
+        "phone_type",
+        "profiles",
+        "social_accounts",
+        "social_media_posts",
+        "social_media_profile",
+        "spam_status",
+        "telegram_group",
+        "telegram_handle",
+        "url",
+        "urls",
+        "username",
+        "validation",
+        "visualizations"
+      ]
+    },
+    "bank_identifier": {
+      "description": "Auto-discovered: bank_identifier",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company"
+      ]
+    },
+    "document_id": {
+      "description": "Auto-discovered: document_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "location",
+        "name"
+      ]
+    },
+    "nft_token": {
+      "description": "NFT token ID or collection",
+      "category": "financial",
+      "tool_count": 3,
+      "yields_to": [
+        "nft_data",
+        "nft_token"
+      ]
+    },
+    "hash_sha1": {
+      "description": "SHA1 file hash",
+      "category": "malware",
+      "tool_count": 4,
+      "yields_to": [
+        "dns",
+        "domain",
+        "hash_type",
+        "ip_v4",
+        "malware_analysis",
+        "password",
+        "url",
+        "whois"
+      ]
+    },
+    "artist_name": {
+      "description": "Auto-discovered: artist_name",
+      "category": "unknown",
+      "tool_count": 2,
+      "yields_to": [
+        "analytics",
+        "channel_analytics",
+        "streaming_stats"
+      ]
+    },
+    "imei": {
+      "description": "Mobile device IMEI number",
+      "category": "device",
+      "tool_count": 7,
+      "yields_to": [
+        "brand",
+        "device_data",
+        "device_info",
+        "email",
+        "location",
+        "manufacturer",
+        "model",
+        "name",
+        "phone",
+        "social_media_profile",
+        "warranty"
+      ]
+    },
+    "barcode": {
+      "description": "Auto-discovered: barcode",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "company",
+        "product"
+      ]
+    },
+    "favicon_hash": {
+      "description": "Website favicon hash",
+      "category": "infrastructure",
+      "tool_count": 0,
+      "yields_to": []
+    },
+    "asn": {
+      "description": "Autonomous System Number",
+      "category": "infrastructure",
+      "tool_count": 1,
+      "yields_to": [
+        "asn",
+        "carrier",
+        "geolocation"
+      ]
+    },
+    "facebook_id": {
+      "description": "Facebook numeric user ID",
+      "category": "identity",
+      "tool_count": 2,
+      "yields_to": [
+        "facebook_id",
+        "friends",
+        "name",
+        "social_accounts",
+        "username"
+      ]
+    },
+    "date": {
+      "description": "Auto-discovered: date",
+      "category": "unknown",
+      "tool_count": 5,
+      "yields_to": [
+        "history",
+        "locations",
+        "posts",
+        "repositories",
+        "trend_data",
+        "trends",
+        "url",
+        "videos"
+      ]
+    },
+    "document": {
+      "description": "Document file for analysis",
+      "category": "media",
+      "tool_count": 3,
+      "yields_to": [
+        "text",
+        "url"
+      ]
+    },
+    "slack_token": {
+      "description": "Auto-discovered: slack_token",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "chat_data",
+        "credentials",
+        "files",
+        "messages",
+        "url"
+      ]
+    },
+    "text": {
+      "description": "Auto-discovered: text",
+      "category": "unknown",
+      "tool_count": 6,
+      "yields_to": [
+        "audio",
+        "image",
+        "text",
+        "url",
+        "video"
+      ]
+    },
+    "subreddit": {
+      "description": "Reddit subreddit name",
+      "category": "social",
+      "tool_count": 7,
+      "yields_to": [
+        "activity_pattern",
+        "activity_patterns",
+        "analytics",
+        "comment_data",
+        "comments",
+        "documents",
+        "post_data",
+        "posts",
+        "removed_content",
+        "subreddit_data",
+        "subreddits",
+        "trend_data",
+        "trends"
+      ]
+    },
+    "voyage_number": {
+      "description": "Auto-discovered: voyage_number",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "shipping_data"
+      ]
+    },
+    "snapchat_id": {
+      "description": "Auto-discovered: snapchat_id",
+      "category": "unknown",
+      "tool_count": 1,
+      "yields_to": [
+        "avatars",
+        "image",
+        "images"
+      ]
+    },
+    "linkedin_url": {
+      "description": "LinkedIn profile URL",
+      "category": "identity",
+      "tool_count": 0,
+      "yields_to": []
+    }
+  }
+}

@@ -1,0 +1,53 @@
+# Investigation data (contains sensitive OSINT results)
+investigations/
+
+# Personal investigation notes
+*.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Expanded ontology intermediates (regenerable)
+src/ontology/*_expanded.json
+
+# External tool installs
+tools_installed/
+
+# Research intermediates
+docs/cipher387_full_readme.md
+docs/extracted_tools_*.json
+docs/tools_research_*.json
+
+# Regenerable ontology viz data (large JSON inlined into HTML)
+ontology_viz/ontology_data.json
+
+# Legacy planning docs
+PROJECT.md
+
+# Test scripts with hardcoded paths
+test_pipeline.py
+test_name_tools.py
+update_pivot_map.py

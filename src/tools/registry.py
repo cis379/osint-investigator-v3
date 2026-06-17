@@ -1,0 +1,96 @@
+import json
+from pathlib import Path
+from .base import BaseTool
+
+from . import username_tools
+from . import email_tools
+from . import domain_tools
+from . import ip_tools
+from . import phone_tools
+from . import crypto_tools
+from . import social_tools
+from . import image_tools
+from . import paste_tools
+from . import name_tools
+
+ALL_TOOL_MODULES = [
+    username_tools,
+    email_tools,
+    domain_tools,
+    ip_tools,
+    phone_tools,
+    crypto_tools,
+    social_tools,
+    image_tools,
+    paste_tools,
+    name_tools,
+]
+
+_tool_instances: dict[str, BaseTool] = {}
+
+
+def _load_tools():
+    if _tool_instances:
+        return
+    for module in ALL_TOOL_MODULES:
+        for tool in getattr(module, "TOOLS", []):
+            _tool_instances[tool.name] = tool
+
+
+def get_all_tools() -> dict[str, BaseTool]:
+    _load_tools()
+    return _tool_instances
+
+
+def get_tool(name: str) -> BaseTool | None:
+    _load_tools()
+    return _tool_instances.get(name)
+
+
+def get_tools_for_selector(selector_type: str) -> list[BaseTool]:
+    _load_tools()
+    ontology_path = Path(__file__).parent.parent / "ontology" / "pivot_map.json"
+    with open(ontology_path, "r", encoding="utf-8") as f:
+        pivot_map = json.load(f)["pivot_map"]
+
+    if selector_type not in pivot_map:
+        return []
+
+    tool_ids = pivot_map[selector_type]["tools"]
+    return [_tool_instances[tid] for tid in tool_ids if tid in _tool_instances]
+
+
+def run_tool(tool_name: str, selector: str, selector_type: str):
+    tool = get_tool(tool_name)
+    if not tool:
+        return None
+    return tool.query(selector, selector_type)
+
+
+def run_all_tools_for_selector(selector: str, selector_type: str) -> list:
+    tools = get_tools_for_selector(selector_type)
+    results = []
+    for tool in tools:
+        result = tool.query(selector, selector_type)
+        results.append(result)
+    return results
+
+
+def check_tool_availability() -> dict[str, bool]:
+    _load_tools()
+    status = {}
+    for name, tool in _tool_instances.items():
+        if tool.method in ("api", "library", "generator"):
+            status[name] = True
+        else:
+            status[name] = tool.check_installed()
+    return status
+
+
+if __name__ == "__main__":
+    print("=== Tool Registry ===")
+    availability = check_tool_availability()
+    for name, available in sorted(availability.items()):
+        status = "READY" if available else "NOT INSTALLED"
+        tool = get_tool(name)
+        print(f"  {name:25s} [{status:15s}] inputs: {tool.input_types}  outputs: {tool.output_types}")
