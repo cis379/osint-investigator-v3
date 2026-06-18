@@ -87,6 +87,38 @@ def get_selector_capability(selector_type: str) -> dict:
     }
 
 
+def get_web_search_profile(selector_type: str, selector: str | None = None) -> dict:
+    """Web-search line profile for a selector type (the SEPARATE collection line,
+    distinct from structured tools). Returns the strategy, seed query templates,
+    fetch priorities, and extract targets that guide the web-search collector skill.
+
+    If `selector` is given, the templates are rendered into ready-to-run `queries`
+    ({selector}, and for emails {local}/{domain}).
+    """
+    path = Path(__file__).parent.parent / "ontology" / "web_search.json"
+    with open(path, "r", encoding="utf-8") as f:
+        profiles = json.load(f)["web_search"]
+
+    prof = profiles.get(selector_type)
+    if not prof:
+        return {"selector_type": selector_type, "searchable": False}
+
+    prof = dict(prof)
+    prof["selector_type"] = selector_type
+    if selector is not None:
+        local, domain = selector, selector
+        if "@" in selector:
+            local, _, domain = selector.partition("@")
+        rendered = []
+        for t in prof.get("query_templates", []):
+            try:
+                rendered.append(t.format(selector=selector, domain=domain, local=local))
+            except (KeyError, IndexError, ValueError):
+                rendered.append(t)
+        prof["queries"] = rendered
+    return prof
+
+
 def run_tool(tool_name: str, selector: str, selector_type: str):
     tool = get_tool(tool_name)
     if not tool:

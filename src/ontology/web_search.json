@@ -1,0 +1,104 @@
+{
+  "_doc": "Web-search collection line. Separate from structured tools (pivot_map/tools_registry). Each searchable selector type declares a profile that GUIDES the web-search collector skill: a strategy, seed query templates (the collector also generates adaptive follow-ups), which result domains are worth fetching, and which entity types to extract. 'priority' = primary (web search is the main line for this type) or supplemental (structured tools lead; web search fills gaps). The collector returns RAW cited findings; the supervisor tiers and commits them.",
+  "web_search": {
+    "name": {
+      "searchable": true,
+      "priority": "primary",
+      "strategy": "Identify and disambiguate the real person. Highest value: employer + role/title, education, professional licenses (attorney/medical/etc.), location, contact info (email/phone), and family/associates. Public records, LinkedIn, .edu/.gov, and licensing/directory pages carry the most signal. For common names, only attach a finding if a corroborating detail ties it to the SAME individual; flag ambiguous matches.",
+      "query_templates": [
+        "\"{selector}\" site:linkedin.com",
+        "\"{selector}\" site:twitter.com OR site:x.com",
+        "\"{selector}\" site:github.com",
+        "\"{selector}\" email OR contact",
+        "\"{selector}\" resume OR CV filetype:pdf",
+        "\"{selector}\" (attorney OR lawyer OR professor OR director OR engineer OR founder)",
+        "\"{selector}\" (university OR college OR \"law school\" OR PhD OR JD OR MBA)",
+        "\"{selector}\" (bar admission OR license OR registration)"
+      ],
+      "fetch_priority": ["linkedin.com", "*.edu", "*.gov", "findlaw.com", "avvo.com", "theorg.com", "clustrmaps.com", "spokeo.com"],
+      "extract": ["email", "phone", "username", "company", "role", "location", "address", "url", "name", "education"]
+    },
+    "username": {
+      "searchable": true,
+      "priority": "supplemental",
+      "strategy": "The structured line (sherlock/maigret) enumerates account existence; web search is for ATTRIBUTION and content. Fetch the real profile pages to pull display name, bio, linked emails/sites, and cross-platform handles. Confirm a profile actually exists and belongs to the subject (vs a namespace collision).",
+      "query_templates": [
+        "\"{selector}\" site:instagram.com",
+        "\"{selector}\" site:twitter.com OR site:x.com",
+        "\"{selector}\" site:github.com",
+        "\"{selector}\" site:reddit.com",
+        "\"{selector}\" site:linkedin.com",
+        "\"{selector}\" site:t.me OR site:telegram.me",
+        "\"{selector}\" (bio OR profile OR \"real name\")"
+      ],
+      "fetch_priority": ["instagram.com", "threads.net", "bsky.app", "github.com", "linkedin.com", "reddit.com"],
+      "extract": ["name", "email", "username", "url", "company", "location"]
+    },
+    "email": {
+      "searchable": true,
+      "priority": "supplemental",
+      "strategy": "Tie the address to an identity and surface exposure. Look for the owner's name, associated usernames/profiles, and any breach/paste/leak mentions. The local-part often reveals a username to pivot on.",
+      "query_templates": [
+        "\"{selector}\"",
+        "\"{selector}\" -site:{domain}",
+        "\"{selector}\" site:pastebin.com OR site:github.com",
+        "\"{local}\" (profile OR linkedin OR twitter)",
+        "\"{selector}\" (password OR leak OR breach OR dump)"
+      ],
+      "fetch_priority": ["pastebin.com", "github.com", "linkedin.com"],
+      "extract": ["name", "username", "url", "company", "breach"]
+    },
+    "company": {
+      "searchable": true,
+      "priority": "primary",
+      "strategy": "Map the organization: official site/domains, key people, employees, locations, registrations. LinkedIn and business registries are highest value.",
+      "query_templates": [
+        "\"{selector}\" site:linkedin.com",
+        "\"{selector}\" (employees OR leadership OR team)",
+        "\"{selector}\" (headquarters OR address OR location)",
+        "\"{selector}\" (@gmail.com OR @outlook.com OR contact)"
+      ],
+      "fetch_priority": ["linkedin.com", "opencorporates.com", "sec.gov", "*.gov"],
+      "extract": ["domain", "name", "email", "location", "address", "url"]
+    },
+    "phone": {
+      "searchable": true,
+      "priority": "supplemental",
+      "strategy": "Attribute the number to a person/business via reverse-lookup and social mentions. Name + location are the prize.",
+      "query_templates": [
+        "\"{selector}\"",
+        "\"{selector}\" site:facebook.com OR site:linkedin.com",
+        "\"{selector}\" (name OR owner OR contact)"
+      ],
+      "fetch_priority": ["linkedin.com", "facebook.com", "truecaller.com"],
+      "extract": ["name", "company", "location", "url"]
+    },
+    "domain": {
+      "searchable": true,
+      "priority": "supplemental",
+      "strategy": "Structured tools (whois/dns/crt.sh) lead. Use web search for exposed files, leaked secrets, and who is behind it.",
+      "query_templates": [
+        "site:{selector}",
+        "site:{selector} filetype:pdf OR filetype:xlsx OR filetype:csv",
+        "site:{selector} inurl:admin OR inurl:login",
+        "\"{selector}\" site:github.com",
+        "\"{selector}\" (\"api key\" OR password OR secret)"
+      ],
+      "fetch_priority": ["github.com", "{selector}"],
+      "extract": ["email", "name", "company", "url", "credential"]
+    },
+    "telegram_handle": {
+      "searchable": true,
+      "priority": "primary",
+      "strategy": "telegram_handle has no structured tools, so web search IS the line. Find the channel/user, real name, linked handles on other platforms, and any indexing/mirror sites.",
+      "query_templates": [
+        "\"{selector}\" site:t.me",
+        "\"{selector}\" telegram",
+        "\"{selector}\" site:github.com",
+        "\"{selector}\" site:twitter.com OR site:x.com"
+      ],
+      "fetch_priority": ["t.me", "telegram.me"],
+      "extract": ["name", "username", "url", "channel"]
+    }
+  }
+}

@@ -11,6 +11,8 @@ Multi-agent OSINT investigation system. Takes a seed selector, pivots through OS
 - `src/tools/registry.py` - Tool loader and dispatcher
 - `src/tools/collect.py` - **Gatherer's tool.** Runs OSINT tool(s), logs raw output, returns JSON. Does NOT touch the graph.
 - `src/tools/graph_commit.py` - **Supervisor's tool.** Commits analyzed entities/relationships (with confidence tiers) to the graph; regenerates HTML + bibliography. Runs no tools.
+- `src/tools/web_collect.py` - **Web-search collector's logger.** Logs a web-search round (queries/pages/findings) to investigation.md and echoes findings for the supervisor. No graph writes.
+- `src/ontology/web_search.json` - The web-search LINE: per-selector-type search profiles (strategy, query templates, fetch priorities, extract targets). Read via `registry.get_web_search_profile(type)`.
 - `src/tools/execute.py` - Legacy all-in-one (runs tool + auto-graphs everything as "confirmed"). Superseded by the collect/graph_commit split; kept as a fallback.
 - `src/tools/name_tools.py` - Name-specific tools (Wikipedia, Wikidata, Gravatar, GitHub/GitLab username gen)
 - `src/graph/database.py` - NetworkX-based investigation graph with JSON persistence
@@ -36,8 +38,8 @@ Multi-agent OSINT investigation system. Takes a seed selector, pivots through OS
 1. User types `/investigate <selector>` (e.g., `/investigate user@example.com`)
 2. System detects selector type and creates investigation workspace
 3. Supervisor agent plans investigation using ontology
-4. Gatherer agents execute OSINT tools via `collect.py` (runs tools + logs RAW output; no graph writes)
-5. Supervisor analyzes the raw results, tiers findings by confidence, and builds the graph via `graph_commit.py`
+4. Collection runs on two lines: the **structured** gatherer via `collect.py` (typed tools), and the **web-search** collector via `skills/web_searcher.md` + `web_collect.py` (real searches/fetches). The supervisor routes each selector to the right line(s) — web search is the primary line for `name`/`company`/`telegram_handle`.
+5. Supervisor analyzes the raw results from both lines, tiers findings by confidence, and builds the graph via `graph_commit.py`
 6. User interacts with supervisor throughout (redirect, inject seeds, ask questions)
 7. Report writer produces CTI report + HTML report + bibliography when investigation completes
 
