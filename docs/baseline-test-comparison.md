@@ -57,6 +57,21 @@ never a repeatable, logged tool. V3 (a copy of V1's *code*) only has
 wired as first-class, logged collectors at the ontology level. This is the #1 gap
 between V3 and V1's actual output, proven by direct comparison — not a theory.
 
+### 2026-06-18 — web-search line added (commit f1f31d7), re-test Robin Grieff
+The web-search collection line (ontology profiles + `skills/web_searcher.md` +
+`web_collect.py`) **closed the gap.** Live run INV-20260618-004:
+
+| Case | V3 result WITH web-search line | vs V1 |
+|------|-------------------------------|-------|
+| Robin Grieff | 20 entities (9 confirmed / 6 probable / 5 possible). Recovered the FULL cited identity: ASU SDOC Law Director role, NY attorney reg #5764840, Cornell JD, Binghamton BA, rgrieff@asu.edu, office phone/address, Rochester home address, family (Marvin + Brianna Grieff). | **Recovered 9/11 golden facts at probable+.** The 2 it couldn't verify on-page (rgrieff@gmail.com, DOB) were honestly down-tiered to `possible`, not overclaimed. |
+
+Structured line alone still produced 0 attribution (reproducing the prior baseline).
+The web-search line is what recovered the law connection. Disambiguation held
+(excluded unrelated near-names). Friction: external anti-scraping blocks
+(ContactOut 403, ClustrMaps refused, US News timeout) and WebFetch email redaction
+forced some facts to rest on search snippets → conservatively tiered. **Verdict: the
+web-search line works and matches V1 on a name seed.**
+
 ---
 
 ## How to compare (each future run)

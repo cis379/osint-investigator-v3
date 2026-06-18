@@ -55,9 +55,10 @@ searches), `fetch_priority` (which result domains are worth opening), and `extra
   The supervisor makes the final call.
 
 ## Step 5 — Log + return
-Write a JSON spec and run web_collect.py (logs raw audit + echoes findings):
-```bash
-cat > "{CASE_DIR}/_websearch.json" <<'JSON'
+**Write** the JSON spec to `{CASE_DIR}/_websearch.json` using your file-writing tool
+(the Write tool) — do NOT use a shell heredoc (`cat <<'JSON'`), which fails in
+PowerShell, this environment's primary shell. Spec shape:
+```json
 {
   "selector": "{SELECTOR}", "type": "{TYPE}",
   "searches": [
@@ -70,10 +71,18 @@ cat > "{CASE_DIR}/_websearch.json" <<'JSON'
      "source_url": "https://...", "confidence_hint": "probable"}
   ]
 }
-JSON
+```
+Then run (logs raw audit + echoes findings):
+```
 python C:/Users/cis37/osint-investigator-v3/src/tools/web_collect.py --log "{LOG_FILE}" --input "{CASE_DIR}/_websearch.json"
 ```
 Then return the findings JSON (and a 1-line note on coverage/ambiguities) to the supervisor.
+
+**Note on WebFetch:** the fetch summarizer may redact emails (rendering them as
+"[email protected]") and some sites block fetches (403 / connection refused /
+timeout). When a page is blocked or an email is scrubbed, fall back to the WebSearch
+result snippet for the value, and tier accordingly (snippet-only → usually `probable`
+or `possible`, since you couldn't confirm it on the source page directly).
 
 ## Rules
 1. **Cite everything** — URL + supporting snippet for every finding. No citation, no finding.

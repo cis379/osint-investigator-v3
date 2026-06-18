@@ -96,9 +96,10 @@ the graph HTML and bibliography.
 
 **You decide what enters the graph and how strong it is. See "Confidence Tiers" below.**
 
-Write a JSON spec of your analyzed findings and pipe it to graph_commit.py:
-```bash
-cat > "{CASE_DIR}/_commit.json" <<'JSON'
+**Write** the JSON spec of your analyzed findings to `{CASE_DIR}/_commit.json` using
+your file-writing tool (the Write tool) — do NOT use a shell heredoc (`cat <<'JSON'`),
+which fails in PowerShell, this environment's primary shell. Spec shape:
+```json
 {
   "entities": [
     {"value": "ns1.example.com", "type": "domain", "tool": "dns_lookup",
@@ -113,7 +114,9 @@ cat > "{CASE_DIR}/_commit.json" <<'JSON'
      "confidence": "confirmed", "citation": "dns_lookup NS record"}
   ]
 }
-JSON
+```
+Then run:
+```
 python C:/Users/cis37/osint-investigator-v3/src/tools/graph_commit.py --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
 ```
 
