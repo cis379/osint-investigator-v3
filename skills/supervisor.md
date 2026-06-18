@@ -39,10 +39,18 @@ You have **TWO collection lines**. Route each selector to the right one(s) — o
   structured tools are thin or absent, and web search is how you recover the real
   identity/affiliation. (A `name` seed yields almost nothing without it.)
 
-Check what's available for the type before dispatching:
+**Let the ontology decide what can run** — call `plan_collection`, which returns the
+runnable structured tools, the web-search availability, and applies a general-username
+fallback for handle-like types that have no tools:
 ```
-python -c "import sys; sys.path.insert(0,'C:/Users/cis37/osint-investigator-v3'); from src.tools.registry import get_selector_capability, get_web_search_profile; c=get_selector_capability('{TYPE}'); w=get_web_search_profile('{TYPE}'); print('structured tools:', c['implemented']); print('web searchable:', w.get('searchable'), '| priority:', w.get('priority'))"
+python -c "import sys,json; sys.path.insert(0,'C:/Users/cis37/osint-investigator-v3'); from src.tools.registry import plan_collection; print(json.dumps(plan_collection('{SELECTOR}','{TYPE}'), indent=2))"
 ```
+Collect on the returned `effective_type` (it may differ from the detected type when a
+fallback applied). **General-username rule:** a bare handle with no platform context is
+a *general* `username` — the broad enumerators (sherlock/maigret) check ALL platforms
+incl. Telegram/Instagram. Only use a platform-specific type (telegram_handle, etc.)
+when the user gives explicit context (e.g. a `t.me/` URL). If `fallback_applied` is
+true, tell the gatherer to collect as the `effective_type` and note it for the user.
 
 For each collection round:
 

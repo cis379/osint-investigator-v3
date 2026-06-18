@@ -119,6 +119,60 @@ def get_web_search_profile(selector_type: str, selector: str | None = None) -> d
     return prof
 
 
+# Handle-like types that, when they have no runnable structured tools, can fall back
+# to the general "username" bucket (the broad enumerators cover all platforms).
+_HANDLE_LIKE_TYPES = {
+    "username", "telegram_handle", "snapchat_id", "discord_id", "twitter",
+    "instagram", "mastodon_profile", "artist_name", "facebook_id", "node_id",
+}
+
+
+def plan_collection(selector: str, selector_type: str) -> dict:
+    """Ontology-driven routing: what can ACTUALLY run against this selector, across
+    both lines (structured + web-search), with a general-username fallback.
+
+    This is how a gatherer/supervisor uses the ontology to find runnable tools for a
+    selector instead of assuming a type has any. If a handle-like type has no
+    structured tools, it re-routes to general "username".
+    """
+    _load_tools()
+    cap = get_selector_capability(selector_type)
+    web = get_web_search_profile(selector_type, selector)
+
+    plan = {
+        "selector": selector,
+        "detected_type": selector_type,
+        "effective_type": selector_type,
+        "structured_tools": cap.get("implemented", []),
+        "web_searchable": bool(web.get("searchable")),
+        "web_priority": web.get("priority"),
+        "fallback_applied": False,
+        "note": "",
+    }
+
+    # Fallback: a handle-like type with no structured tools -> general username.
+    if not plan["structured_tools"] and selector_type in _HANDLE_LIKE_TYPES and selector_type != "username":
+        ucap = get_selector_capability("username")
+        if ucap.get("implemented"):
+            uweb = get_web_search_profile("username", selector)
+            plan.update({
+                "effective_type": "username",
+                "structured_tools": ucap["implemented"],
+                "web_searchable": bool(uweb.get("searchable")),
+                "web_priority": uweb.get("priority"),
+                "fallback_applied": True,
+                "note": (f"'{selector_type}' has no runnable structured tools; treating as "
+                         f"general username (sherlock/maigret cover all platforms incl. "
+                         f"Telegram/Instagram)."),
+            })
+
+    if not plan["structured_tools"] and not plan["web_searchable"]:
+        plan["note"] = plan["note"] or (
+            f"No runnable structured tools and not web-searchable for '{selector_type}'. "
+            f"Consider a type override or report the gap.")
+    return plan
+
+
 def run_tool(tool_name: str, selector: str, selector_type: str):
     tool = get_tool(tool_name)
     if not tool:

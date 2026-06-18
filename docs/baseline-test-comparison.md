@@ -13,6 +13,10 @@ The three standing cases (run each iteration):
 | name | `Robin Grieff` | name | `~/osint-investigator/investigations/INV-20260519-003` |
 | username | `allthespills` | username (Instagram) | `~/osint-investigator/investigations/INV-20260519-002` |
 
+> Selector typing fixed (commit after f1f31d7): `allthespills` now auto-detects as the
+> general `username` (was wrongly `telegram_handle`, which had no tools). `plan_collection`
+> also falls back handle-like tool-less types to general `username`. No manual override needed.
+
 ---
 
 ## V1 GOLDEN RESULTS (the bar to match)

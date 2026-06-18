@@ -41,6 +41,19 @@ The collect.py script:
 It does NOT build the graph, assign confidence, or assess significance. Just run
 collect.py and return the output.
 
+## Selector type
+Collect on the `type` the supervisor gives you — it has already run `plan_collection`,
+so this is the `effective_type` (e.g. a bare handle is collected as the general
+`username`, not a platform-specific type). Don't second-guess it.
+
+## Runtime — stay bounded
+Some tools are slow (maigret can sweep thousands of sites). Do NOT let collection hang:
+- Prefer `--run-all` for fast types; for `username` consider running tools one at a
+  time (`--tool sherlock`, then `--tool maigret`) so a slow one can't block the rest.
+- If a single tool runs longer than ~3-4 minutes, stop it, report what you have, and
+  note the timeout. Partial results + a clear note beat a hung collector.
+- `collect.py` per-tool execution is already time-capped; still, report promptly.
+
 ## Rules
 
 1. **NO ANALYSIS** - Do not interpret results. Do not assess significance. Do not identify patterns.

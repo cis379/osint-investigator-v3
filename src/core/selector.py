@@ -31,7 +31,13 @@ DETECTION_ORDER = [
     "phone",
     "domain",
     "discord_id",
-    "telegram_handle",
+    # NOTE: telegram_handle is intentionally NOT auto-detected. A bare handle is
+    # indistinguishable from a username on any other platform (the old pattern
+    # greedily claimed every 5-32 char handle as telegram_handle with false "exact"
+    # confidence, and telegram_handle has no structured tools -> silent 0-tool runs).
+    # A bare handle resolves to the general "username" bucket (sherlock/maigret cover
+    # all platforms, incl. Telegram/Instagram). Use telegram_handle only when the user
+    # gives explicit platform context (e.g. a t.me/ URL).
     "username",
 ]
 
@@ -83,11 +89,15 @@ def detect_selector_type(raw_input: str) -> Selector:
             if stype == "phone":
                 final_value = re.sub(r'[\s\-\(\)]', '', normalized)
 
+            # A bare handle matched as "username" is a GENERAL/ambiguous identifier
+            # (platform unknown) -> mark inferred so the supervisor treats it generally
+            # and leans on the broad enumerators + web search. Structured types
+            # (email/ip/domain/...) remain "exact".
             return Selector(
                 value=final_value,
                 selector_type=stype,
                 original_input=raw_input,
-                confidence="exact",
+                confidence="inferred" if stype == "username" else "exact",
             )
 
     return Selector(
