@@ -189,10 +189,10 @@ class InvestigationGraph:
 
             border_color = type_colors.get(entity_type, "#9E9E9E")
             bg_color = border_color + "33"
-            if confidence == "probable":
-                border_style = True
-            else:
-                border_style = False
+            # Weak tiers (probable/possible) get a dashed border so strong (confirmed)
+            # entities stand out. "possible" is the weakest — kept visible as a pivot,
+            # not hidden — see graph_commit.py.
+            border_style = confidence in ("probable", "possible")
 
             nodes.append({
                 "id": node_id,
@@ -227,15 +227,22 @@ class InvestigationGraph:
         edges = []
         for src, tgt, data in self.graph.edges(data=True):
             conf = data.get("confidence", "confirmed")
+            # 3-tier edge styling: confirmed (strong/solid) -> probable (dashed amber)
+            # -> possible (faint dotted). Weak links stay visible, just clearly weaker.
+            edge_style = {
+                "confirmed": {"color": "#8b949e", "opacity": 0.9, "width": 2, "dashes": False},
+                "probable": {"color": "#f0883e", "opacity": 0.8, "width": 1, "dashes": True},
+                "possible": {"color": "#b06a2c", "opacity": 0.45, "width": 1, "dashes": [2, 4]},
+            }.get(conf, {"color": "#f0883e", "opacity": 0.8, "width": 1, "dashes": True})
             edges.append({
                 "from": src,
                 "to": tgt,
                 "label": data.get("relationship", ""),
                 "title": f"Relationship: {data.get('relationship', '')}\nTool: {data.get('source_tool', '')}\nConfidence: {conf}\nCitation: {data.get('citation', '')}",
                 "arrows": "to",
-                "color": {"color": "#8b949e" if conf == "confirmed" else "#f0883e", "opacity": 0.8},
-                "width": 2 if conf == "confirmed" else 1,
-                "dashes": conf != "confirmed",
+                "color": {"color": edge_style["color"], "opacity": edge_style["opacity"]},
+                "width": edge_style["width"],
+                "dashes": edge_style["dashes"],
                 "font": {"color": "#8b949e", "size": 11, "strokeWidth": 2, "strokeColor": "#0d1117"},
             })
 

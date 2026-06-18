@@ -9,7 +9,9 @@ Multi-agent OSINT investigation system. Takes a seed selector, pivots through OS
 - `src/ontology/` - Selector types, tools registry, and pivot map JSON files
 - `src/tools/` - OSINT tool wrappers (each returns structured ToolResult objects)
 - `src/tools/registry.py` - Tool loader and dispatcher
-- `src/tools/execute.py` - Unified tool execution with auto graph/log/bibliography persistence
+- `src/tools/collect.py` - **Gatherer's tool.** Runs OSINT tool(s), logs raw output, returns JSON. Does NOT touch the graph.
+- `src/tools/graph_commit.py` - **Supervisor's tool.** Commits analyzed entities/relationships (with confidence tiers) to the graph; regenerates HTML + bibliography. Runs no tools.
+- `src/tools/execute.py` - Legacy all-in-one (runs tool + auto-graphs everything as "confirmed"). Superseded by the collect/graph_commit split; kept as a fallback.
 - `src/tools/name_tools.py` - Name-specific tools (Wikipedia, Wikidata, Gravatar, GitHub/GitLab username gen)
 - `src/graph/database.py` - NetworkX-based investigation graph with JSON persistence
 - `src/graph/visualizer.py` - vis.js HTML graph generator
@@ -27,8 +29,8 @@ Multi-agent OSINT investigation system. Takes a seed selector, pivots through OS
 1. User types `/investigate <selector>` (e.g., `/investigate user@example.com`)
 2. System detects selector type and creates investigation workspace
 3. Supervisor agent plans investigation using ontology
-4. Gatherer agents execute OSINT tools via `execute.py` (auto-logs, auto-graphs, auto-bibliography)
-5. Supervisor analyzes results, identifies connections, plans pivots
+4. Gatherer agents execute OSINT tools via `collect.py` (runs tools + logs RAW output; no graph writes)
+5. Supervisor analyzes the raw results, tiers findings by confidence, and builds the graph via `graph_commit.py`
 6. User interacts with supervisor throughout (redirect, inject seeds, ask questions)
 7. Report writer produces CTI report + HTML report + bibliography when investigation completes
 
@@ -50,14 +52,31 @@ The graph, bibliography, and log update live — open them in a browser and refr
 
 ## Running Tools
 
-### Via execute.py (recommended — handles logging, graph, bibliography automatically):
+The collection step and the graph-building step are deliberately separate:
+raw tool use (gatherer) is split from analysis/graph-building (supervisor).
+
+### Collection — `collect.py` (gatherer; raw output, no graph):
 ```bash
 # Single tool
-python src/tools/execute.py --tool whois_lookup --selector example.com --type domain \
-    --graph investigations/INV-xxx/graph.json --log investigations/INV-xxx/investigation.md \
-    --depth 1 --case INV-xxx --regen-html investigations/INV-xxx/graph.html
+python src/tools/collect.py --tool whois_lookup --selector example.com --type domain \
+    --log investigations/INV-xxx/investigation.md
 
 # All tools for a selector type
+python src/tools/collect.py --run-all --selector example.com --type domain \
+    --log investigations/INV-xxx/investigation.md
+```
+
+### Graph commit — `graph_commit.py` (supervisor; analyzed findings -> tiered graph):
+```bash
+python src/tools/graph_commit.py --graph investigations/INV-xxx/graph.json \
+    --regen-html investigations/INV-xxx/graph.html --case INV-xxx --input findings.json
+# findings.json: {"entities":[{value,type,tool,confidence,citation,depth}], "relationships":[...]}
+# confidence is one of: confirmed | probable | possible
+```
+
+### Legacy — `execute.py` (all-in-one; auto-graphs everything as "confirmed"):
+Kept as a fallback only. Prefer the collect/graph_commit split above.
+```bash
 python src/tools/execute.py --run-all --selector example.com --type domain \
     --graph investigations/INV-xxx/graph.json --log investigations/INV-xxx/investigation.md \
     --depth 1 --case INV-xxx --regen-html investigations/INV-xxx/graph.html
