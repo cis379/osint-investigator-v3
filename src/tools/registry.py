@@ -60,6 +60,33 @@ def get_tools_for_selector(selector_type: str) -> list[BaseTool]:
     return [_tool_instances[tid] for tid in tool_ids if tid in _tool_instances]
 
 
+def get_selector_capability(selector_type: str) -> dict:
+    """Honest view of a selector type: what ACTUALLY runs vs. the catalog claim.
+
+    Recomputed from the live registry (not the annotated fields), so it is always
+    truthful even if pivot_map's annotations are stale.
+    """
+    _load_tools()
+    ontology_path = Path(__file__).parent.parent / "ontology" / "pivot_map.json"
+    with open(ontology_path, "r", encoding="utf-8") as f:
+        pivot_map = json.load(f)["pivot_map"]
+
+    if selector_type not in pivot_map:
+        return {"selector_type": selector_type, "exists": False,
+                "implemented": [], "implemented_count": 0, "catalog_count": 0, "yields": []}
+
+    entry = pivot_map[selector_type]
+    impl = [tid for tid in entry.get("tools", []) if tid in _tool_instances]
+    return {
+        "selector_type": selector_type,
+        "exists": True,
+        "implemented": impl,
+        "implemented_count": len(impl),
+        "catalog_count": entry.get("tool_count", len(entry.get("tools", []))),
+        "yields": entry.get("yields", []),
+    }
+
+
 def run_tool(tool_name: str, selector: str, selector_type: str):
     tool = get_tool(tool_name)
     if not tool:

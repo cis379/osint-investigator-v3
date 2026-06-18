@@ -27,7 +27,7 @@ python -c "import sys; sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3
 ## Step 4: Load the ontology and plan
 
 ```
-python -c "import sys,json; sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3'); pm = json.load(open(r'C:\Users\cis37\osint-investigator-v3\src\ontology\pivot_map.json'))['pivot_map']; entry = pm.get('TYPE', {}); print(f'Tools available: {entry.get(\"tool_count\", 0)}'); print(f'Tool IDs: {entry.get(\"tools\", [])[:20]}'); print(f'Expected yields: {entry.get(\"yields\", [])}')"
+python -c "import sys; sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3'); from src.tools.registry import get_selector_capability; cap = get_selector_capability('TYPE'); print(f'Runnable tools: {cap[\"implemented_count\"]} of {cap[\"catalog_count\"]} cataloged'); print(f'Will actually run: {cap[\"implemented\"]}'); print(f'Expected yields: {cap[\"yields\"]}')"
 ```
 
 ## Step 5: Become the Supervisor

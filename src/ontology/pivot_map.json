@@ -303,7 +303,13 @@
         "youtube_tags"
       ],
       "tool_count": 189,
-      "description": "Social media or platform username/handle"
+      "description": "Social media or platform username/handle",
+      "implemented_tools": [
+        "sherlock",
+        "maigret",
+        "google_dork_generator"
+      ],
+      "implemented_count": 3
     },
     "email": {
       "tools": [
@@ -410,7 +416,13 @@
         "visualizations"
       ],
       "tool_count": 58,
-      "description": "Email address"
+      "description": "Email address",
+      "implemented_tools": [
+        "holehe",
+        "emailrep",
+        "google_dork_generator"
+      ],
+      "implemented_count": 3
     },
     "domain": {
       "tools": [
@@ -553,7 +565,18 @@
         "whois"
       ],
       "tool_count": 70,
-      "description": "Domain name"
+      "description": "Domain name",
+      "implemented_tools": [
+        "whois_lookup",
+        "dns_lookup",
+        "crtsh",
+        "wayback",
+        "http_headers",
+        "google_dork_generator",
+        "urlscan",
+        "threatfox"
+      ],
+      "implemented_count": 8
     },
     "url": {
       "tools": [
@@ -793,7 +816,14 @@
         "youtube_tags"
       ],
       "tool_count": 145,
-      "description": "Full URL"
+      "description": "Full URL",
+      "implemented_tools": [
+        "wayback",
+        "http_headers",
+        "urlscan",
+        "threatfox"
+      ],
+      "implemented_count": 4
     },
     "ip_v4": {
       "tools": [
@@ -874,7 +904,16 @@
         "whois"
       ],
       "tool_count": 29,
-      "description": "IPv4 address"
+      "description": "IPv4 address",
+      "implemented_tools": [
+        "ip_geolocation",
+        "reverse_dns",
+        "ipinfo",
+        "urlscan",
+        "threatfox",
+        "shodan_internetdb"
+      ],
+      "implemented_count": 6
     },
     "ip_v6": {
       "tools": [
@@ -901,7 +940,13 @@
         "vulnerabilities"
       ],
       "tool_count": 7,
-      "description": "IPv6 address"
+      "description": "IPv6 address",
+      "implemented_tools": [
+        "ip_geolocation",
+        "reverse_dns",
+        "ipinfo"
+      ],
+      "implemented_count": 3
     },
     "crypto_btc": {
       "tools": [
@@ -936,7 +981,11 @@
         "wallet_clusters"
       ],
       "tool_count": 13,
-      "description": "Bitcoin wallet address"
+      "description": "Bitcoin wallet address",
+      "implemented_tools": [
+        "blockchain_btc"
+      ],
+      "implemented_count": 1
     },
     "crypto_eth": {
       "tools": [
@@ -961,7 +1010,11 @@
         "visualizations"
       ],
       "tool_count": 7,
-      "description": "Ethereum wallet address"
+      "description": "Ethereum wallet address",
+      "implemented_tools": [
+        "etherscan"
+      ],
+      "implemented_count": 1
     },
     "phone": {
       "tools": [
@@ -1051,7 +1104,12 @@
         "visualizations"
       ],
       "tool_count": 44,
-      "description": "Phone number"
+      "description": "Phone number",
+      "implemented_tools": [
+        "phoneinfoga",
+        "google_dork_generator"
+      ],
+      "implemented_count": 2
     },
     "name": {
       "tools": [
@@ -1159,7 +1217,16 @@
         "visualizations"
       ],
       "tool_count": 63,
-      "description": "Real name or alias"
+      "description": "Real name or alias",
+      "implemented_tools": [
+        "gravatar_check",
+        "hibp_name_search",
+        "wikipedia_search",
+        "name_to_username",
+        "wikidata_search",
+        "google_dork_generator"
+      ],
+      "implemented_count": 6
     },
     "company": {
       "tools": [
@@ -1225,7 +1292,16 @@
         "visualizations"
       ],
       "tool_count": 36,
-      "description": "Company or organization name"
+      "description": "Company or organization name",
+      "implemented_tools": [
+        "name_to_username",
+        "gravatar_check",
+        "hibp_name_search",
+        "wikipedia_search",
+        "wikidata_search",
+        "google_dork_generator"
+      ],
+      "implemented_count": 6
     },
     "hash_md5": {
       "tools": [
@@ -1252,7 +1328,11 @@
         "whois"
       ],
       "tool_count": 8,
-      "description": "MD5 file hash"
+      "description": "MD5 file hash",
+      "implemented_tools": [
+        "threatfox"
+      ],
+      "implemented_count": 1
     },
     "hash_sha256": {
       "tools": [
@@ -1278,7 +1358,11 @@
         "whois"
       ],
       "tool_count": 6,
-      "description": "SHA256 file hash"
+      "description": "SHA256 file hash",
+      "implemented_tools": [
+        "threatfox"
+      ],
+      "implemented_count": 1
     },
     "hash_sha1": {
       "tools": [
@@ -1298,7 +1382,9 @@
         "whois"
       ],
       "tool_count": 4,
-      "description": "SHA1 file hash"
+      "description": "SHA1 file hash",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "keyword": {
       "tools": [
@@ -1754,7 +1840,9 @@
         "youtube_tags"
       ],
       "tool_count": 326,
-      "description": "Search keyword or phrase"
+      "description": "Search keyword or phrase",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "hashtag": {
       "tools": [
@@ -1798,7 +1886,9 @@
         "visualizations"
       ],
       "tool_count": 15,
-      "description": "Social media hashtag"
+      "description": "Social media hashtag",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "coordinates": {
       "tools": [
@@ -1976,7 +2066,9 @@
         "vessel_data"
       ],
       "tool_count": 151,
-      "description": "Lat/lon coordinate pair"
+      "description": "Lat/lon coordinate pair",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "geolocation": {
       "tools": [
@@ -2019,7 +2111,9 @@
         "visualizations"
       ],
       "tool_count": 15,
-      "description": "GPS coordinates or location"
+      "description": "GPS coordinates or location",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "date": {
       "tools": [
@@ -2040,7 +2134,9 @@
         "videos"
       ],
       "tool_count": 5,
-      "description": "Selector type: date"
+      "description": "Selector type: date",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "file": {
       "tools": [
@@ -2060,7 +2156,9 @@
         "whois"
       ],
       "tool_count": 3,
-      "description": "Selector type: file"
+      "description": "Selector type: file",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "twitter_archive": {
       "tools": [
@@ -2073,7 +2171,9 @@
         "tweets"
       ],
       "tool_count": 1,
-      "description": "Selector type: twitter_archive"
+      "description": "Selector type: twitter_archive",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "youtube_video_id": {
       "tools": [
@@ -2098,7 +2198,9 @@
         "videos"
       ],
       "tool_count": 5,
-      "description": "YouTube video ID"
+      "description": "YouTube video ID",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "youtube_channel_id": {
       "tools": [
@@ -2121,7 +2223,9 @@
         "videos"
       ],
       "tool_count": 3,
-      "description": "YouTube channel ID"
+      "description": "YouTube channel ID",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "regex": {
       "tools": [
@@ -2133,7 +2237,9 @@
         "transcript"
       ],
       "tool_count": 1,
-      "description": "Selector type: regex"
+      "description": "Selector type: regex",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "facebook_id": {
       "tools": [
@@ -2148,7 +2254,9 @@
         "username"
       ],
       "tool_count": 2,
-      "description": "Facebook numeric user ID"
+      "description": "Facebook numeric user ID",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "image": {
       "tools": [
@@ -2207,7 +2315,9 @@
         "username"
       ],
       "tool_count": 25,
-      "description": "Image file or URL for reverse search"
+      "description": "Image file or URL for reverse search",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "subreddit": {
       "tools": [
@@ -2235,7 +2345,9 @@
         "trends"
       ],
       "tool_count": 7,
-      "description": "Reddit subreddit name"
+      "description": "Reddit subreddit name",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "snapchat_bitmoji_id": {
       "tools": [
@@ -2247,7 +2359,9 @@
         "images"
       ],
       "tool_count": 1,
-      "description": "Selector type: snapchat_bitmoji_id"
+      "description": "Selector type: snapchat_bitmoji_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "snapchat_id": {
       "tools": [
@@ -2259,7 +2373,9 @@
         "images"
       ],
       "tool_count": 1,
-      "description": "Selector type: snapchat_id"
+      "description": "Selector type: snapchat_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "node_id": {
       "tools": [
@@ -2271,7 +2387,9 @@
         "sysop_info"
       ],
       "tool_count": 1,
-      "description": "Selector type: node_id"
+      "description": "Selector type: node_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "group_id": {
       "tools": [
@@ -2283,7 +2401,9 @@
         "username"
       ],
       "tool_count": 1,
-      "description": "Selector type: group_id"
+      "description": "Selector type: group_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "artist_name": {
       "tools": [
@@ -2296,7 +2416,9 @@
         "streaming_stats"
       ],
       "tool_count": 2,
-      "description": "Selector type: artist_name"
+      "description": "Selector type: artist_name",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "discord_id": {
       "tools": [
@@ -2312,7 +2434,9 @@
         "servers"
       ],
       "tool_count": 2,
-      "description": "Discord user/server ID"
+      "description": "Discord user/server ID",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "telegram_export": {
       "tools": [
@@ -2322,7 +2446,9 @@
         "chat_data"
       ],
       "tool_count": 1,
-      "description": "Selector type: telegram_export"
+      "description": "Selector type: telegram_export",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "telegram_handle": {
       "tools": [
@@ -2359,7 +2485,9 @@
         "telegram_handle"
       ],
       "tool_count": 12,
-      "description": "Telegram username"
+      "description": "Telegram username",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "audio_file": {
       "tools": [
@@ -2370,7 +2498,9 @@
         "transcript"
       ],
       "tool_count": 2,
-      "description": "Audio file for analysis"
+      "description": "Audio file for analysis",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "whatsapp_export": {
       "tools": [
@@ -2381,7 +2511,9 @@
         "chat_data"
       ],
       "tool_count": 2,
-      "description": "Selector type: whatsapp_export"
+      "description": "Selector type: whatsapp_export",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "slack_token": {
       "tools": [
@@ -2395,7 +2527,9 @@
         "url"
       ],
       "tool_count": 1,
-      "description": "Selector type: slack_token"
+      "description": "Selector type: slack_token",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "api_key": {
       "tools": [
@@ -2410,7 +2544,9 @@
         "url"
       ],
       "tool_count": 2,
-      "description": "Selector type: api_key"
+      "description": "Selector type: api_key",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "google_dork": {
       "tools": [
@@ -2420,7 +2556,9 @@
         "url"
       ],
       "tool_count": 1,
-      "description": "Selector type: google_dork"
+      "description": "Selector type: google_dork",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "location": {
       "tools": [
@@ -2446,7 +2584,9 @@
         "url"
       ],
       "tool_count": 8,
-      "description": "Selector type: location"
+      "description": "Selector type: location",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "certificate": {
       "tools": [
@@ -2461,7 +2601,9 @@
         "port"
       ],
       "tool_count": 1,
-      "description": "SSL/TLS certificate hash or serial"
+      "description": "SSL/TLS certificate hash or serial",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "warc_file": {
       "tools": [
@@ -2475,7 +2617,9 @@
         "url"
       ],
       "tool_count": 3,
-      "description": "Selector type: warc_file"
+      "description": "Selector type: warc_file",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "har_file": {
       "tools": [
@@ -2485,7 +2629,9 @@
         "warc_file"
       ],
       "tool_count": 1,
-      "description": "Selector type: har_file"
+      "description": "Selector type: har_file",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "document": {
       "tools": [
@@ -2498,7 +2644,9 @@
         "url"
       ],
       "tool_count": 3,
-      "description": "Document file for analysis"
+      "description": "Document file for analysis",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "doi": {
       "tools": [
@@ -2510,7 +2658,9 @@
         "url"
       ],
       "tool_count": 2,
-      "description": "Selector type: doi"
+      "description": "Selector type: doi",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "password": {
       "tools": [
@@ -2527,7 +2677,9 @@
         "username"
       ],
       "tool_count": 2,
-      "description": "Password or password hash for breach search"
+      "description": "Password or password hash for breach search",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "device_model": {
       "tools": [
@@ -2541,7 +2693,9 @@
         "username"
       ],
       "tool_count": 3,
-      "description": "Selector type: device_model"
+      "description": "Selector type: device_model",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "document_id": {
       "tools": [
@@ -2552,7 +2706,9 @@
         "name"
       ],
       "tool_count": 1,
-      "description": "Selector type: document_id"
+      "description": "Selector type: document_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "national_id": {
       "tools": [
@@ -2563,7 +2719,9 @@
         "name"
       ],
       "tool_count": 1,
-      "description": "Selector type: national_id"
+      "description": "Selector type: national_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "email_header": {
       "tools": [
@@ -2578,7 +2736,9 @@
         "routing"
       ],
       "tool_count": 3,
-      "description": "Selector type: email_header"
+      "description": "Selector type: email_header",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "eml_file": {
       "tools": [
@@ -2591,7 +2751,9 @@
         "url"
       ],
       "tool_count": 1,
-      "description": "Selector type: eml_file"
+      "description": "Selector type: eml_file",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "mbox_file": {
       "tools": [
@@ -2602,7 +2764,9 @@
         "url"
       ],
       "tool_count": 1,
-      "description": "Selector type: mbox_file"
+      "description": "Selector type: mbox_file",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "bssid": {
       "tools": [
@@ -2619,7 +2783,9 @@
         "social_media_profile"
       ],
       "tool_count": 3,
-      "description": "WiFi access point MAC (BSSID)"
+      "description": "WiFi access point MAC (BSSID)",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "imei": {
       "tools": [
@@ -2645,7 +2811,9 @@
         "warranty"
       ],
       "tool_count": 7,
-      "description": "Mobile device IMEI number"
+      "description": "Mobile device IMEI number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "property_address": {
       "tools": [
@@ -2665,7 +2833,9 @@
         "url"
       ],
       "tool_count": 4,
-      "description": "Physical/real estate address"
+      "description": "Physical/real estate address",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "ssn": {
       "tools": [
@@ -2676,7 +2846,9 @@
         "name"
       ],
       "tool_count": 1,
-      "description": "Selector type: ssn"
+      "description": "Selector type: ssn",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "credential": {
       "tools": [
@@ -2687,7 +2859,9 @@
         "breach_record"
       ],
       "tool_count": 1,
-      "description": "Selector type: credential"
+      "description": "Selector type: credential",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "text": {
       "tools": [
@@ -2706,7 +2880,9 @@
         "video"
       ],
       "tool_count": 6,
-      "description": "Selector type: text"
+      "description": "Selector type: text",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "video": {
       "tools": [
@@ -2717,7 +2893,9 @@
         "video"
       ],
       "tool_count": 2,
-      "description": "Selector type: video"
+      "description": "Selector type: video",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "nft_token": {
       "tools": [
@@ -2730,7 +2908,9 @@
         "nft_token"
       ],
       "tool_count": 3,
-      "description": "NFT token ID or collection"
+      "description": "NFT token ID or collection",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "token_id": {
       "tools": [
@@ -2741,7 +2921,9 @@
         "nft_token"
       ],
       "tool_count": 1,
-      "description": "Selector type: token_id"
+      "description": "Selector type: token_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "app_id": {
       "tools": [
@@ -2753,7 +2935,9 @@
         "url"
       ],
       "tool_count": 2,
-      "description": "Selector type: app_id"
+      "description": "Selector type: app_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "lei": {
       "tools": [
@@ -2764,7 +2948,9 @@
         "company"
       ],
       "tool_count": 2,
-      "description": "Selector type: lei"
+      "description": "Selector type: lei",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "fcc_id": {
       "tools": [
@@ -2775,7 +2961,9 @@
         "device_data"
       ],
       "tool_count": 1,
-      "description": "Selector type: fcc_id"
+      "description": "Selector type: fcc_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "lei_number": {
       "tools": [
@@ -2786,7 +2974,9 @@
         "company"
       ],
       "tool_count": 2,
-      "description": "Selector type: lei_number"
+      "description": "Selector type: lei_number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "bank_identifier": {
       "tools": [
@@ -2796,7 +2986,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Selector type: bank_identifier"
+      "description": "Selector type: bank_identifier",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "fdic_cert": {
       "tools": [
@@ -2806,7 +2998,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Selector type: fdic_cert"
+      "description": "Selector type: fdic_cert",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "iban": {
       "tools": [
@@ -2816,7 +3010,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Selector type: iban"
+      "description": "Selector type: iban",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "bin_number": {
       "tools": [
@@ -2826,7 +3022,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Selector type: bin_number"
+      "description": "Selector type: bin_number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "bin": {
       "tools": [
@@ -2836,7 +3034,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Selector type: bin"
+      "description": "Selector type: bin",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "credit_card_number": {
       "tools": [
@@ -2846,7 +3046,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Selector type: credit_card_number"
+      "description": "Selector type: credit_card_number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "barcode": {
       "tools": [
@@ -2857,7 +3059,9 @@
         "product"
       ],
       "tool_count": 1,
-      "description": "Selector type: barcode"
+      "description": "Selector type: barcode",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "hs_code": {
       "tools": [
@@ -2868,7 +3072,9 @@
         "shipping_data"
       ],
       "tool_count": 1,
-      "description": "Selector type: hs_code"
+      "description": "Selector type: hs_code",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "asin": {
       "tools": [
@@ -2878,7 +3084,9 @@
         "keyword"
       ],
       "tool_count": 1,
-      "description": "Selector type: asin"
+      "description": "Selector type: asin",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "serial_number": {
       "tools": [
@@ -2893,7 +3101,9 @@
         "warranty"
       ],
       "tool_count": 3,
-      "description": "Selector type: serial_number"
+      "description": "Selector type: serial_number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "code": {
       "tools": [
@@ -2913,7 +3123,9 @@
         "text"
       ],
       "tool_count": 10,
-      "description": "Selector type: code"
+      "description": "Selector type: code",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "http_status_code": {
       "tools": [
@@ -2923,7 +3135,9 @@
         "image"
       ],
       "tool_count": 1,
-      "description": "Selector type: http_status_code"
+      "description": "Selector type: http_status_code",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "mac_address": {
       "tools": [
@@ -2933,7 +3147,9 @@
         "company"
       ],
       "tool_count": 1,
-      "description": "Network MAC address"
+      "description": "Network MAC address",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "flight_number": {
       "tools": [
@@ -2951,7 +3167,9 @@
         "map_data"
       ],
       "tool_count": 7,
-      "description": "Flight number (e.g., AA123)"
+      "description": "Flight number (e.g., AA123)",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "container_number": {
       "tools": [
@@ -2963,7 +3181,9 @@
         "shipping_data"
       ],
       "tool_count": 3,
-      "description": "Selector type: container_number"
+      "description": "Selector type: container_number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "voyage_number": {
       "tools": [
@@ -2973,7 +3193,9 @@
         "shipping_data"
       ],
       "tool_count": 1,
-      "description": "Selector type: voyage_number"
+      "description": "Selector type: voyage_number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "vessel_name": {
       "tools": [
@@ -2987,7 +3209,9 @@
         "vessel_data"
       ],
       "tool_count": 3,
-      "description": "Ship/vessel name"
+      "description": "Ship/vessel name",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "vessel_mmsi": {
       "tools": [
@@ -2997,7 +3221,9 @@
         "vessel_data"
       ],
       "tool_count": 1,
-      "description": "Ship MMSI or IMO number"
+      "description": "Ship MMSI or IMO number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "gpx_file": {
       "tools": [
@@ -3009,7 +3235,9 @@
         "map_data"
       ],
       "tool_count": 2,
-      "description": "Selector type: gpx_file"
+      "description": "Selector type: gpx_file",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "license_plate": {
       "tools": [
@@ -3025,7 +3253,9 @@
         "vehicle_data"
       ],
       "tool_count": 3,
-      "description": "Vehicle license/number plate"
+      "description": "Vehicle license/number plate",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "cell_tower_id": {
       "tools": [
@@ -3037,7 +3267,9 @@
         "map_data"
       ],
       "tool_count": 2,
-      "description": "Selector type: cell_tower_id"
+      "description": "Selector type: cell_tower_id",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "ssid": {
       "tools": [
@@ -3047,7 +3279,9 @@
         "coordinates"
       ],
       "tool_count": 1,
-      "description": "WiFi network SSID name"
+      "description": "WiFi network SSID name",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "vin": {
       "tools": [
@@ -3059,7 +3293,9 @@
         "phone"
       ],
       "tool_count": 1,
-      "description": "Vehicle Identification Number"
+      "description": "Vehicle Identification Number",
+      "implemented_tools": [],
+      "implemented_count": 0
     },
     "asn": {
       "tools": [
@@ -3071,7 +3307,9 @@
         "geolocation"
       ],
       "tool_count": 1,
-      "description": "Autonomous System Number"
+      "description": "Autonomous System Number",
+      "implemented_tools": [],
+      "implemented_count": 0
     }
   }
 }

@@ -21,7 +21,14 @@ Multi-agent OSINT investigation system. Takes a seed selector, pivots through OS
 - `src/report/bibliography.py` - Clickable bibliography with investigation links per entity
 - `.claude/commands/investigate.md` - `/investigate` slash command definition
 - `skills/` - Claude Code skill definitions for agents (supervisor, gatherer, report-writer)
-- `ontology_viz/ontology.html` - Interactive ontology visualization (1031 tools, 114 selector types)
+- `ontology_viz/ontology.html` - Interactive ontology visualization of the full catalog
+- `src/ontology/annotate_implemented.py` - Flags which catalog tools are actually implemented (re-run after wiring tools)
+
+> **Ontology honesty:** the ontology is a large *catalog* (1,031 tools / 90 selector
+> types) but only ~25 are implemented. `pivot_map.json` records `implemented_tools` /
+> `implemented_count` per type; `tools_registry.json` records `"implemented": bool`
+> per tool. Use `registry.get_selector_capability(type)` for the truthful view of what
+> actually runs. Only 13/90 selector types currently have any runnable tool.
 - `investigations/` - Output directory for investigation cases
 
 ## How to Run an Investigation

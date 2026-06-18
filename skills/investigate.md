@@ -53,21 +53,21 @@ print('Log initialized')
 
 ## Step 5: Become the Supervisor
 
-After setup, you ARE the supervisor. Read the supervisor skill instructions and follow them. Load the ontology to understand what tools are available:
+After setup, you ARE the supervisor. Read the supervisor skill instructions and follow them. Load the ontology to understand what tools will ACTUALLY run for this selector type (the honest view — not the full catalog):
 
 ```
 python -c "
-import sys, json; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
-with open('C:\\Users\\cis37\\osint-investigator-v3\\src\\ontology\\pivot_map.json') as f:
-    pm = json.load(f)['pivot_map']
-selector_type = '{TYPE}'
-if selector_type in pm:
-    entry = pm[selector_type]
-    print(f'Available tools: {entry[\"tools\"]}')
-    print(f'Expected yields: {entry[\"yields\"]}')
-    print(f'Description: {entry[\"description\"]}')
+import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
+from src.tools.registry import get_selector_capability
+cap = get_selector_capability('{TYPE}')
+print(f'Runnable tools: {cap[\"implemented_count\"]} of {cap[\"catalog_count\"]} cataloged')
+print(f'Will actually run: {cap[\"implemented\"]}')
+print(f'Expected yields: {cap[\"yields\"]}')
 "
 ```
+
+If `implemented_count` is 0, the structured line has nothing to run for this type —
+say so honestly and consider the web-search line (when available) or a type override.
 
 Then present your investigation plan to the user and begin the investigation loop per the supervisor skill.
 
