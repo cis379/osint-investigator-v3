@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import shutil
 from abc import ABC, abstractmethod
@@ -74,12 +75,20 @@ class BaseTool(ABC):
             return False
 
     def run_command(self, cmd: list[str], timeout: int = 120) -> tuple[str, str, int]:
+        # Force UTF-8 on both sides: decode our capture as UTF-8 (errors="replace"
+        # so odd bytes never crash parsing), and tell the child process (maigret,
+        # sherlock, holehe, theHarvester) to emit UTF-8 too. Without this, Windows
+        # defaults to cp1252 and Unicode-heavy tools throw 'charmap' encode errors.
+        env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=timeout,
+                env=env,
             )
             return result.stdout, result.stderr, result.returncode
         except subprocess.TimeoutExpired:

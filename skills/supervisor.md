@@ -40,7 +40,7 @@ Working directory: C:\Users\cis37\osint-investigator-v3
 Investigation: {CASE_ID}
 
 Run this and return the full output (one --tool call per tool, or --run-all for the whole type):
-python C:\Users\cis37\osint-investigator-v3\src\tools\collect.py --run-all --selector "{SELECTOR}" --type {SELECTOR_TYPE} --log "{LOG_FILE}"
+python C:/Users/cis37/osint-investigator-v3/src/tools/collect.py --run-all --selector "{SELECTOR}" --type {SELECTOR_TYPE} --log "{LOG_FILE}"
 
 Report back the complete raw JSON output for each tool.
 ```
@@ -82,7 +82,7 @@ cat > "{CASE_DIR}/_commit.json" <<'JSON'
   ]
 }
 JSON
-python C:\Users\cis37\osint-investigator-v3\src\tools\graph_commit.py --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
+python C:/Users/cis37/osint-investigator-v3/src/tools/graph_commit.py --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
 ```
 
 Then log your analysis narrative (the reasoning, corroborations, and gaps):
@@ -158,6 +158,12 @@ Rules:
   When unsure, go one tier weaker.
 - **Corroboration upgrades.** If a second tool independently confirms a `possible`
   or `probable` finding, re-commit it as `confirmed` with both citations.
+- **Tool-reported confidence is NOT authoritative.** Several wrappers stamp EVERY
+  hit `confirmed` in code (e.g. sherlock, maigret, name_to_username) — that only
+  means "the account/string exists," never "attributed to the subject." Ignore the
+  tool's self-grade. Re-grade every finding yourself from the evidence: start
+  conservative (`possible`/`probable`) and promote UP the chain only when
+  corroboration or direct verification earns it.
 
 ## Analysis Guidelines
 

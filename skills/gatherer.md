@@ -25,12 +25,12 @@ the graph — that happens later, after the supervisor analyzes what you return.
 
 ### Single tool:
 ```
-python C:\Users\cis37\osint-investigator-v3\src\tools\collect.py --tool TOOL_NAME --selector "SELECTOR" --type TYPE --log "LOG_FILE"
+python C:/Users/cis37/osint-investigator-v3/src/tools/collect.py --tool TOOL_NAME --selector "SELECTOR" --type TYPE --log "LOG_FILE"
 ```
 
 ### All tools for a selector type:
 ```
-python C:\Users\cis37\osint-investigator-v3\src\tools\collect.py --run-all --selector "SELECTOR" --type TYPE --log "LOG_FILE"
+python C:/Users/cis37/osint-investigator-v3/src/tools/collect.py --run-all --selector "SELECTOR" --type TYPE --log "LOG_FILE"
 ```
 
 The collect.py script:
