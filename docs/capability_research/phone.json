@@ -1,0 +1,181 @@
+{
+  "bucket": "phone",
+  "summary": "Phone is the weakest automatable OSINT category. Validation/format/region is fully solvable for free and OFFLINE via Google's libphonenumber (python `phonenumbers`) — no key, no network. Carrier and line-type are reliably solvable only via paid HLR-backed APIs (Twilio Lookup is the production backbone); the offline `phonenumbers` carrier guess is best-effort/inaccurate, and free tiers (Numverify/Veriphone) give carrier+line_type at low monthly quotas. REVERSE lookup -> owner name and spam/fraud reputation are PAID-DATA-ONLY (Trestle, Twilio caller_name, IPQualityScore). PhoneInfoga (already wired) is officially 'stable but unmaintained' and only does thin local parsing + footprint generation; do not build a roadmap on it.",
+  "capabilities": [
+    {
+      "capability": "phone_validation",
+      "selector_types": ["phone"],
+      "best": [
+        {
+          "id": "phonenumbers_lib",
+          "name": "python-phonenumbers (Google libphonenumber port)",
+          "exec_category": "custom",
+          "install": "pip install phonenumbers==9.0.18",
+          "run": "python -c \"import phonenumbers,json; n=phonenumbers.parse('{selector}',None); print(json.dumps({'valid':phonenumbers.is_valid_number(n),'possible':phonenumbers.is_possible_number(n),'e164':phonenumbers.format_number(n,phonenumbers.PhoneNumberFormat.E164),'country_code':n.country_code,'national':n.national_number,'region':phonenumbers.region_code_for_number(n),'number_type':str(phonenumbers.number_type(n))}))\"",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (v9.0.18, 2026; David Drysdale tracks Google upstream metadata)",
+          "outputs": ["validation", "region", "phone"],
+          "status": "to_wire",
+          "notes": "OFFLINE — no key, no network, no quota. The correct default for valid/format/region/E.164 normalization. number_type() distinguishes mobile/fixed-line/VoIP/toll-free FROM THE NUMBERING PLAN (not live HLR) so it is structural, not a carrier query. Must pass region=None only if number is E.164 (has +); otherwise supply a default region. Selector should be normalized to E.164 before any downstream paid lookup."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "veriphone_api",
+          "exec_category": "HTTP",
+          "install": "API key from https://veriphone.io (free tier 1,000 validations/mo)",
+          "run": "GET https://api.veriphone.io/v2/verify?phone={selector}&key=$VERIPHONE_KEY",
+          "auth": "api_key",
+          "free": true,
+          "notes": "Hosted alternative if offline lib is undesirable. Free tier = format validation + line-type + region (1,000/mo); carrier/HLR is paid-tier only. JSON out. Good cross-check but libphonenumber covers the free part without a key."
+        }
+      ],
+      "gaps": "None significant — offline validation is fully solved for free. Only caveat: number_type() reflects the numbering plan, not number portability, so a ported mobile may misreport. Live line-type needs an HLR API (see carrier capability)."
+    },
+    {
+      "capability": "carrier_line_type_sim",
+      "selector_types": ["phone"],
+      "best": [
+        {
+          "id": "twilio_lookup_v2",
+          "name": "Twilio Lookup v2 (Line Type Intelligence / SIM Swap)",
+          "exec_category": "HTTP",
+          "install": "Twilio account + Account SID & Auth Token; no SDK needed (plain REST + basic auth)",
+          "run": "GET https://lookups.twilio.com/v2/PhoneNumbers/{selector}?Fields=line_type_intelligence,sim_swap  (HTTP Basic auth: AccountSID:AuthToken)",
+          "auth": "api_key",
+          "free": false,
+          "maintained": "active (v2 API, production; Twilio platform)",
+          "outputs": ["carrier", "line_type", "phone", "validation"],
+          "status": "to_wire",
+          "notes": "Production backbone. Base validation/formatting is FREE; premium data packages billed per request: line_type_intelligence ~$0.008, caller_name ~$0.01, sim_swap, call_forwarding, line_status, identity_match ~$0.10, sms_pumping_risk. line_type_intelligence returns mobile/landline/fixed-VoIP/non-fixed-VoIP/toll-free + carrier name + mobile_country_code/mobile_network_code. SIM-swap = last SIM change recency (fraud signal). Wrap with credential vault."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "numverify_api",
+          "exec_category": "HTTP",
+          "install": "Free API key from https://numverify.com (free tier 100 requests/mo)",
+          "run": "GET https://apilayer.net/api/validate?access_key=$NUMVERIFY_KEY&number={selector}",
+          "auth": "api_key",
+          "free": true,
+          "notes": "apilayer; free tier carrier + location + line_type (mobile/landline/VoIP) for 232 countries, but only 100 req/mo and HTTPS is paid-tier on the legacy plan. JSON. Good free spot-check for carrier when Twilio budget is unavailable; not for volume. PhoneInfoga's numverify scanner uses this same key."
+        },
+        {
+          "id": "phonenumbers_carrier",
+          "exec_category": "custom",
+          "install": "pip install phonenumbers",
+          "run": "python -c \"import phonenumbers; from phonenumbers import carrier; n=phonenumbers.parse('{selector}',None); print(carrier.name_for_number(n,'en'))\"",
+          "auth": "none",
+          "free": true,
+          "notes": "OFFLINE carrier GUESS from the original-assignment metadata only. Best-effort, frequently wrong for ported numbers and US numbers. Use as a free hint, never as confirmed carrier."
+        }
+      ],
+      "gaps": "Reliable live carrier + line-type requires a paid HLR-backed API (Twilio/Numverify-paid/Veriphone-paid). No free tool gives accurate carrier at volume. SIM-swap and call-forwarding signals are Twilio-only (paid) with no free equivalent."
+    },
+    {
+      "capability": "reverse_lookup_owner",
+      "selector_types": ["phone"],
+      "best": [
+        {
+          "id": "trestle_reverse_phone",
+          "name": "Trestle Reverse Phone API",
+          "exec_category": "HTTP",
+          "install": "API key from https://trestleiq.com (free trial, no credit card); pay-as-you-go ~$0.07/query",
+          "run": "GET https://api.trestleiq.com/3.0/phone?phone={selector}  (header: x-api-key: $TRESTLE_KEY)",
+          "auth": "api_key",
+          "free": false,
+          "maintained": "active (Trestle Identity Data APIs, 2026)",
+          "outputs": ["name", "address", "company"],
+          "status": "to_wire",
+          "notes": "Best agent-callable phone->owner-name source. Returns owner name + demographics, current/historical addresses, and associated people. US-centric. Free TRIAL exists (good for a real investigation), then paid. This is the realistic 'last mile' to identity."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "twilio_caller_name",
+          "exec_category": "HTTP",
+          "install": "Twilio account; same endpoint as Lookup v2",
+          "run": "GET https://lookups.twilio.com/v2/PhoneNumbers/{selector}?Fields=caller_name  (Basic auth)",
+          "auth": "api_key",
+          "free": false,
+          "notes": "CNAM caller-name (~$0.01/req). US-only, landline-biased, often blank for mobiles. Cheaper than Trestle but much thinner attribution. identity_match (~$0.10) verifies a name you already have rather than discovering one."
+        }
+      ],
+      "gaps": "PAID-DATA-ONLY across the board. No free/open tool maps a phone to an owner name reliably; the audit confirms name-attribution is paid-data-only (Trestle, Pipl, OSINT Industries, Predicta). Free CLIs (PhoneInfoga/Phunter) only generate Google-dork footprints, they do not return owner identity."
+    },
+    {
+      "capability": "spam_fraud_reputation",
+      "selector_types": ["phone"],
+      "best": [
+        {
+          "id": "ipqualityscore_phone",
+          "name": "IPQualityScore Phone Validation API",
+          "exec_category": "HTTP",
+          "install": "Free API key from https://www.ipqualityscore.com (free plan ~1,000 lookups to start)",
+          "run": "GET https://www.ipqualityscore.com/api/json/phone/$IPQS_KEY/{selector}",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (IPQS Fraud Prevention API, 2026)",
+          "outputs": ["fraud_score", "carrier", "line_type", "validation"],
+          "status": "to_wire",
+          "notes": "Best fraud/spam-risk signal with a usable free allocation. Returns fraud_score (>=75 suspicious, >=85 risky, >=90 high-risk), active status, carrier, line_type, country, recent_abuse, VOIP/prepaid/risky flags, leaked flag. ~150 countries. Pay-as-you-go ~$0.0005/lookup beyond free. Single GET, clean JSON — easy to wire."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "twilio_sms_pumping_risk",
+          "exec_category": "HTTP",
+          "install": "Twilio account; Lookup v2",
+          "run": "GET https://lookups.twilio.com/v2/PhoneNumbers/{selector}?Fields=sms_pumping_risk  (Basic auth)",
+          "auth": "api_key",
+          "free": false,
+          "notes": "Narrow: SMS-pumping / artificial-traffic fraud risk only (not general spam-caller reputation). Paid. Complements IPQS for SMS-fraud-specific scoring."
+        }
+      ],
+      "gaps": "True crowd-sourced spam-CALLER reputation (Truecaller/Hiya/Robokiller style) has NO official agent-callable free API — Truecaller's API is enterprise/gated and ToS-restricted for scraping. IPQS gives an algorithmic fraud score, not community spam reports. This is a real coverage gap."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "phoneinfoga",
+      "reason": "ALREADY IMPLEMENTED in src/tools/phone_tools.py (PhoneInfogaTool, status=already_implemented). Officially 'stable but unmaintained' (own README, last release Feb 2024; repo may be archived anytime). Does thin LOCAL parsing (libphonenumber-equivalent) + Google-dork footprint generation; its numverify/google scanners need keys. Keep as-is but do not invest further."
+    },
+    {
+      "id": "ext_0450_phomber",
+      "reason": "Unmaintained hobby CLI; no native structured/JSON output; wraps the same libphonenumber + footprint generation we get directly from phonenumbers. Redundant."
+    },
+    {
+      "id": "ext_0452_firefly",
+      "reason": "Abandoned hobby CLI, no JSON, no maintained releases. Redundant with phonenumbers."
+    },
+    {
+      "id": "ext_0453_phonenumber_osint",
+      "reason": "spider863644/PhoneNumber-OSINT — small unvetted research CLI, no structured output, automatable_now=false in buckets."
+    },
+    {
+      "id": "ext_0454_phunter",
+      "reason": "Phunter CLI only generates link/footprint guesses (Truecaller/WhatsApp/social URLs to check manually); returns no confirmed structured attribution. Manual-research aid, not a structured collector."
+    },
+    {
+      "id": "ext_0944_phoneinfoga",
+      "reason": "Duplicate catalog entry for PhoneInfoga (already implemented; see above)."
+    },
+    {
+      "id": "ext_0951_moriarty_project",
+      "reason": "Moriarty Project — unmaintained, scrapes social/spam sites with no stable structured output; brittle and ToS-risky."
+    },
+    {
+      "id": "ext_0905_telegram_phone_number_checker",
+      "reason": "bellingcat/telegram-phone-number-checker is a TELEGRAM-account-existence tool (belongs to telegram bucket, not phone validation/carrier/owner/reputation). Requires Telegram API credentials + session; stateful, out of scope here."
+    },
+    {
+      "id": "truecaller",
+      "reason": "Best-known spam-caller DB, but NO official free agent-callable API; enterprise-gated and ToS-prohibits scraping. Manual/paid-only — cannot wire as a structured collector."
+    },
+    {
+      "id": "abstract_phone_validation",
+      "reason": "Viable free-tier validation API but fully redundant with the offline phonenumbers lib (validation) and IPQS/Numverify (carrier/reputation); no unique capability to justify another key."
+    }
+  ]
+}

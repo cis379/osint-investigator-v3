@@ -1,0 +1,201 @@
+{
+  "bucket": "media_geo_search_ioc",
+  "_summary": "Media (reverse-image/EXIF), geolocation/maps, file-hash IOC threat-intel, and structured search/paste-leak APIs. Reality check: almost the entire reverse-image and face-search space is manual-only or paid (Yandex/Google Lens/PimEyes have no automatable API; TinEye and Search4faces are paid-key-only). EXIF (ExifTool) and the hash-IOC stack (VirusTotal/OTX/Pulsedive/MalwareBazaar) are the strongest structured wins. Structured search engines have degraded badly in 2025-2026: Bing Search API was retired (Aug 2025), Brave killed its free tier (Feb 2026, card required), and Google PSE is closed to new customers (retires Jan 2027). Google PSE is only usable if a key already exists.",
+  "capabilities": [
+    {
+      "capability": "image_exif_metadata",
+      "selector_types": ["image", "url"],
+      "best": [
+        {
+          "id": "exiftool",
+          "name": "ExifTool",
+          "exec_category": "CLI",
+          "install": "Windows: download exiftool.exe from https://exiftool.org (rename to exiftool.exe, put on PATH). Linux/mac: apt install libimage-exiftool-perl / brew install exiftool",
+          "run": "exiftool -j -n {selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (v13.59 dev / 13.55 production, 2026-05-28; Phil Harvey, ~monthly releases)",
+          "outputs": ["coordinates", "geolocation", "name", "date", "keyword"],
+          "status": "already_implemented",
+          "notes": "Universal metadata standard. ALREADY WIRED but ORPHANED + UNINSTALLED: src/tools/image_tools.py declares ExifToolWrapper with input_types=['url'], yet check_installed runs 'exiftool -ver' and the binary is not installed on this box. Current wrapper is weak: it line-greps stdout for 'GPS' and mislabels GPS hits as entity_type='name'. FIX: (1) install the exe; (2) run with '-j -n' for clean JSON + decimal GPS so it parses deterministically instead of regex-scraping; (3) map GPSLatitude/GPSLongitude to entity_type='coordinates', DateTimeOriginal to 'date', Make/Model/Software/Artist to metadata; (4) input_types should include 'image'/'file' (catalog ext_0962 lists ['file','image']). Works on a local file path or a downloaded image; for a remote URL the gatherer must fetch the bytes to a temp file first."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "pillow_exif",
+          "name": "Pillow / piexif (Python lib)",
+          "exec_category": "custom",
+          "notes": "Pure-Python fallback if the ExifTool binary cannot be installed. Reads EXIF/GPS from JPEG/TIFF only (far narrower format coverage than ExifTool; no XMP/IPTC/MakerNotes). Use only as a no-binary degraded path."
+        }
+      ],
+      "gaps": "None for extraction breadth once ExifTool is installed - it is the category standard. The only gap is the missing binary + the orphaned/incorrect wrapper."
+    },
+    {
+      "capability": "reverse_image_search",
+      "selector_types": ["image", "url"],
+      "best": [
+        {
+          "id": "tineye_api",
+          "name": "TinEye Commercial API",
+          "exec_category": "HTTP",
+          "install": "n/a (REST). POST image bytes or image_url to the search endpoint.",
+          "run": "POST https://api.tineye.com/rest/search/  (multipart image= OR form image_url=) with header 'x-api-key: {KEY}'",
+          "auth": "api_key",
+          "free": false,
+          "maintained": "active (commercial, 2026). Endpoint api.tineye.com/rest/; x-api-key header (replacing older HMAC/basic-auth).",
+          "outputs": ["url", "domain"],
+          "status": "to_wire",
+          "notes": "The ONLY genuinely automatable reverse-image API. PAID: plans start ~$200/mo for 5,000 searches, down to ~$0.01/search at 1M bundle. No free tier. Returns matched-image URLs + the pages/domains hosting them (good for tracing where a photo was reused). Wire only if a key is funded; otherwise EXCLUDED-by-budget. Returns matches by exact/near-duplicate image, NOT faces."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "search4faces_api",
+          "name": "Search4faces API (face search)",
+          "exec_category": "HTTP",
+          "notes": "Reverse FACE search (different capability from image-duplicate search). JSON-RPC 2.0 at https://search4faces.com/api/json-rpc/v1, header x-authorization-token: {KEY}; methods detectFaces / searchFace / rateLimit. PAID ($40-$320/mo for 5k-135k calls; free trial on request). Indexes VK/OK/TikTok/Clubhouse avatars but datasets largely frozen ~2022. Only automatable face-search option - the rest (PimEyes, FaceCheck.ID) are manual/credit web UIs. EXCLUDED-by-budget unless a key is funded."
+        }
+      ],
+      "gaps": "Massive. Google Lens, Yandex Images, and Bing Visual Search have NO official automatable reverse-image API (browser/manual only - excluded). PimEyes / FaceCheck.ID are paid credit-based web UIs with no clean API. So free, structured reverse-image/face search effectively does not exist - every real option is paid (TinEye, Search4faces) or manual (everything else). This is a hard, money-or-manual gap; surface it to the user rather than pretending coverage."
+    },
+    {
+      "capability": "geolocation_maps",
+      "selector_types": ["coordinates", "geolocation"],
+      "best": [
+        {
+          "id": "nominatim_reverse",
+          "name": "Nominatim (OpenStreetMap) reverse geocoding",
+          "exec_category": "HTTP",
+          "install": "n/a (REST). Must send a descriptive User-Agent identifying the app.",
+          "run": "GET https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={lat}&lon={lon}&zoom=18&addressdetails=1   (header User-Agent: osint-investigator-v3/1.0 contact@example.com)",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Nominatim 5.x, 2026; run by the OSM Foundation)",
+          "outputs": ["geolocation", "name", "keyword"],
+          "status": "to_wire",
+          "notes": "Turns a coordinate pair into a structured place/address (country, state, city, road, POI). MAX 1 req/sec on the public instance; no bulk/grid querying; User-Agent required. Single-coordinate enrichment per pivot fits the policy fine. This is the one clean, free, structured map capability - most of the catalog's 'coordinates' tools (photo-map.ru, snapchat_map, flickr maps, NASA fire map, etc.) are web_interface only and excluded."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "geonames_findnearby",
+          "name": "GeoNames findNearby / findNearbyPlaceName",
+          "exec_category": "HTTP",
+          "notes": "GET http://api.geonames.org/findNearbyPlaceNameJSON?lat={lat}&lng={lon}&username={USER}. Free with a registered username (no key/card; daily credit quota). Good cross-check for nearest populated place / admin region and elevation. Lighter than Nominatim but needs a free account."
+        }
+      ],
+      "gaps": "No free, automatable API for the high-value GEOINT-by-imagery tasks: photo geolocation databases (Flickr/Snapchat/Instagram location maps), Telegram-nearby, and Mapillary-style street imagery are all manual web tools or need heavy custom auth. Forward/reverse geocoding (coordinate <-> place) is well covered; 'find media taken near here' is not."
+    },
+    {
+      "capability": "file_hash_ioc_lookup",
+      "selector_types": ["hash_md5", "hash_sha1", "hash_sha256"],
+      "best": [
+        {
+          "id": "virustotal_free",
+          "name": "VirusTotal API v3 (file report)",
+          "exec_category": "HTTP",
+          "install": "n/a (REST).",
+          "run": "GET https://www.virustotal.com/api/v3/files/{hash}  (header x-apikey: {KEY})",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (API v3, 2026)",
+          "outputs": ["hash_sha256", "hash_md5", "hash_sha1", "url", "domain", "ip_v4"],
+          "status": "to_wire",
+          "notes": "The most-cited multi-engine verdict source (70+ AV engines) + rich pivots: contacted domains/IPs/URLs, names, signatures, sandbox behaviour. FREE key tier: 4 req/min, 500/day, non-commercial. Accepts md5/sha1/sha256 interchangeably on the same {hash} path. In tool_buckets api_research as 'virustotal_free' with input_types hash_md5/sha1/sha256. Top pick for hash IOC."
+        },
+        {
+          "id": "otx_indicator_file",
+          "name": "AlienVault OTX (LevelBlue) - file indicator",
+          "exec_category": "HTTP",
+          "install": "n/a (REST). Optional OTXv2 Python SDK.",
+          "run": "GET https://otx.alienvault.com/api/v1/indicators/file/{hash}/general  (header X-OTX-API-KEY: {KEY})",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (community-driven; free account/key, 2026)",
+          "outputs": ["hash_sha256", "url", "domain", "ip_v4", "keyword"],
+          "status": "to_wire",
+          "notes": "FREE, generous rate limits. Links a hash to community 'pulses' (named campaigns/adversary context) - strong for attribution and related-IOC pivoting where VT gives verdicts. Sections: /general, /analysis. Best paired WITH VirusTotal (verdict vs. campaign context)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "pulsedive_explore",
+          "name": "Pulsedive indicator API",
+          "exec_category": "HTTP",
+          "notes": "GET https://pulsedive.com/api/info.php?indicator={hash}&key={KEY} (or explore.php search). FREE tier supports full indicator lookups with risk score, linked threats and feeds. Header/query key. Good third opinion + risk scoring; lower hash coverage than VT/OTX."
+        },
+        {
+          "id": "malwarebazaar",
+          "name": "MalwareBazaar (abuse.ch) get_info",
+          "exec_category": "HTTP",
+          "notes": "POST query=get_info&hash={hash} to https://mb-api.abuse.ch/api/v1/ with header 'Auth-Key: {KEY}'. FREE but now REQUIRES an abuse.ch auth key (changed from anonymous). Best for malware-sample metadata: family/signature, file type, tags, first-seen, YARA. Sample-centric (only returns hits for known malware samples) - narrower than VT but authoritative when it hits."
+        },
+        {
+          "id": "threatfox",
+          "name": "ThreatFox (abuse.ch)",
+          "exec_category": "HTTP",
+          "notes": "ALREADY IMPLEMENTED (src/tools - tool_buckets 'implemented', input_types include hash_md5/hash_sha256). IOC-match service; complements the above for hash->malware/campaign mapping. status=already_implemented; do not re-wire."
+        }
+      ],
+      "gaps": "Strongest structured category in this bucket - well covered. Only nuance: VT free tier is non-commercial + rate-limited (4/min), and MalwareBazaar/abuse.ch now require a (free) key, so the runner can no longer hit it anonymously. Plain hash-CRACKING (hash -> plaintext, e.g. CrackStation/search-that-hash) is a different task and mostly manual web UIs - excluded."
+    },
+    {
+      "capability": "structured_search_engine",
+      "selector_types": ["keyword"],
+      "best": [
+        {
+          "id": "google_pse",
+          "name": "Google Programmable Search (Custom Search JSON API)",
+          "exec_category": "HTTP",
+          "install": "n/a (REST). Requires a pre-existing Programmable Search Engine (cx) + API key.",
+          "run": "GET https://www.googleapis.com/customsearch/v1?key={KEY}&cx={CX}&q={selector}",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "DEPRECATED-but-live: closed to NEW customers since 2025; existing keys work until 2027-01-01, then retired. Google points new users to Vertex AI Search.",
+          "outputs": ["url", "domain", "keyword"],
+          "status": "to_wire",
+          "notes": "Best remaining structured SERP API ONLY IF a key+cx already exist (the user's auto-memory shows existing Google tooling, cis379@gmail.com). FREE 100 queries/day, then $5/1k up to 10k/day. Configure the cx to 'search entire web'. Returns clean JSON (title/link/snippet) - true structured dorking, replacing manual google_dork_generator. CAVEAT: cannot be provisioned fresh anymore; if no existing key, this is unavailable -> EXCLUDED-no-new-signup."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "brave_search_api",
+          "name": "Brave Search API",
+          "exec_category": "HTTP",
+          "notes": "GET https://api.search.brave.com/res/v1/web/search?q={selector}, header X-Subscription-Token: {KEY}. Clean JSON SERP (web/news/images/video), 50 req/sec. BUT Brave KILLED its free tier in Feb 2026 - now metered ($5/1k, ~$0.003-0.005/query), credit card REQUIRED, no spend cap. Best-maintained independent index, but no longer free-for-automation -> treat as paid. Pick over Google PSE only when funded and a fresh signup is needed (Google PSE is closed to new users)."
+        }
+      ],
+      "gaps": "Structured web search has degraded sharply: Bing Web Search API was RETIRED 2025-08-11 (replacement 'Grounding with Bing' is an Azure LLM-answer service, not a SERP API - excluded). Google PSE is closed to new customers (works only with a legacy key, retires 2027). Brave dropped its free tier. Net: there is NO free, freshly-provisionable structured SERP API in mid-2026. Realistic free path is the project's existing unstructured web-search line (skills/web_searcher.md), not a structured API. If a budget/legacy-key exists, Google PSE (legacy) or Brave (paid) are the wiring targets."
+    },
+    {
+      "capability": "paste_leak_site_search",
+      "selector_types": ["keyword"],
+      "best": [],
+      "runner_up": [
+        {
+          "id": "intelx_search",
+          "name": "Intelligence X (IntelX) search API",
+          "exec_category": "HTTP",
+          "notes": "POST https://2.intelx.io/intelligent/search then GET .../result with header 'x-key: {KEY}'. Searches pastes/leaks/darkweb/whois by selector. FREE tier exists but is throttled (~50 lookups/day historically) and key-gated. The closest thing to a structured paste/leak search API. Pairs with the existing google_pse dork (site:pastebin.com ...) for breadth. Wire only if a key is available."
+        }
+      ],
+      "gaps": "Effectively a structured gap. Pastebin's own scraping API is paid/PRO-only; psbdmp and 'my CSE for 48 pastebins' (catalog ext_0460) are manual web/CSE tools - excluded. Historic Castrick Clues shut down 2026-02-07. With no funded IntelX key, paste/leak search falls back to (a) a Google PSE 'site:paste*' dork via the structured_search capability, or (b) the unstructured web-search line. Breach-credential search (HIBP/DeHashed/Hudson Rock) is owned by another bucket, not here."
+    }
+  ],
+  "excluded": [
+    { "id": "yandex_images", "reason": "Best free reverse-image quality but NO official automatable API - manual web UI only." },
+    { "id": "google_lens", "reason": "No public reverse-image API; browser/manual only." },
+    { "id": "bing_visual_search", "reason": "Bing Search APIs (incl. Visual Search) RETIRED 2025-08-11; no replacement SERP/visual API." },
+    { "id": "pimeyes", "reason": "Face search, paid credit-based web UI, no clean API; also ethically/ToS fraught." },
+    { "id": "facecheck_id", "reason": "Face search, paid/credit web UI, no automatable free API (ext-listed as web_interface)." },
+    { "id": "ext_0959_betaface_api", "reason": "Face-RECOGNITION/attribute API (age/gender/landmarks), not reverse-image identity search; not the capability needed and low OSINT value here." },
+    { "id": "crackstation_net", "reason": "Hash CRACKING (hash->plaintext) via manual web form (ext_0392); not IOC threat-intel; manual-only." },
+    { "id": "search_that_hash", "reason": "CLI hash-type identifier/cracker (ext_0398), not threat-intel IOC lookup; out of scope for malware-IOC capability." },
+    { "id": "grounding_with_bing", "reason": "Microsoft's Bing-API replacement is an Azure AI Foundry LLM-grounding service returning synthesized answers, not raw structured SERP; heavy Azure setup, not a drop-in search API." },
+    { "id": "pastebin_scraping_api", "reason": "Real-time scraping API is PRO/paid only; free tier cannot search pastes programmatically." },
+    { "id": "ext_0460_my_cse_for_48_pastebins", "reason": "A Google Custom Search Engine web page (manual), not a callable structured endpoint." },
+    { "id": "photo-map.ru / snapchat_map / flickr_photo_map / youtube_geofind / instahunt", "reason": "Coordinate/geo media-discovery tools are all web_interface (manual) in the catalog - no automatable API." },
+    { "id": "thexifer / geotagonline", "reason": "Web-based EXIF viewers (manual); ExifTool CLI supersedes them with structured output." },
+    { "id": "repostsleuth", "reason": "Reddit-scoped reverse-image web tool (manual); narrow and UI-only." }
+  ]
+}

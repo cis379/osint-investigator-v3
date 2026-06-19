@@ -1,0 +1,328 @@
+{
+  "bucket": "domain_web",
+  "selector_types": ["domain", "url"],
+  "capabilities": [
+    {
+      "capability": "whois_rdap",
+      "selector_types": ["domain"],
+      "best": [
+        {
+          "id": "whois_lookup",
+          "name": "python-whois",
+          "exec_category": "CLI",
+          "install": "pip install python-whois",
+          "run": "library: whois.whois({selector})",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (port-43 WHOIS; output varies by registrar)",
+          "outputs": ["name", "email", "phone", "company", "domain"],
+          "status": "already_implemented",
+          "notes": "Legacy port-43 WHOIS. Free-text, registrar-dependent, increasingly redacted (GDPR). Keep, but pair with RDAP for structured/normalized data."
+        },
+        {
+          "id": "rdap",
+          "name": "RDAP (rdap.org bootstrap)",
+          "exec_category": "HTTP",
+          "install": "none (stdlib requests)",
+          "run": "GET https://rdap.org/domain/{selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (IETF standard, RFC 7480-7484; rdap.org redirects to the authoritative per-TLD RDAP server via IANA bootstrap)",
+          "outputs": ["name", "email", "domain", "company"],
+          "status": "to_wire",
+          "notes": "Successor to WHOIS. Returns standardized JSON: events (registration/expiry dates), entities (registrant/registrar w/ vCard), nameservers, status, secureDNS. rdap.org auto-routes to the correct registry RDAP endpoint. Parse JSON directly - no scraping. Best structured complement to the WHOIS we already have."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "who-dat",
+          "name": "lissy93/who-dat",
+          "exec_category": "HTTP",
+          "run": "GET https://who-dat.as93.net/{selector}  (or self-host)",
+          "notes": "Self-hostable service that merges RDAP+WHOIS into one normalized JSON shape, discovers RDAP server per-TLD via IANA bootstrap. Good if rdap.org normalization is insufficient. Public instance is best-effort; self-host for reliability."
+        }
+      ],
+      "gaps": "WHOIS history / historical registrant data is paid-only (SecurityTrails/WhoisXML). RDAP gives current state only."
+    },
+    {
+      "capability": "dns_records",
+      "selector_types": ["domain"],
+      "best": [
+        {
+          "id": "dns_lookup",
+          "name": "dnspython resolver",
+          "exec_category": "CLI",
+          "install": "pip install dnspython",
+          "run": "library: dns.resolver.resolve({selector}, rtype) for A/AAAA/MX/TXT/NS/CNAME/SOA",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (dnspython 2.x)",
+          "outputs": ["ip_v4", "ip_v6", "domain"],
+          "status": "already_implemented",
+          "notes": "Covers core record types. Could add DoH fallback (Google/Cloudflare https://dns.google/resolve?name={selector}&type=A) for environments where UDP/53 is blocked, plus CAA/DNSKEY/DMARC TXT parsing. Adequate as-is."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "doh_google",
+          "name": "Google DNS-over-HTTPS",
+          "exec_category": "HTTP",
+          "run": "GET https://dns.google/resolve?name={selector}&type=A",
+          "notes": "No-key JSON DoH endpoint; resilient when raw DNS is filtered. Cloudflare equivalent: https://cloudflare-dns.com/dns-query (Accept: application/dns-json)."
+        }
+      ],
+      "gaps": "Passive DNS (historical A-record / IP-history, reverse-IP co-hosted domains) is not covered - that needs SecurityTrails/Censys/Netlas (keyed)."
+    },
+    {
+      "capability": "subdomain_enumeration",
+      "selector_types": ["domain"],
+      "best": [
+        {
+          "id": "subfinder",
+          "name": "subfinder (ProjectDiscovery)",
+          "exec_category": "CLI",
+          "install": "go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest  (requires go1.24+)",
+          "run": "subfinder -d {selector} -silent -json -all",
+          "auth": "none (works key-free; optional API keys in $HOME/.config/subfinder/provider-config.yaml unlock more sources)",
+          "free": true,
+          "maintained": "active (latest release 2026-03)",
+          "outputs": ["domain"],
+          "status": "to_wire",
+          "notes": "Best passive subdomain engine. Aggregates 30+ passive sources (crt.sh, Anubis, HackerTarget, Wayback, etc.). Runs fully passive with no keys; -json emits one object/line {host,source}. Go binary - add an availability check in the runner."
+        },
+        {
+          "id": "crtsh",
+          "name": "crt.sh CT search",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://crt.sh/?q=%.{selector}&output=json",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Sectigo-run CT aggregator)",
+          "outputs": ["domain", "email"],
+          "status": "already_implemented",
+          "notes": "Already wired. Doubles as a passive subdomain source via cert SANs - overlaps with one of subfinder's sources but is a reliable key-free standalone."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "theharvester",
+          "name": "theHarvester",
+          "exec_category": "CLI",
+          "install": "pipx install theHarvester  (or git clone + pipx install --python python3.12 .)",
+          "run": "theHarvester -d {selector} -b crtsh,anubis,bevigil,otx,duckduckgo,rapiddns,subdomaincenter -f out.json",
+          "notes": "Org-recon multitool: subdomains + emails + hosts + virtual hosts in one pass. Most actively maintained of this class (v4.x, 2026; flit-core packaging). JSON output. Prefer subfinder for pure subdomain breadth; use theHarvester when you also want emails/hosts for a company investigation. Pin sources that need no key."
+        }
+      ],
+      "gaps": "Active DNS brute-force (amass active / puredns) and resolver-verified live subdomains not covered by the passive picks; amass active mode is heavier and noisier. Censys/Netlas give more SANs but are keyed/credit-limited."
+    },
+    {
+      "capability": "certificate_transparency",
+      "selector_types": ["domain"],
+      "best": [
+        {
+          "id": "crtsh",
+          "name": "crt.sh",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://crt.sh/?q=%.{selector}&output=json",
+          "auth": "none",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["domain", "email"],
+          "status": "already_implemented",
+          "notes": "Already wired. The canonical free CT log search. Yields SAN domains, issuer, validity windows. Can be slow/flaky under load; add retry + timeout (already 30s)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "certspotter",
+          "name": "SSLMate Cert Spotter API",
+          "exec_category": "HTTP",
+          "run": "GET https://api.certspotter.com/v1/issuances?domain={selector}&include_subdomains=true&expand=dns_names&expand=issuer",
+          "notes": "Clean JSON CT API, good crt.sh fallback. Free unauthenticated tier is rate-limited (a handful of queries/hr); add API key for more. Use as failover when crt.sh times out."
+        }
+      ],
+      "gaps": "None significant for free CT search - crt.sh + Cert Spotter cover it. Pre-cert/expired-only filtering is manual."
+    },
+    {
+      "capability": "web_archive",
+      "selector_types": ["domain", "url"],
+      "best": [
+        {
+          "id": "wayback",
+          "name": "Wayback Machine CDX API",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://web.archive.org/cdx/search/cdx?url={selector}&output=json&limit=50&fl=timestamp,original,statuscode,mimetype",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Internet Archive)",
+          "outputs": ["url"],
+          "status": "already_implemented",
+          "notes": "Already wired. CDX index of historical snapshots. For URL-discovery add collapse=urlkey and matchType=prefix to dedup; raise limit for full crawl history."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "gau",
+          "name": "gau (getallurls, lc/gau)",
+          "exec_category": "CLI",
+          "install": "go install github.com/lc/gau/v2/cmd/gau@latest",
+          "run": "gau --providers wayback,commoncrawl,otx,urlscan --json {selector}",
+          "notes": "Aggregates known historical URLs from Wayback + Common Crawl + AlienVault OTX + urlscan in one pass - broader than Wayback alone. Key-free. Great for exposed-path / endpoint discovery. JSON output. Add an availability check (Go binary)."
+        }
+      ],
+      "gaps": "archive.today (archive.ph) has no stable public API and is Cloudflare-gated - manual/excluded. Common Crawl direct index queries are heavy; gau abstracts them."
+    },
+    {
+      "capability": "url_site_scanning",
+      "selector_types": ["domain", "url"],
+      "best": [
+        {
+          "id": "urlscan",
+          "name": "urlscan.io Search API",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://urlscan.io/api/v1/search/?q=domain:{selector}&size=10",
+          "auth": "none (search is key-free; submitting new scans needs a free API key)",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["url", "domain", "ip_v4"],
+          "status": "already_implemented",
+          "notes": "Already wired. Searches existing public scans -> resolved IPs, servers, page domains, screenshots. To trigger a fresh scan use POST https://urlscan.io/api/v1/scan/ with API-Key header (free tier ~100 private/1000 public scans/day)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "threatfox",
+          "name": "ThreatFox (abuse.ch) IOC search",
+          "exec_category": "HTTP",
+          "run": "POST https://threatfox-api.abuse.ch/api/v1/ {\"query\":\"search_ioc\",\"search_term\":\"{selector}\"}",
+          "notes": "Already wired. Checks domain/url/IP/hash against malware IOC DB. Note: abuse.ch now issues free Auth-Keys (Auth-Key header) for some endpoints - verify ThreatFox still accepts anonymous POST, register a free key if it starts 401ing."
+        }
+      ],
+      "gaps": "Live rendered-DOM/redirect-chain capture beyond urlscan (e.g. a headless browser scan) is out of scope for the structured line. VirusTotal URL report (keyed, 4 req/min free) could add multi-engine verdicts."
+    },
+    {
+      "capability": "http_fingerprint_tech_detection",
+      "selector_types": ["domain", "url"],
+      "best": [
+        {
+          "id": "http_headers",
+          "name": "HTTP header probe (requests)",
+          "exec_category": "CLI",
+          "install": "pip install requests",
+          "run": "library: requests.head(https://{selector}) + socket.gethostbyname",
+          "auth": "none",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["ip_v4", "domain"],
+          "status": "already_implemented",
+          "notes": "Already wired. Captures Server header + resolves IP. Minimal fingerprinting (header-only). Good cheap baseline; upgrade path below for real tech-stack detection."
+        },
+        {
+          "id": "httpx",
+          "name": "httpx (ProjectDiscovery)",
+          "exec_category": "CLI",
+          "install": "go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest  (requires go1.24+)",
+          "run": "echo {selector} | httpx -json -title -tech-detect -status-code -web-server -ip -cname -location",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (2026)",
+          "outputs": ["domain", "ip_v4", "url"],
+          "status": "to_wire",
+          "notes": "Best structured fingerprinter. -tech-detect uses Wappalyzer signatures -> CMS/framework/server/CDN; -json emits one record with status, title, tech[], webserver, cname, host(IP), tls. Single-host probe is fast. Go binary - add availability check. Big upgrade over header-only http_headers."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "whatweb",
+          "name": "WhatWeb",
+          "exec_category": "CLI",
+          "install": "gem install whatweb  (or apt install whatweb)",
+          "run": "whatweb --log-json=- -a 1 {selector}",
+          "notes": "Mature Ruby fingerprinter, 1800+ plugins, aggression-tunable, JSON log. Heavier dependency (Ruby) than httpx. Use if httpx tech coverage misses something; otherwise httpx is the lighter single-binary choice."
+        }
+      ],
+      "gaps": "Passive-only tech detection (no live request) requires BuiltWith/Wappalyzer API (keyed). httpx/whatweb both touch the target."
+    },
+    {
+      "capability": "exposed_file_leaked_secret_discovery",
+      "selector_types": ["domain", "url"],
+      "best": [
+        {
+          "id": "google_dork_generator",
+          "name": "Google Dork Generator",
+          "exec_category": "generator",
+          "install": "none (built-in)",
+          "run": "library: generates site:/filetype:/inurl: dorks for {selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (in-repo)",
+          "outputs": [],
+          "status": "already_implemented",
+          "notes": "Already wired. Emits dork strings (index-of, filetype:pdf/xlsx, inurl:admin/login, 'api key'/'password'/'secret', pastebin/github mentions). NOTE: it only GENERATES queries - it does not execute them. Pair with the web-search line or a Programmable Search API to actually run them."
+        },
+        {
+          "id": "gau",
+          "name": "gau (getallurls)",
+          "exec_category": "CLI",
+          "install": "go install github.com/lc/gau/v2/cmd/gau@latest",
+          "run": "gau --json {selector} | filter for .env,.sql,.bak,.git,.config,backup,/admin",
+          "auth": "none",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["url"],
+          "status": "to_wire",
+          "notes": "Best STRUCTURED exposed-path discovery: surfaces historically-known URLs (from Wayback/CommonCrawl/OTX/urlscan) including stale .env/.git/backup/admin endpoints that current crawls miss. Post-filter the URL list for sensitive extensions/paths. Doubles in the web_archive capability."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "trufflehog",
+          "name": "TruffleHog",
+          "exec_category": "CLI",
+          "install": "pip install trufflehog  (or brew install trufflehog)",
+          "run": "trufflehog github --org={selector_org} --json   |  trufflehog filesystem <cloned_repo> --json",
+          "notes": "Verified-secret scanner (700+ detectors, live credential validation). Repo/filesystem/GitHub-org scoped, NOT domain-scoped - only relevant once a domain pivots to a GitHub org/repo. JSON output, very active. Out of the direct domain->web flow but the best leaked-credential verifier when a code surface is found."
+        }
+      ],
+      "gaps": "Actually EXECUTING dorks needs a search API (Brave/Bing/Google Programmable Search, all keyed) - the generator only produces query strings. GitHub code-search for the domain string (api.github.com/search/code, keyed) would find leaked configs referencing the domain; worth wiring separately."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "securitytrails",
+      "reason": "Passive-DNS/subdomain/WHOIS-history would be ideal but free tier is only 50 queries/MONTH and ownership moved to Recorded Future (pricing/API instability flagged in audit). Not viable for automated use; revisit only if a key is provisioned."
+    },
+    {
+      "id": "censys_platform",
+      "reason": "Legacy free Search disabled in 2026; new Platform requires Starter+ tier for subdomain/host search (credit-metered, ~5 credits/100 results). No usable free automation tier. Keep on backlog as keyed HTTP collector."
+    },
+    {
+      "id": "netlas",
+      "reason": "Excellent (response-body regex search Shodan can't do) but Community free tier is only 50 requests/day and requires an API key. Mark to_wire later as keyed HTTP collector; not free/no-key enough to be a default pick now."
+    },
+    {
+      "id": "shodan_full_api",
+      "reason": "Domain/DNS endpoints need a paid membership; only InternetDB (IP-only) is free, which lives in the ip bucket, not domain_web."
+    },
+    {
+      "id": "archive_today",
+      "reason": "archive.today/archive.ph has no stable public API and is Cloudflare/anti-bot gated - manual-only, not automatable in the structured line."
+    },
+    {
+      "id": "dnsdumpster",
+      "reason": "Web UI only (CSRF-token + HTML scraping, no documented stable JSON API); hashemilab acquisition added a keyed API but free programmatic use is unreliable. subfinder/crt.sh cover the same passive subdomain ground key-free."
+    },
+    {
+      "id": "spiderfoot_oss",
+      "reason": "OSS abandoned after Intel 471 acquisition (2+ yrs stale per audit). We build our own orchestration; do not depend on it."
+    },
+    {
+      "id": "wappalyzer_cli",
+      "reason": "Official Wappalyzer CLI/npm package was deprecated/went commercial; signatures live on but the standalone OSS CLI is unmaintained. httpx -tech-detect uses Wappalyzer fingerprints and is the maintained path."
+    }
+  ]
+}

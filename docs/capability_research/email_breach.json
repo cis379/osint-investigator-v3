@@ -1,0 +1,188 @@
+{
+  "bucket": "email_breach",
+  "_researched": "2026-06-19",
+  "_notes": "Selector type: email. Covers (1) account existence across sites, (2) breach/credential exposure, (3) deliverability/verification, (4) email->identity. holehe + emailrep already wired in src/tools/email_tools.py. emailrep.io free tier is effectively dead (folded into Sublime Security) — flagged. HIBP is the only authoritative breach source and needs a ~$3.95/mo key; Hudson Rock Cavalier gives free infostealer-exposure coverage as the no-cost breach pick.",
+  "capabilities": [
+    {
+      "capability": "account_existence_enumeration",
+      "selector_types": ["email"],
+      "best": [
+        {
+          "id": "holehe",
+          "name": "holehe",
+          "exec_category": "CLI",
+          "install": "pip install holehe",
+          "run": "holehe {selector} --only-used --no-color",
+          "auth": "none",
+          "free": true,
+          "maintained": "stale (last code push 2024-09-10, v1.61; NOT archived, 11.3k stars, 76 open issues). Still the best free email->account-existence CLI (~120 sites).",
+          "outputs": ["url", "username"],
+          "status": "already_implemented",
+          "notes": "Already wired as HoleheTool. Uses password-reset / account-existence probes, does not alert the target. Expect silent module breakage + rate-limit false-negatives because of staleness — isolate and treat negatives as low-confidence. Per-module results; add --only-used to cut noise. Has -C/--csv and -j/--json options for structured output if the wrapper is upgraded (current wrapper parses stdout)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "ghunt",
+          "name": "GHunt",
+          "exec_category": "custom",
+          "install": "pip install ghunt  (or pipx)",
+          "run": "ghunt email {selector} --json out.json",
+          "auth": "cookies",
+          "free": true,
+          "maintained": "active (v2, mxrch/GHunt). Google-account focused.",
+          "outputs": ["name", "url", "username"],
+          "status": "to_wire",
+          "notes": "Deep Gmail/Google-account existence + linked-services pivot (real name, Maps reviews, YouTube channel, profile photo). Needs valid Google account cookies via 'ghunt login' -> STATEFUL, not a clean stateless collector. Requires credential vault + auth-expiry handling. Best treated as email->identity, not generic existence. Listed as runner-up because of the cookie/auth burden."
+        }
+      ],
+      "gaps": "holehe is the only maintained free generic email->account CLI and it is stale; no actively-maintained free drop-in replacement exists. The 'User-Scanner replaces holehe' claim is an unbenchmarked promo post — do not adopt on faith. Many richer existence/identity sources (Epieos, OSINT Industries, Castrick) are web-only or paid (see excluded)."
+    },
+    {
+      "capability": "breach_credential_exposure",
+      "selector_types": ["email"],
+      "best": [
+        {
+          "id": "hibp_breachedaccount",
+          "name": "Have I Been Pwned API v3 (breachedaccount)",
+          "exec_category": "HTTP",
+          "install": "none (REST API)",
+          "run": "GET https://haveibeenpwned.com/api/v3/breachedaccount/{selector}?truncateResponse=false  | headers: hibp-api-key: <KEY>, user-agent: osint-investigator",
+          "auth": "api_key",
+          "free": false,
+          "maintained": "active (Troy Hunt; v3 stable, current). Most-cited breach source.",
+          "outputs": ["name"],
+          "status": "to_wire",
+          "notes": "PAID key required (~$3.50-$3.95/mo Pwned 1 tier) for any email-search endpoint; key is a 32-char hex string sent in the hibp-api-key header, user-agent header also mandatory. Returns JSON array of breach objects (Name, BreachDate, DataClasses, IsVerified...). 404 = no breaches (clean), 200 = breached. Rate-limited per subscription tier (handle 429 with backoff). Companion endpoints on same key: /pasteaccount/{email}, /stealerlogsbyemail/{email}. Authoritative, low false-positive — make this the primary breach collector. Outputs breach names/data-classes, not new pivotable selectors."
+        },
+        {
+          "id": "hudsonrock_cavalier_email",
+          "name": "Hudson Rock Cavalier - search by email (free OSINT endpoint)",
+          "exec_category": "HTTP",
+          "install": "none (REST API)",
+          "run": "GET https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-email?email={selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Hudson Rock; free OSINT tier of the commercial Cavalier infostealer DB).",
+          "outputs": ["url", "ip_v4", "username", "domain"],
+          "status": "to_wire",
+          "notes": "FREE, no key on the public osint-tools/search-by-email endpoint -> best free breach/exposure pick. Returns infostealer-infection exposure: whether the email appears as a victim and/or in stolen credential logs, plus stealer family, antivirus, date_compromised, and (partially redacted) lists of websites/credentials exposed. Complements HIBP (HIBP = public breach corpora; Hudson Rock = infostealer/stealer-log exposure). NOTE: the authenticated commercial API (docs.hudsonrock.com /search-by-login/emails, POST, needs key) is a different, paid endpoint — wire the free GET osint-tools one. Free monitoring tier covers up to 3 emails/3 domains/3 usernames; expect 429 backoff on the public endpoint."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "hibp_pwnedpasswords",
+          "name": "HIBP Pwned Passwords (k-anonymity)",
+          "exec_category": "HTTP",
+          "install": "none (REST API)",
+          "run": "GET https://api.pwnedpasswords.com/range/{first5_of_sha1}",
+          "auth": "none",
+          "free": true,
+          "notes": "Free, keyless, k-anonymity password-hash range check. Not email-keyed (needs a candidate password), so not a primary email-breach collector — keep only if a credential pair is in scope."
+        }
+      ],
+      "gaps": "Authoritative email-keyed breach search (HIBP) is paid. Free breach coverage is limited to infostealer exposure (Hudson Rock) which misses classic credential-dump breaches. DeHashed/LeakCheck/IntelX would add raw leaked-record depth but are paid (IntelX has a ~50/day free tier — see excluded). No free tool returns the actual plaintext leaked password/record without a paid subscription."
+    },
+    {
+      "capability": "email_deliverability_verification",
+      "selector_types": ["email"],
+      "best": [
+        {
+          "id": "disify",
+          "name": "Disify",
+          "exec_category": "HTTP",
+          "install": "none (REST API)",
+          "run": "GET https://disify.com/api/email/{selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (CodeKJ/DISIFY, public docs.disify.com).",
+          "outputs": [],
+          "status": "to_wire",
+          "notes": "FREE, NO key, no signup -> best deliverability pick. One call returns JSON {format, dns, whitelist, disposable} validating syntax + MX/DNS presence + disposable/temporary-domain flag. No live SMTP mailbox probe (so it confirms domain-deliverable, not mailbox-exists), but it is keyless and unlimited-enough for automation. Yields a quality/triage signal (real vs disposable vs invalid), not new selectors."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "mailtester_smtp",
+          "name": "MailTester / Reacher-style SMTP probe",
+          "exec_category": "HTTP",
+          "install": "none (REST API; keyed)",
+          "run": "GET https://api.<provider>/verify?email={selector}&key=<KEY>",
+          "auth": "api_key",
+          "free": false,
+          "notes": "For true mailbox-level SMTP deliverability (catch-all/role/SMTP-accept) use a keyed verifier (Abstract API / EmailVerifierApi / Maileroo / Gamalogic) — all have small free tiers (100-500 credits) but require signup. Wire only if mailbox-exists certainty (beyond Disify's domain check) is needed. Self-hosting reacherhq/check-if-email-exists (Rust/CLI) is the keyless alternative but is heavyweight and gets blocked by major providers."
+        }
+      ],
+      "gaps": "Keyless free APIs (Disify) only do syntax+MX+disposable, not live SMTP mailbox verification. True mailbox-exists checks need a keyed verifier (free tier w/ signup) or a self-hosted SMTP prober that major mailbox providers (Gmail/Outlook) actively block."
+    },
+    {
+      "capability": "email_to_identity",
+      "selector_types": ["email"],
+      "best": [
+        {
+          "id": "ghunt_email_identity",
+          "name": "GHunt (email -> Google identity)",
+          "exec_category": "custom",
+          "install": "pip install ghunt",
+          "run": "ghunt email {selector} --json out.json",
+          "auth": "cookies",
+          "free": true,
+          "maintained": "active (mxrch/GHunt v2).",
+          "outputs": ["name", "username", "url"],
+          "status": "to_wire",
+          "notes": "Best free email->real-identity pivot for Gmail/Google-hosted emails: returns Google account display name, profile photo, Maps reviews, YouTube channel, GAIA ID, linked services. STATEFUL — needs valid Google cookies loaded via 'ghunt login' (listener/base64/manual); cookies expire -> needs a credential vault + re-auth alerting, hence exec_category=custom. Only works for emails tied to a Google account."
+        },
+        {
+          "id": "gravatar_email",
+          "name": "Gravatar (email hash lookup)",
+          "exec_category": "HTTP",
+          "install": "none (REST API)",
+          "run": "GET https://www.gravatar.com/{md5(lowercase trimmed email)}.json",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Automattic).",
+          "outputs": ["name", "username", "url"],
+          "status": "to_wire",
+          "notes": "FREE, keyless. MD5-hash the lowercased/trimmed email and GET the .json profile. When present returns display name, username, linked accounts, URLs, and avatar -> direct email->name/username pivot. Already implemented for the 'name' selector as gravatar_check (src/tools/name_tools.py) but NOT wired for the email selector — small wrapper add. Sparse coverage (only emails with a Gravatar) but zero-cost and high-precision when it hits."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "holehe_pivot",
+          "name": "holehe (account existence -> username pivot)",
+          "exec_category": "CLI",
+          "install": "pip install holehe",
+          "run": "holehe {selector} --only-used --no-color",
+          "auth": "none",
+          "free": true,
+          "status": "already_implemented",
+          "notes": "Existence hits across ~120 sites indirectly attribute identity (which platforms the person uses); some modules leak partial usernames/recovery hints. Secondary to GHunt/Gravatar for actual name attribution."
+        }
+      ],
+      "gaps": "Free email->real-name attribution is essentially limited to Gmail (GHunt, cookie-gated) and emails with a Gravatar. General-purpose email->identity (any provider) is paid-data territory: OSINT Industries, Epieos, Pipl, Predicta, DeHashed (all excluded below — web-only or paid). No maintained free tool closes the last mile to identity for arbitrary email domains."
+    }
+  ],
+  "excluded": [
+    { "id": "emailrep", "reason": "Already wired (EmailRepTool) but free tier folded into Sublime Security; emailrep.io public endpoint is effectively dead / heavily rate-limited without a Sublime key. Keep wrapper but expect failures; do not rely on it." },
+    { "id": "h8mail", "reason": "Abandoned (audit-flagged dead). Superseded by HIBP + Hudson Rock." },
+    { "id": "mosint", "reason": "Abandoned (audit-flagged dead)." },
+    { "id": "theharvester", "reason": "Not single-email scoped — it is domain/company-scoped (harvests emails/subdomains/hosts for an org). Actively maintained (laramies, ~v4.9+, releases through 2025-26) and worth wiring under a DOMAIN/company bucket, but out of scope for an email selector." },
+    { "id": "dehashed", "reason": "Paid only (no usable free automation tier). Strong leaked-record depth; revisit if budget allows. Web/API but key-gated." },
+    { "id": "leakcheck", "reason": "Paid/keyed leak search; no free automation tier." },
+    { "id": "intelx", "reason": "Has a ~50-lookup/day free tier (could be promoted later) but free tier is heavily limited and ToS-restricted for automation; defer." },
+    { "id": "osint_industries", "reason": "Paid commercial email/phone enrichment (web + paid API). Best-in-class last-mile identity but no free tier." },
+    { "id": "epieos", "reason": "Web-interface only for the free tier (manual); strong email->Google/identity but not a structured collector. Paid API exists." },
+    { "id": "pipl", "reason": "Paid identity-resolution API, enterprise-gated." },
+    { "id": "spycloud", "reason": "Enterprise paid breach/credential exposure; no free automation." },
+    { "id": "hunter_io", "reason": "Email finder/verifier for ORG recon (domain-scoped), keyed; belongs in a domain/company bucket, not single-email. Has small free tier." },
+    { "id": "mailboxlayer", "reason": "Keyed email-verification API; redundant with keyless Disify for our needs (use Disify free; mailboxlayer only if SMTP-level + key acceptable)." },
+    { "id": "trumail", "reason": "Dead/abandoned email-verification service (public API discontinued)." },
+    { "id": "breachchecker_com", "reason": "Web-interface only, manual; no structured API." },
+    { "id": "have_i_been_sold", "reason": "Web-interface only, manual." },
+    { "id": "psbdmp_ws", "reason": "Pastebin-dump search, web-interface; API exists but narrow/unreliable — defer to HIBP paste endpoint." },
+    { "id": "castrickclues", "reason": "Shut down 2026-02-07 (audit-flagged dead)." },
+    { "id": "spiderfoot", "reason": "OSS abandoned after Intel 471 acquisition (2+ yrs stale); not used as orchestration." },
+    { "id": "maltego", "reason": "GUI framework / paid transforms — not a structured headless collector." },
+    { "id": "recon_ng", "reason": "Framework/orchestration, not a single-capability collector; most modules need their own keys." }
+  ]
+}

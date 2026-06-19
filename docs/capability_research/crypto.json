@@ -1,0 +1,236 @@
+{
+  "bucket": "crypto",
+  "capabilities": [
+    {
+      "capability": "address_balance_and_tx_history",
+      "selector_types": ["crypto_btc", "crypto_eth"],
+      "best": [
+        {
+          "id": "blockchain_btc",
+          "name": "Blockchain.info BTC (rawaddr)",
+          "exec_category": "HTTP",
+          "install": "none (requests)",
+          "run": "GET https://blockchain.info/rawaddr/{selector}?limit=10",
+          "auth": "none",
+          "free": true,
+          "maintained": "active public explorer (Blockchain.com)",
+          "outputs": ["crypto_btc"],
+          "status": "already_implemented",
+          "notes": "Wired in src/tools/crypto_tools.py::BlockchainBtcTool. Returns final_balance, n_tx, total_received/sent, and per-tx input/output addresses (connected wallets). Aggressive rate-limiting on the free host; for production add Blockstream/mempool as fallbacks below."
+        },
+        {
+          "id": "etherscan",
+          "name": "Etherscan (free tier, V2)",
+          "exec_category": "HTTP",
+          "install": "none (requests)",
+          "run": "GET https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address={selector}&startblock=0&endblock=99999999&sort=desc&page=1&offset=10&apikey={KEY}",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active; V2 multichain (60+ EVM chains via one key, 5 calls/sec free)",
+          "outputs": ["crypto_eth"],
+          "status": "already_implemented",
+          "notes": "Wired as EtherscanTool in crypto_tools.py but uses the LEGACY v1 URL (api.etherscan.io/api) with NO apikey. V1 was sunset May 31 2025 and the free tier now requires a key. ACTION: migrate to V2 endpoint above + add a free API key. Balance via action=balance; tokentx for ERC-20 transfers. chainid swaps to BSC/Arbitrum/Base/etc for cross-chain (capability below)."
+        },
+        {
+          "id": "blockstream_esplora",
+          "name": "Blockstream Esplora (BTC)",
+          "exec_category": "HTTP",
+          "install": "none (requests)",
+          "run": "GET https://blockstream.info/api/address/{selector} ; txs: GET https://blockstream.info/api/address/{selector}/txs",
+          "auth": "none",
+          "free": true,
+          "maintained": "active; Blockstream public infra since 2021, no key",
+          "outputs": ["crypto_btc"],
+          "status": "to_wire",
+          "notes": "No-key BTC explorer. /address returns chain_stats + mempool_stats {tx_count, funded_txo_sum, spent_txo_sum} -> balance = funded - spent (sats). /txs returns last 50 mempool + 25 confirmed, /txs/chain/:last_seen_txid pages 25 at a time. Best free no-key fallback when blockchain.info rate-limits. Self-hostable. Same API works for Liquid."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "mempool_space",
+          "name": "mempool.space REST API",
+          "exec_category": "HTTP",
+          "run": "GET https://mempool.space/api/address/{selector} ; txs: GET https://mempool.space/api/address/{selector}/txs ; utxo: .../utxo",
+          "auth": "none",
+          "free": true,
+          "notes": "Esplora-compatible schema (same fields as Blockstream), no key. Good second BTC fallback; also exposes fee/UTXO data. Enterprise tier exists but public API is free."
+        },
+        {
+          "id": "blockchair_dashboards",
+          "name": "Blockchair address dashboards (multi-chain)",
+          "exec_category": "HTTP",
+          "run": "GET https://api.blockchair.com/{chain}/dashboards/address/{selector}  (chain=bitcoin|ethereum|litecoin|dogecoin|bitcoin-cash|dash|zcash...)",
+          "auth": "none (free) / api_key (paid for higher limits)",
+          "free": true,
+          "notes": "One schema across 17+ chains incl. BTC and ETH -> single wrapper covers many selector types. Free tier 30 req/min, no key; some queries cost >1 'request point'. Strong unifier but free limits are tight; key it for volume."
+        }
+      ],
+      "gaps": "All free explorers cap returned tx pages (10-50); deep history (1000s of txs) needs paging loops or a keyed plan. Token/ERC-20 balances require a separate Etherscan call (tokentx/tokenbalance). No free tool gives USD-valued balance history without a price feed."
+    },
+    {
+      "capability": "chain_analysis_clustering",
+      "selector_types": ["crypto_btc", "crypto_eth"],
+      "best": [
+        {
+          "id": "blockchain_btc_connected_wallets",
+          "name": "Connected-wallet extraction (input/output co-spend)",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "derived from blockchain.info / Blockstream /txs output",
+          "auth": "none",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["crypto_btc"],
+          "status": "already_implemented",
+          "notes": "BlockchainBtcTool already emits all input/output addresses per tx as crypto_btc entities. The classic common-input-ownership (co-spend) clustering heuristic can be applied by the supervisor over these inputs. This is the only FREE programmatic clustering we can do without a paid analytics vendor."
+        },
+        {
+          "id": "graphsense_iknaio",
+          "name": "GraphSense (Iknaio hosted REST + graphsense-python)",
+          "exec_category": "HTTP",
+          "install": "pip install graphsense-python",
+          "run": "GET https://api.ikna.io/{currency}/addresses/{address}/entity  (address->cluster/entity, tags, neighbors)",
+          "auth": "api_key",
+          "free": false,
+          "maintained": "active (Iknaio/CSH/AIT; /clusters/* endpoints, /entities/* sunset 2026-10-31)",
+          "outputs": ["crypto_btc", "crypto_eth", "name"],
+          "status": "to_wire",
+          "notes": "The ONLY open-source-grade address-clustering engine with a real API. Hosted instance (api.ikna.io) returns entity/cluster membership, address tags, and neighbor flows for BTC/ETH/TRON. Key is FREE-on-request (email contact@graphsense.org) but gated -> not zero-friction; mark free=false until a key is held. Self-hostable (Cassandra/Spark) for full sovereignty. Best clustering pick once keyed."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "graphsense_self_host",
+          "name": "GraphSense self-hosted (graphsense-lib CLI)",
+          "exec_category": "CLI",
+          "install": "pip install graphsense-lib",
+          "run": "graphsense-cli ... (ingest + REST backend)",
+          "auth": "none (local)",
+          "free": true,
+          "notes": "Full clustering with data sovereignty but heavy infra (Cassandra + Spark + full-node ingest). Not realistic for a lightweight gatherer; note as the sovereign fallback."
+        }
+      ],
+      "gaps": "Production-grade multi-heuristic clustering (peeling chains, change-address detection, cross-tx entity merge) is paid (Chainalysis/TRM/Elliptic) or self-hosted GraphSense. Free path is limited to co-spend heuristic on explorer output + keyed GraphSense lookups."
+    },
+    {
+      "capability": "attribution_exchange_service_id",
+      "selector_types": ["crypto_btc", "crypto_eth"],
+      "best": [
+        {
+          "id": "ofac_sanctioned_addresses",
+          "name": "OFAC sanctioned digital-currency addresses (0xB10C)",
+          "exec_category": "HTTP",
+          "install": "none (fetch static list once, cache)",
+          "run": "GET https://raw.githubusercontent.com/0xB10C/ofac-sanctioned-digital-currency-addresses/main/sanctioned_addresses_ETH.txt  (also _XBT.txt for BTC, _XMR, _USDT, _USDC, plus combined .json)",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (auto-generated from Treasury SDN advanced XML; covers 17 assets)",
+          "outputs": ["name", "crypto_btc", "crypto_eth"],
+          "status": "to_wire",
+          "notes": "Definitive, authoritative sanctions attribution. Local set-membership check -> if hit, label = sanctioned entity (high-confidence 'confirmed'). Cache the list, refresh daily. ultrasoundmoney/ofac-ethereum-addresses is an ETH-only mirror. Zero-friction, no key, no rate limit."
+        },
+        {
+          "id": "etherscan_labels_dump",
+          "name": "Etherscan address labels (brianleect/etherscan-labels JSON/CSV dump)",
+          "exec_category": "HTTP",
+          "install": "none (download combined dump, load into dict)",
+          "run": "GET https://raw.githubusercontent.com/brianleect/etherscan-labels/main/data/etherscan/combined/combinedAllLabels.json  (per-label files also available)",
+          "auth": "none",
+          "free": true,
+          "maintained": "periodic refresh; community label dumps for top EVM chains",
+          "outputs": ["crypto_eth", "name"],
+          "status": "to_wire",
+          "notes": "Maps ETH addresses -> exchange/service/protocol labels (e.g. 'Coinbase', 'Binance', 'Tornado Cash'). Etherscan's own nametag API endpoint exists but is PRO PLUS only (paid). This static dump is the free substitute: local lookup, no key. Pair with eth-labels.com public API (swagger at https://eth-labels.com/swagger) for fresher lookups (170k+ labels) when online."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "arkham_intel_api",
+          "name": "Arkham Intelligence Intel API",
+          "exec_category": "HTTP",
+          "run": "GET https://api.intel.arkm.com/...  (entity/label lookup by address)",
+          "auth": "api_key",
+          "free": false,
+          "notes": "Best-in-class probabilistic attribution (entity labels across chains). Freemium dashboard but the Intel API requires requested access / paid tier; attribution is probabilistic not binary. Use as the keyed last-mile attribution upgrade, not a free default. Docs: api-guide.intel.arkm.com."
+        },
+        {
+          "id": "walletlabels",
+          "name": "Walletlabels (7.5M+ ETH labels)",
+          "exec_category": "HTTP",
+          "run": "query interface over 7.5M+ labeled ETH addresses",
+          "auth": "api_key (paid for API)",
+          "free": false,
+          "notes": "Large ETH label corpus; web search free, programmatic API is paid. Runner-up to the free static dumps above."
+        }
+      ],
+      "gaps": "Free attribution = static lists only (OFAC sanctions + community label dumps), which lag real-time and miss un-labeled/fresh service wallets. Live, probabilistic, cross-chain entity attribution (Arkham/Chainalysis/Nansen/Breadcrumbs) is all keyed/paid. No free CLI/HTTP gives confident exchange deposit-address attribution at scale."
+    },
+    {
+      "capability": "cross_chain_analysis",
+      "selector_types": ["crypto_btc", "crypto_eth", "crypto_other"],
+      "best": [
+        {
+          "id": "blockchair_multichain",
+          "name": "Blockchair unified multi-chain dashboards",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://api.blockchair.com/{chain}/dashboards/address/{selector}  (one schema for BTC, ETH, LTC, DOGE, BCH, DASH, ZEC, BSV, Groestlcoin + testnets)",
+          "auth": "none (free) / api_key (volume)",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["crypto_btc", "crypto_eth"],
+          "status": "to_wire",
+          "notes": "Single normalized response across UTXO and account chains -> one wrapper services many selector types with the same parser. Free 30 req/min no key. Best free unifier for breadth-of-chains coverage."
+        },
+        {
+          "id": "etherscan_v2_chainid",
+          "name": "Etherscan V2 multichain (chainid switch)",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://api.etherscan.io/v2/api?chainid={id}&module=account&action=txlist&address={selector}&apikey={KEY}  (chainid: 1=ETH, 56=BSC, 42161=Arbitrum, 8453=Base, 10=Optimism, 137=Polygon...)",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (60+ EVM chains, one free key, 5 req/sec shared; ~90% of chains in free tier)",
+          "outputs": ["crypto_eth"],
+          "status": "to_wire",
+          "notes": "Cross-EVM-chain coverage from the SAME key/code by varying chainid -> covers the entire EVM side (an address appears on many EVM chains). Pairs with the existing EtherscanTool migration. Does NOT cover non-EVM (BTC, Solana, TRON) -> use Blockchair for UTXO chains."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "3xpl",
+          "name": "3xpl.com universal explorer API",
+          "exec_category": "HTTP",
+          "run": "GET https://api.3xpl.com/{blockchain}/address/{selector}?data=...&from=all (free key from 3xpl)",
+          "auth": "api_key",
+          "free": true,
+          "notes": "Fast ad-free universal explorer spanning many UTXO + account chains under one API; free key. Good Blockchair alternative for cross-chain breadth."
+        },
+        {
+          "id": "graphsense_crosschain",
+          "name": "GraphSense cross-ledger links",
+          "exec_category": "HTTP",
+          "auth": "api_key",
+          "free": false,
+          "notes": "Iknaio GraphSense links entities across BTC/ETH/TRON; keyed. The analytics-grade cross-chain option once GraphSense is wired (see clustering)."
+        }
+      ],
+      "gaps": "True cross-chain ENTITY linkage (same actor across BTC<->ETH<->Solana, bridge tracing) is paid/keyed (Arkham, GraphSense, Breadcrumbs). Free tools give parallel per-chain lookups (query each chain for the address) but not automated bridge/swap correlation. Non-EVM + non-UTXO chains (Solana, TON, Cosmos) need their own explorers (Solscan, TonAPI)."
+    }
+  ],
+  "excluded": [
+    {"id": "ext_1005_etherscan_website", "reason": "Etherscan website (manual/web_interface) duplicate of the wired Etherscan API tool"},
+    {"id": "ext_1004_blockchain_explorer", "reason": "blockchain.com/explorer web UI; covered by the wired blockchain.info rawaddr API"},
+    {"id": "ext_0574_wallet_explorer", "reason": "walletexplorer.com is a browser-only clustering site, no API; manual-only"},
+    {"id": "ext_0575_blockpath", "reason": "Blockpath web interface, no programmatic API"},
+    {"id": "ext_0581_breadcrumbs", "reason": "Breadcrumbs.app — strong clustering/visualization but web UI + paid API; no free automatable endpoint"},
+    {"id": "ext_0583_wallet_labels", "reason": "Walletlabels API is paid; free access is web-only (kept as paid runner-up under attribution)"},
+    {"id": "ext_1006_oxt_me", "reason": "OXT.me (Samourai) BTC clustering explorer effectively offline/seized; do not wire"},
+    {"id": "ext_0576_cryptocurrency_alerting", "reason": "alerting/monitoring service, paid, not an OSINT lookup"},
+    {"id": "ext_0578_coinwink", "reason": "price-alert service, not investigative"},
+    {"id": "ext_0580_bitcoin_abuse_database", "reason": "bitcoinabuse.com merged into Chainabuse (Chainalysis); free API deprecated/gated — re-evaluate Chainabuse API separately if needed"},
+    {"id": "chainalysis_trm_elliptic", "reason": "Enterprise attribution/clustering (Chainalysis, TRM, Elliptic) — no free tier, license-only"},
+    {"id": "nansen", "reason": "Nansen wallet labels — paid subscription, no free automatable API"},
+    {"id": "etherscan_nametags_api", "reason": "Etherscan native nametags/metadata endpoint is PRO PLUS (paid) tier only; use free static label dumps instead"}
+  ]
+}

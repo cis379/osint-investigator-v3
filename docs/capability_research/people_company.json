@@ -1,0 +1,189 @@
+{
+  "bucket": "people_company",
+  "_notes": "Researcher: people_company line (selector types: name, company). Covers PERSON identification/public-records, COMPANY/org recon, and BUSINESS REGISTRIES. Verified maintained status + endpoints/auth via WebSearch/WebFetch mid-2026. Honest gap: real person-identification (name -> address/relatives/phone) is overwhelmingly paid people-search or web-search; there is NO good free structured tool for it. Already-implemented name tools live in src/tools/name_tools.py.",
+  "capabilities": [
+    {
+      "capability": "person_identification_public_records",
+      "selector_types": ["name"],
+      "best": [
+        {
+          "id": "wikidata_search",
+          "name": "Wikidata",
+          "exec_category": "HTTP",
+          "install": "stdlib (requests)",
+          "run": "GET https://www.wikidata.org/w/api.php?action=wbsearchentities&search={selector}&language=en&format=json  (then wbgetentities for claims P106 occupation / P108 employer / P569 DOB / P27 citizenship)",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (WMF-hosted, live)",
+          "outputs": ["name", "url", "company"],
+          "status": "already_implemented",
+          "notes": "Best STRUCTURED person source but only covers notable/public figures. Already wired in name_tools.py (WikidataTool). Pulls occupation/employer/DOB/citizenship + Wikipedia sitelink."
+        },
+        {
+          "id": "wikipedia_search",
+          "name": "Wikipedia",
+          "exec_category": "HTTP",
+          "install": "stdlib (requests)",
+          "run": "GET https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={selector}&format=json",
+          "auth": "none",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["name", "url", "company"],
+          "status": "already_implemented",
+          "notes": "Biographical context for notable persons only. Already wired (WikipediaSearchTool)."
+        },
+        {
+          "id": "gravatar_check",
+          "name": "Gravatar profile check",
+          "exec_category": "HTTP",
+          "install": "stdlib",
+          "run": "GET https://en.gravatar.com/{md5(email)}.json  (email candidates derived from name)",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Automattic)",
+          "outputs": ["email", "url", "username"],
+          "status": "already_implemented",
+          "notes": "Confirms an email/name pair when a Gravatar exists; yields linked accounts. Already wired (GravatarTool). Pivots off name->email guesses, low hit rate but high confidence on hit."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "name_to_username",
+          "name": "Name->username (GitHub/GitLab)",
+          "exec_category": "HTTP",
+          "run": "name -> username permutations -> GET api.github.com/users/{u} + gitlab.com/api/v4/users?username={u}",
+          "auth": "none",
+          "free": true,
+          "status": "already_implemented",
+          "notes": "Already wired (UsernameFromNameTool). Bridges name -> username/url for the username line. Confirms when GitHub display name matches."
+        }
+      ],
+      "gaps": "HONEST GAP: there is NO good free/structured tool for real person identification of non-notable people (name -> address, relatives, phone, age, prior addresses). That capability is owned by (a) the WEB-SEARCH line, and (b) PAID people-search/identity APIs (Pipl, OSINT Industries, Predicta Search, TruePeopleSearch, BeenVerified, Spokeo). All are excluded here as paid-only/web-only. hibp_name_search (name_tools.py) does NOT do any breach lookup -- it only generates email permutations; the only real breach source is HIBP API v3 (keyed, ~$3.95/mo, in the email/breach bucket, not here)."
+    },
+    {
+      "capability": "company_org_recon_email_subdomain",
+      "selector_types": ["company", "domain"],
+      "best": [
+        {
+          "id": "theharvester",
+          "name": "theHarvester",
+          "exec_category": "CLI",
+          "install": "pipx install theHarvester   (Python 3.11+; alt: pip install -r requirements/base.txt from repo)",
+          "run": "theHarvester -d {selector} -b duckduckgo,crtsh,bing,otx,hackertarget -l 500 -f {out}.json   (then parse {out}.json)",
+          "auth": "none for free sources; some -b sources (shodan, hunter, securityTrails, github-code, etc.) need API keys in api-keys.yaml",
+          "free": true,
+          "maintained": "active (laramies; v4.11.x, repo indexed Mar 2026 -- most actively maintained recon CLI)",
+          "outputs": ["email", "domain", "url", "ip_v4", "name"],
+          "status": "to_wire",
+          "notes": "BEST org-recon tool. Takes a DOMAIN (not a free-text company name) -> emails, subdomains, hosts, IPs, sometimes employee names. For a company SELECTOR, first resolve company -> primary domain (via Wikidata P856 official website, or registry below), then run theHarvester on that domain. JSON output via -f. Needs the CLI-collector runner class (audit S4). Pin version; isolate (some sources rate-limit)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "hunter_io",
+          "name": "Hunter.io Domain Search",
+          "exec_category": "HTTP",
+          "install": "stdlib",
+          "run": "GET https://api.hunter.io/v2/domain-search?domain={domain}&api_key={key}",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["email", "name", "url"],
+          "status": "to_wire",
+          "notes": "Cleanest domain -> employee email+name+role API. Free tier ~25-50 searches/mo (keyed). Excellent for company people-discovery but key-gated, so runner-up to the keyless theHarvester."
+        }
+      ],
+      "gaps": "Org recon is domain-anchored, so a free-text company NAME must first be resolved to a domain (use Wikidata official-website P856, or the registry tools below which sometimes carry a website field). Employee enumeration with names/titles at scale is mostly LinkedIn (no compliant free API) or paid (Hunter, RocketReach, Apollo, Clearbit)."
+    },
+    {
+      "capability": "business_registry_lookup",
+      "selector_types": ["company"],
+      "best": [
+        {
+          "id": "gleif_lei",
+          "name": "GLEIF LEI API v1",
+          "exec_category": "HTTP",
+          "install": "stdlib (requests)",
+          "run": "GET https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]={selector}&page[size]=10   (fuzzy: GET https://api.gleif.org/api/v1/fuzzycompletions?field=entity.legalName&q={selector})",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (GLEIF foundation, live; free, no registration)",
+          "outputs": ["company", "lei", "address", "country", "url"],
+          "status": "to_wire",
+          "notes": "GLOBAL, FREE, no key. Company name -> LEI code, registered legal name, HQ + legal address, jurisdiction, registration status, parent/child (relationship records via /lei-records/{lei}/direct-parent etc.). JSON:API format (data[].attributes.entity). Verified endpoint live mid-2026. Best free global registry pivot."
+        },
+        {
+          "id": "sec_edgar",
+          "name": "SEC EDGAR (full-text + submissions)",
+          "exec_category": "HTTP",
+          "install": "stdlib (requests)",
+          "run": "name->CIK: GET https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company={selector}&type=10-K&output=atom  OR  GET https://efts.sec.gov/LATEST/search-index?q=%22{selector}%22 ; then submissions: GET https://data.sec.gov/submissions/CIK{10-digit-zero-padded}.json ; ticker map: GET https://www.sec.gov/files/company_tickers.json",
+          "auth": "none (REQUIRES descriptive User-Agent header, e.g. 'name email'; rate ~10 req/s)",
+          "free": true,
+          "maintained": "active (US SEC, live JSON APIs on data.sec.gov + efts.sec.gov)",
+          "outputs": ["company", "name", "url", "address", "cik"],
+          "status": "to_wire",
+          "notes": "US public companies only. Company name -> CIK -> filings, officers/insiders, business address, former names, tickers. efts.sec.gov full-text search covers electronic filings since 2001. No key; MUST send a real User-Agent or you get 403. Great for officer/exec names of US public cos."
+        },
+        {
+          "id": "companies_house",
+          "name": "UK Companies House API",
+          "exec_category": "HTTP",
+          "install": "stdlib (requests)",
+          "run": "GET https://api.company-information.service.gov.uk/search/companies?q={selector}  ; officers: GET /company/{number}/officers ; profile: GET /company/{number}",
+          "auth": "api_key (free; HTTP Basic, API key as username, blank password)",
+          "free": true,
+          "maintained": "active (UK gov; free, register at developer.company-information.service.gov.uk)",
+          "outputs": ["company", "name", "address", "url", "company_number"],
+          "status": "to_wire",
+          "notes": "UK companies. Company name -> company number, status, registered address, incorporation date, officers/directors (NAMES + partial DOB + addresses), PSC (beneficial owners), filing history. Free key, 600 req / 5 min. Best free source for director/UBO NAMES -> strong people pivot. Needs key in credential vault."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "wikidata_company",
+          "name": "Wikidata (company facts)",
+          "exec_category": "HTTP",
+          "run": "wbsearchentities then wbgetentities: P856 official website, P159 HQ, P1278/P3548 LEI, P1320 OpenCorporates ID, P749 parent org",
+          "auth": "none",
+          "free": true,
+          "maintained": "active",
+          "outputs": ["company", "url", "lei", "domain"],
+          "status": "already_implemented",
+          "notes": "Already wired (WikidataTool). Useful glue: resolves company NAME -> official website/domain (feeds theHarvester) and -> LEI / OpenCorporates ID / parent org. Notable companies only."
+        }
+      ],
+      "gaps": "No single free GLOBAL company-by-name registry beyond GLEIF (which is LEI-scoped, so smaller private firms without an LEI are missing). OpenCorporates -- the broadest aggregator (200M+ companies, 140+ jurisdictions) -- is now PAID-ONLY (see excluded). Country registries outside US/UK are fragmented (each jurisdiction has its own site, mostly no clean API). For non-US/UK/LEI'd companies, coverage is a real gap -> falls to web search."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "opencorporates",
+      "reason": "PAID-ONLY as of 2026. No free/no-key automation tier remains; cheapest self-serve API plan 'Essentials' is GBP 2,250/yr (<=500 calls/mo, 200/day), and a failed/empty search still consumes a call (verified zephira.ai pricing analysis, Jun 2026). Was historically the best global company aggregator (200M+ cos), but excluded as paid-with-no-usable-free-tier. Wikidata P1320 still maps name->OpenCorporates ID if a user has a key."
+    },
+    {
+      "id": "lei_search_gleif_web",
+      "reason": "Duplicate of GLEIF API. ext_0530_lei_search in tool_buckets is the search.gleif.org WEB UI (web_interface / manual). Superseded by the api.gleif.org JSON API picked above."
+    },
+    {
+      "id": "openownership",
+      "reason": "ext_0531 openownership.org -- beneficial-ownership register, but a manual website/bulk-data download, not a clean per-query lookup API. Bulk-data/manual only; not wireable as a per-selector collector now."
+    },
+    {
+      "id": "pipl_osint_industries_predicta",
+      "reason": "Paid identity/people-search APIs (Pipl, OSINT Industries, Predicta Search). These are the real 'last mile' for name->identity per the audit, but all paid with no free tier. Out of scope for the free structured line."
+    },
+    {
+      "id": "truepeoplesearch_spokeo_beenverified",
+      "reason": "US consumer people-search sites (name->address/relatives/phone/age). Manual-website or paid, anti-bot, ToS-restricted, no clean free API. Person identification of non-notable people belongs to the WEB-SEARCH line, not the structured line."
+    },
+    {
+      "id": "hibp_name_search",
+      "reason": "NOT a breach tool despite its name (in name_tools.py). It performs NO breach/HIBP lookup -- it only generates name->email permutations (and a no-op pwnedpasswords range call). Listed here only to flag the mislabel; real breach coverage = HIBP API v3 (keyed) in the email bucket. Keep as an email-candidate generator, not a person-id source."
+    },
+    {
+      "id": "linkedin",
+      "reason": "Highest-value source for company employees/titles but has no compliant free API; scraping is ToS-violating and heavily anti-bot. Excluded from the structured line; partial coverage only via paid (Apollo, RocketReach) or web search."
+    }
+  ]
+}

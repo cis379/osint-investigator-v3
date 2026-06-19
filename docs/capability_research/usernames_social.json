@@ -1,0 +1,334 @@
+{
+  "bucket": "usernames_social",
+  "researcher_notes": "Selectors: username + platform handles (telegram_handle, discord_id, mastodon acct). Audit ranking confirmed live (2026-06): Maigret (now v0.6.1, 2026-06-17) > Naminter > Linkook > Sherlock. Sherlock + Maigret already wired in src/tools/username_tools.py. For per-platform PROFILE EXTRACTION the cleanest structured routes are native public JSON APIs (GitHub, Reddit, Mastodon, YouTube) plus socid-extractor (URL->record, the engine behind Maigret) and instaloader for Instagram. X/Twitter and Discord have no reliable free structured route (API lockdown / token+ToS) and are gaps. Telegram profile/group enumeration needs Telethon + user API_ID/API_HASH (custom, cookie/session-class auth).",
+  "capabilities": [
+    {
+      "capability": "username_enumeration",
+      "selector_types": ["username"],
+      "best": [
+        {
+          "id": "maigret",
+          "name": "Maigret",
+          "exec_category": "CLI",
+          "install": "pip install maigret==0.6.1",
+          "run": "maigret {selector} --json ndjson --no-color --no-progressbar --timeout 10 --top-sites 500",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (v0.6.1, 2026-06-17; site DB auto-refreshed)",
+          "outputs": ["url", "email", "name"],
+          "status": "already_implemented",
+          "notes": "Best default. 3000+ sites; run --top-sites 500 not -a. Embeds socid-extractor so it pulls display name/bio/location and linked emails & account IDs from hit profiles. Already wired but current wrapper parses plain stdout, not --json ndjson; switch to ndjson to capture the email/name metadata it already produces. Pin version (deps changed across 0.5->0.6)."
+        },
+        {
+          "id": "naminter",
+          "name": "Naminter",
+          "exec_category": "CLI",
+          "install": "pip install naminter",
+          "run": "naminter {selector} --no-color --json-output results.json",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (3xp0rt/Naminter, on PyPI, WhatsMyName ~732 sites, 2026)",
+          "outputs": ["url"],
+          "status": "to_wire",
+          "notes": "Anti-bot SECOND PASS. Async + browser impersonation (curl_cffi) to beat Cloudflare/Akamai - exactly the sites Sherlock/Maigret false-negative on. WhatsMyName-backed. JSON/CSV/PDF. Run after Maigret to recheck misses; URL-only (no metadata extraction)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "sherlock",
+          "name": "Sherlock",
+          "exec_category": "CLI",
+          "install": "pip install sherlock-project",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (v0.16.x, 2025-09)",
+          "outputs": ["url"],
+          "status": "already_implemented",
+          "notes": "Fast, ~400 sites, no metadata. Largely redundant once Maigret runs but cheap cross-check. Already wired."
+        }
+      ],
+      "gaps": "None for breadth. Caveat: every checker false-negatives on heavily bot-protected sites; Naminter mitigates but does not fully solve. Captcha-gated platforms remain unconfirmable."
+    },
+    {
+      "capability": "linked_account_pivoting",
+      "selector_types": ["username"],
+      "best": [
+        {
+          "id": "linkook",
+          "name": "Linkook",
+          "exec_category": "CLI",
+          "install": "pip install linkook",
+          "run": "linkook {selector} --no-color --output json --print-all",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (JackJuly/linkook, PyPI v1.1.0, 2025)",
+          "outputs": ["url", "email", "name"],
+          "status": "to_wire",
+          "notes": "The pivoter. From one username, recursively discovers linked social accounts AND associated emails ACROSS DIFFERENT usernames, follows the links recursively. Cross-checks discovered emails against HudsonRock infostealer DB. Exports Neo4j-ready JSON (neo4j_export.json) - maps directly onto our graph model. This is the sock-puppet/linked-account capability the audit calls out."
+        },
+        {
+          "id": "socid_extractor",
+          "name": "socid-extractor",
+          "exec_category": "CLI",
+          "install": "pip install socid-extractor",
+          "run": "socid_extractor --url {profile_url}",
+          "auth": "none",
+          "free": true,
+          "maintained": "very active (soxoj; engine behind Maigret; 150+ sites, 2026)",
+          "outputs": ["name", "email", "url", "user_ids"],
+          "status": "to_wire",
+          "notes": "PROFILE URL -> structured record (display name, bio, location, linked emails, internal user IDs, cross-site links). Input is a URL not a username, so it pivots ON the hits from Maigret/Sherlock/Naminter. Pairs with enumeration to turn a list of profile URLs into identity attributes. Maigret already invokes it internally; expose standalone for re-running on URLs found by other tools."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "maigret_extraction",
+          "name": "Maigret (extraction mode)",
+          "exec_category": "CLI",
+          "auth": "none",
+          "free": true,
+          "status": "already_implemented",
+          "notes": "Maigret's built-in socid-extractor pass already yields linked emails/names per hit; capture via --json ndjson. Use as the always-on baseline pivot before reaching for Linkook."
+        }
+      ],
+      "gaps": "Closing the last mile to a real-world identity still needs paid APIs (OSINT Industries, Predicta, Pipl, DeHashed) - out of free/structured scope."
+    },
+    {
+      "capability": "profile_extraction_github",
+      "selector_types": ["username"],
+      "best": [
+        {
+          "id": "github_user_api",
+          "name": "GitHub Users API",
+          "exec_category": "HTTP",
+          "api_url": "https://api.github.com/users/{selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (official GitHub REST API; 60 req/hr unauth, 5000/hr with token)",
+          "outputs": ["name", "url", "company", "blog", "location", "email"],
+          "status": "to_wire",
+          "notes": "Cleanest structured GitHub profile pull: display name, bio, company, blog/website, location, public email, follower counts, created_at. Same call pattern already used in name_tools.py name_to_username (line 338) but not exposed as a username-input profile tool. Add optional GITHUB_TOKEN env for rate limit."
+        },
+        {
+          "id": "osgint",
+          "name": "OSGINT",
+          "exec_category": "CLI",
+          "install": "git clone https://github.com/hippiiee/osgint && pip install -r osgint/requirements.txt",
+          "run": "python osgint/osgint.py -u {selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (hippiiee/osgint, updated 2026-01)",
+          "outputs": ["email", "name", "url"],
+          "status": "to_wire",
+          "notes": "Goes beyond the API: recovers a user's commit email via the GitHub events/commit-spoof technique (email2username and username2email), plus GPG keys and creation date. Use when the public profile email is hidden. No pip package -> clone+run."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "zen",
+          "name": "Zen",
+          "exec_category": "CLI",
+          "install": "git clone https://github.com/s0md3v/Zen",
+          "auth": "none",
+          "free": true,
+          "maintained": "stable (s0md3v/Zen)",
+          "outputs": ["email"],
+          "status": "to_wire",
+          "notes": "Email-from-GitHub-user/repo via commit history. OSGINT is inspired by it and is broader; keep Zen as fallback."
+        }
+      ],
+      "gaps": "None - GitHub is the best-covered platform here."
+    },
+    {
+      "capability": "profile_extraction_reddit",
+      "selector_types": ["username"],
+      "best": [
+        {
+          "id": "reddit_about_api",
+          "name": "Reddit user about.json",
+          "exec_category": "HTTP",
+          "api_url": "https://www.reddit.com/user/{selector}/about.json",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (Reddit public JSON; read-only, generous rate limit; custom User-Agent recommended)",
+          "outputs": ["name", "url", "name"],
+          "status": "to_wire",
+          "notes": "Public profile JSON: account creation date, karma, verified status, profile description, avatar, is_employee/is_mod flags. MUST send a custom User-Agent header (default UA gets 429). For activity, append /user/{selector}/submitted.json and /comments.json. CLAUDE.md says Reddit is already a v1/keybase-era collector - confirm registry before re-wiring."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "reddit_user_extractor",
+          "name": "Reddit User Extractor",
+          "exec_category": "CLI",
+          "install": "git clone https://github.com/mylk/reddit-user-extractor",
+          "auth": "none",
+          "free": true,
+          "maintained": "medium",
+          "outputs": ["url"],
+          "status": "to_wire",
+          "notes": "Bulk-pulls a user's comments/posts. Lower priority than the native about.json + submitted.json/comments.json endpoints, which need no extra dependency."
+        }
+      ],
+      "gaps": "None for public profiles."
+    },
+    {
+      "capability": "profile_extraction_mastodon",
+      "selector_types": ["username", "mastodon_handle"],
+      "best": [
+        {
+          "id": "mastodon_lookup_api",
+          "name": "Mastodon accounts/lookup API",
+          "exec_category": "HTTP",
+          "api_url": "https://{instance}/api/v1/accounts/lookup?acct={selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (official Mastodon REST API; public, unauthenticated)",
+          "outputs": ["name", "url", "name"],
+          "status": "to_wire",
+          "notes": "For a full handle user@instance.tld: split to instance + acct. Returns id, display_name, note (bio, may contain linked sites/emails), url, created_at, followers/following counts, fields (often hold verified personal links). Note: lookup of a *remote* acct on an arbitrary instance may require the home instance; resolve instance from the handle's domain. No auth needed on the home instance."
+        },
+        {
+          "id": "masto",
+          "name": "Masto",
+          "exec_category": "CLI",
+          "install": "git clone https://github.com/C3n7ral051nt4g3ncy/Masto",
+          "run": "python masto.py -u {selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "medium",
+          "outputs": ["name", "url"],
+          "status": "to_wire",
+          "notes": "Searches a handle/name across Mastodon instances and pulls posts/profile. Useful when instance is unknown; otherwise the native lookup API is cleaner."
+        }
+      ],
+      "runner_up": [],
+      "gaps": "Cross-instance discovery (which instance a bare username lives on) is weak - native API needs the instance domain. Maigret/Naminter partially cover instance discovery."
+    },
+    {
+      "capability": "profile_extraction_youtube",
+      "selector_types": ["username", "youtube_handle"],
+      "best": [
+        {
+          "id": "youtube_data_api",
+          "name": "YouTube Data API v3 (channels)",
+          "exec_category": "HTTP",
+          "api_url": "https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&forHandle={selector}&key={GOOGLE_API_KEY}",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (official Google API; free tier 10000 units/day)",
+          "outputs": ["name", "url", "name"],
+          "status": "to_wire",
+          "notes": "forHandle= resolves @handles; use forUsername= for legacy usernames or id= for channel IDs. Returns title, description (often has contact email/links), country, custom URL, published date, subscriber/view counts, banner. Free but requires a Google API key (api_key auth)."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "yt_dlp_channel",
+          "name": "yt-dlp (channel metadata)",
+          "exec_category": "CLI",
+          "install": "pip install yt-dlp",
+          "run": "yt-dlp --skip-download --dump-single-json --playlist-items 0 https://www.youtube.com/@{selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "very active (yt-dlp)",
+          "outputs": ["name", "url"],
+          "status": "to_wire",
+          "notes": "No-API-key fallback: scrapes channel name, description, uploader_url, channel_follower_count from the channel page as JSON. Use when no Google key is configured."
+        }
+      ],
+      "gaps": "Channel email is usually behind a captcha on the About tab; API description field is the realistic source."
+    },
+    {
+      "capability": "profile_extraction_instagram",
+      "selector_types": ["username"],
+      "best": [
+        {
+          "id": "instaloader",
+          "name": "Instaloader",
+          "exec_category": "custom",
+          "install": "pip install instaloader",
+          "run": "instaloader --no-pictures --no-videos --no-compress-json -- profile {selector}",
+          "auth": "cookies",
+          "free": true,
+          "maintained": "active (instaloader/instaloader)",
+          "outputs": ["name", "url", "name"],
+          "status": "to_wire",
+          "notes": "Public profile metadata (full name, bio, external_url, follower/following/post counts, profile pic, is_private/is_verified) via Python API Profile.from_username. Anonymous works for basic public profiles but Instagram now rate-limits/blocks anon hard -> treat as custom (session-class): supply a logged-in session/cookies for reliability. Library use (instaloader.Profile) is cleaner than CLI for just metadata. Expect breakage as IG changes endpoints."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "socid_extractor_ig",
+          "name": "socid-extractor (Instagram)",
+          "exec_category": "CLI",
+          "install": "pip install socid-extractor",
+          "run": "socid_extractor --url https://www.instagram.com/{selector}/",
+          "auth": "none",
+          "free": true,
+          "maintained": "very active",
+          "outputs": ["name", "user_ids"],
+          "status": "to_wire",
+          "notes": "Lighter pull of IG user id + basic fields from the profile URL when full instaloader session isn't available. Brittle vs IG anti-bot."
+        }
+      ],
+      "gaps": "Instagram is hostile to anonymous automation; durable extraction effectively requires authenticated cookies (sock-puppet account) -> custom/credential-vault handling."
+    },
+    {
+      "capability": "profile_extraction_telegram",
+      "selector_types": ["telegram_handle", "username"],
+      "best": [
+        {
+          "id": "telescan",
+          "name": "Telescan",
+          "exec_category": "custom",
+          "install": "git clone https://github.com/pielco11/telescan && pip install -r telescan/requirements.txt",
+          "run": "python telescan/telescan.py -u {selector}  # requires Telethon session (API_ID/API_HASH)",
+          "auth": "cookies",
+          "free": true,
+          "maintained": "medium (Telethon-based)",
+          "outputs": ["name", "url", "name"],
+          "status": "to_wire",
+          "notes": "Find which groups a user is in / users within a group, plus profile fields. REQUIRES a logged-in Telegram account: API_ID + API_HASH (from my.telegram.org) and a Telethon .session. Auth=cookies/session class -> custom runner + credential vault. Constraint: target often must be in your contacts or a shared group."
+        },
+        {
+          "id": "teletracker",
+          "name": "TeleTracker",
+          "exec_category": "custom",
+          "install": "git clone https://github.com/tsale/TeleTracker",
+          "run": "python TeleTracker/TeleTracker.py  # bot token + channel/chat id; Telethon",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "medium",
+          "outputs": ["name", "url"],
+          "status": "to_wire",
+          "notes": "Channel-centric: downloads channel messages/media, extracts bot & channel metadata, logs JSON/text, tracks online status. Needs a bot token + chat/channel id. Complements Telescan (user-centric)."
+        }
+      ],
+      "runner_up": [],
+      "gaps": "No no-auth structured route for Telegram user/handle profile data. Everything credible needs Telethon + a real Telegram account (session) or a bot token. The web-search line is the better primary for raw telegram_handle per CLAUDE.md."
+    }
+  ],
+  "excluded": [
+    { "id": "twint", "reason": "Twitter scraper, broken by X API lockdown (audit DEAD list)." },
+    { "id": "snscrape", "reason": "Degraded/broken by X API lockdown; unreliable for X. Audit flags X scraping as best-effort only." },
+    { "id": "nitter", "reason": "Nitter instances broken/blocked by X; not a dependable structured source." },
+    { "id": "stweet", "reason": "Twitter scraper, same X API-lockdown breakage; cli_research, not automatable." },
+    { "id": "tweet_machine", "reason": "X-dependent scraper, unreliable post API lockdown." },
+    { "id": "twitter_apify", "reason": "Apify actors are paid (per-run credits), no durable free tier for automation." },
+    { "id": "instagram_apify", "reason": "Apify actor, paid per-run; instaloader covers the free path." },
+    { "id": "reddit_apify", "reason": "Apify actor, paid; native reddit .json API is free." },
+    { "id": "astraahome_discord", "reason": "Discord All-In-One; Discord profile extraction needs a bot/user token and violates ToS; no clean free structured route. Discord = gap." },
+    { "id": "blackbird", "reason": "Username checker with no native JSON output -> not pipeline-friendly; Maigret/Naminter supersede." },
+    { "id": "nexfil", "reason": "soxoj flags unmaintained (audit dead-tool list)." },
+    { "id": "social_analyzer", "reason": "Heavy/Node-based, largely stale; redundant with Maigret/Naminter." },
+    { "id": "profil3r", "reason": "Nicknames tool, unmaintained, superseded by Maigret." },
+    { "id": "snoop", "reason": "Nickname checker, niche/Russian-site focused; Maigret covers superset." },
+    { "id": "go_sherlock", "reason": "Redundant reimplementation of Sherlock; no metadata advantage." },
+    { "id": "follower_wonk_compare", "reason": "web_interface (manual website), not automatable." },
+    { "id": "whotwi", "reason": "web_interface (manual website), X analytics, manual-only." },
+    { "id": "truthnest", "reason": "web_interface (manual website), manual-only." },
+    { "id": "thispersondoesnotexist_api", "reason": "Sock-puppet face generator, not an investigation/extraction tool (creation, not gathering)." },
+    { "id": "faker", "reason": "Sock-puppet persona generator (creation utility), out of gathering scope." }
+  ]
+}

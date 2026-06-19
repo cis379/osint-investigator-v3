@@ -1,0 +1,239 @@
+{
+  "bucket": "ip_network",
+  "selector_types": ["ip_v4", "ip_v6", "asn"],
+  "capabilities": [
+    {
+      "capability": "ip_geolocation",
+      "selector_types": ["ip_v4", "ip_v6"],
+      "best": [
+        {
+          "id": "ip_geolocation",
+          "name": "ip-api.com",
+          "exec_category": "HTTP",
+          "install": "none (stdlib requests)",
+          "run": "GET http://ip-api.com/json/{selector}?fields=status,message,country,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,query",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (commercial service, free non-commercial tier; 45 req/min over HTTP)",
+          "outputs": ["asn", "company"],
+          "status": "already_implemented",
+          "notes": "Wired in src/tools/ip_tools.py (IpGeoTool). City/region/country/lat-lon + ISP/org/ASN. Free tier is HTTP-only and 45 req/min; do not use over HTTPS without a key."
+        },
+        {
+          "id": "ipinfo",
+          "name": "IPinfo.io",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://ipinfo.io/{selector}/json",
+          "auth": "none (anonymous ~1k/day; api_key raises to 50k/mo free)",
+          "free": true,
+          "maintained": "active (commercial, generous free tier)",
+          "outputs": ["domain", "asn", "company"],
+          "status": "already_implemented",
+          "notes": "Wired in src/tools/ip_tools.py (IpInfoTool). Geolocation + ASN/org + hostname. Best second geo source for cross-checking ip-api."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "ripestat_geoloc",
+          "name": "RIPEstat maxmind-geo-lite / geoloc",
+          "exec_category": "HTTP",
+          "run": "GET https://stat.ripe.net/data/maxmind-geo-lite/data.json?resource={selector}",
+          "auth": "none",
+          "free": true,
+          "notes": "Authoritative-registry-adjacent geo from RIPE NCC, no key. Coarser than ip-api/ipinfo but useful as a neutral third source. Same RIPEstat base used for ASN/BGP below."
+        }
+      ],
+      "gaps": "All free IP-geo sources are city-level estimates; none give rooftop accuracy. No free reverse-geo to physical address (paid only). Two-source agreement (ip-api + ipinfo) is the practical confidence ceiling."
+    },
+    {
+      "capability": "ip_reputation_abuse",
+      "selector_types": ["ip_v4", "ip_v6"],
+      "best": [
+        {
+          "id": "abuseipdb",
+          "name": "AbuseIPDB Check",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://api.abuseipdb.com/api/v2/check?ipAddress={selector}&maxAgeInDays=90&verbose -H 'Key: {ABUSEIPDB_API_KEY}' -H 'Accept: application/json'",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (v2 API stable, 2026)",
+          "outputs": ["company", "domain"],
+          "status": "to_wire",
+          "notes": "Free tier = 1000 checks/day (3000 if domain-verified). Returns abuseConfidenceScore (0-100), totalReports, lastReportedAt, usageType, isp, domain, isTor, countryCode. The single best free crowd-sourced abuse-reputation source; trivial to wire. Requires free account key."
+        },
+        {
+          "id": "threatfox",
+          "name": "ThreatFox (abuse.ch) IOC search",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "POST https://threatfox-api.abuse.ch/api/v1/  body {\"query\":\"search_ioc\",\"search_term\":\"{selector}\"}",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (abuse.ch; now requires free Auth-Key header as of 2024 policy change)",
+          "outputs": ["ip_v4", "domain", "hash_md5", "hash_sha256"],
+          "status": "already_implemented",
+          "notes": "Wired in src/tools/social_tools.py (ThreatFoxTool). Confirms whether IP is a known malware C2/IOC with malware family + threat_type. NOTE: abuse.ch now requires a free Auth-Key header; the wired tool may need a key added to keep working."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "otx_alienvault",
+          "name": "AlienVault OTX IP reputation/pulses",
+          "exec_category": "HTTP",
+          "run": "GET https://otx.alienvault.com/api/v1/indicators/IPv4/{selector}/general -H 'X-OTX-API-KEY: {key}'",
+          "auth": "api_key",
+          "free": true,
+          "notes": "Free key. Pulse memberships, passive DNS, malware. Good breadth complement to AbuseIPDB's crowd reports; noisier/less normalized scoring."
+        }
+      ],
+      "gaps": "No single free source gives a clean malicious/benign verdict; AbuseIPDB is crowd-confidence, ThreatFox/OTX are IOC-membership. VirusTotal IP report (free key, 4 req/min) would add multi-engine consensus but is rate-limited; not wired."
+    },
+    {
+      "capability": "scanner_noise_classification",
+      "selector_types": ["ip_v4"],
+      "best": [
+        {
+          "id": "greynoise_community",
+          "name": "GreyNoise Community API",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://api.greynoise.io/v3/community/{selector}  (optional -H 'key: {GREYNOISE_API_KEY}')",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (v3 Community endpoint, 2026)",
+          "outputs": [],
+          "status": "to_wire",
+          "notes": "THE tool for this capability; nothing else in the stack classifies scanner vs benign noise. Returns noise(bool), riot(bool), classification(benign|malicious|unknown), name(org), last_seen, link. Unauthenticated = ~10 lookups/day; free account key = 50 lookups/week. Low quota -> wire as an on-demand single-IP enrichment, not a bulk pass. IPv4 only."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "shodan_internetdb_tags",
+          "name": "Shodan InternetDB (tags field)",
+          "exec_category": "HTTP",
+          "run": "GET https://internetdb.shodan.io/{selector}",
+          "auth": "none",
+          "free": true,
+          "notes": "Already implemented (see open_ports below). Its tags[] field flags 'compromised','self-signed','scanner' etc. Not a true noise classifier but the only no-quota free signal of mass-scanner/honeypot character."
+        }
+      ],
+      "gaps": "GreyNoise Community quota is very low (10/day anon). No free unlimited scanner-noise classifier exists. Censys/Shodan paid tiers and GreyNoise RIOT (paid) are the only high-volume options. IPv6 unsupported by GreyNoise Community."
+    },
+    {
+      "capability": "open_ports_services_banners",
+      "selector_types": ["ip_v4"],
+      "best": [
+        {
+          "id": "shodan_internetdb",
+          "name": "Shodan InternetDB",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://internetdb.shodan.io/{selector}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (free Shodan service, no key, no published rate cap)",
+          "outputs": ["domain"],
+          "status": "already_implemented",
+          "notes": "Wired in src/tools/ip_tools.py (ShodanInternetDBTool). Returns ports[], cpes[], hostnames[], tags[], vulns[] (CVEs). Best free no-key port/service source. IPv4 only. No raw banners (use full Shodan API w/ key for banners)."
+        },
+        {
+          "id": "netlas_host",
+          "name": "Netlas.io Host Info",
+          "exec_category": "HTTP",
+          "install": "pip install netlas  (or REST)",
+          "run": "GET https://app.netlas.io/api/host/{selector}/ -H 'X-API-Key: {NETLAS_API_KEY}'",
+          "auth": "api_key",
+          "free": true,
+          "maintained": "active (2026; free tier ~50 req/day on registered key)",
+          "outputs": ["domain", "asn", "company"],
+          "status": "to_wire",
+          "notes": "Best Shodan/Censys complement with a usable free tier. Host Info aggregates scan responses (ports, banners, protocols), certs, DNS, whois in one call. Adds real banners that InternetDB lacks. Python SDK + CLI available."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "censys_platform",
+          "name": "Censys Platform API (host)",
+          "exec_category": "HTTP",
+          "run": "GET https://api.platform.censys.io/v3/global/asset/host/{selector} -H 'Authorization: Bearer {PAT}' -H 'Accept: application/vnd.censys.api.v3.host.v1+json'",
+          "auth": "api_key",
+          "free": false,
+          "notes": "Deepest banner/service data but the 2026 Platform migration moved to a credit-based Personal Access Token model with no clear free automation tier; API calls consume credits. Keep as paid runner-up; prefer Netlas for free banner depth."
+        }
+      ],
+      "gaps": "Free no-key option (InternetDB) gives ports+CVEs but no banners and IPv4-only. Banners require a key (Netlas free tier, or paid Shodan/Censys). No free IPv6 port-scan data source."
+    },
+    {
+      "capability": "asn_bgp_netblock",
+      "selector_types": ["asn", "ip_v4", "ip_v6"],
+      "best": [
+        {
+          "id": "ripestat",
+          "name": "RIPEstat Data API",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://stat.ripe.net/data/as-overview/data.json?resource=AS{selector}  ;  GET .../announced-prefixes/data.json?resource=AS{selector}  ;  GET .../network-info/data.json?resource={ip}  ;  GET .../prefix-overview/data.json?resource={prefix}",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (RIPE NCC official, 2026)",
+          "outputs": ["asn", "company", "ip_v4", "ip_v6"],
+          "status": "to_wire",
+          "notes": "Best free no-key ASN/BGP/netblock source; authoritative RIR data. as-overview -> holder name + announce status; announced-prefixes -> all netblocks for an ASN; network-info -> containing prefix + announcing ASN for an IP (IPv4 AND IPv6); prefix-overview -> who announces a prefix. No request limit (register if >1000/day), 8 concurrent/IP."
+        },
+        {
+          "id": "bgpview",
+          "name": "BGPView API",
+          "exec_category": "HTTP",
+          "install": "none",
+          "run": "GET https://api.bgpview.io/asn/{selector}  ;  GET https://api.bgpview.io/asn/{selector}/prefixes  ;  GET https://api.bgpview.io/ip/{ip}  ;  GET https://api.bgpview.io/asn/{selector}/peers",
+          "auth": "none",
+          "free": true,
+          "maintained": "active (free, no key)",
+          "outputs": ["asn", "company", "ip_v4", "ip_v6", "domain"],
+          "status": "to_wire",
+          "notes": "Best complement to RIPEstat: cleaner JSON for ASN metadata (name, description, country, RIR, website, abuse email), peers/upstreams/downstreams, and prefix lists. /ip/{ip} maps IP->ASN+prefix. No key, no published cap. Excellent for ASN-relationship pivoting RIPEstat does less cleanly."
+        }
+      ],
+      "runner_up": [
+        {
+          "id": "ipinfo_asn",
+          "name": "IPinfo (ASN extraction)",
+          "exec_category": "HTTP",
+          "run": "GET https://ipinfo.io/{ip}/json",
+          "auth": "none",
+          "free": true,
+          "notes": "Already implemented; extracts ASN+org from an IP. Convenient quick IP->ASN but only one prefix/holder, no BGP relationships. Use RIPEstat/BGPView for full netblock/peer data."
+        }
+      ],
+      "gaps": "RIPEstat + BGPView cover registry/BGP fully and free. Historical BGP routing changes / RPKI validation depth and IRR object detail are thinner; RIPEstat has RPKI-validation and whois endpoints if needed, otherwise paid (e.g. bgp.tools, RADb) for deep historical."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "emailrep",
+      "reason": "not an IP tool; free tier folded into Sublime Security (flagged in audit)."
+    },
+    {
+      "id": "spiderfoot_oss",
+      "reason": "OSS abandoned after Intel 471 acquisition (2022), 2+ yrs stale; not wiring as orchestration."
+    },
+    {
+      "id": "censys_legacy_search",
+      "reason": "Legacy Search API deprecated in 2026 Platform migration; new Platform API is credit-based with no clear free automation tier -> kept as paid runner-up under open_ports, not a free pick."
+    },
+    {
+      "id": "shodan_full_api",
+      "reason": "Full Shodan host API (banners/full data) requires a paid membership key; free InternetDB covers the no-key port/CVE need. Add later only if a key is provisioned."
+    },
+    {
+      "id": "ipqualityscore_ip",
+      "reason": "Fraud/proxy/VPN IP scoring is good but free tier is small and the value (proxy/VPN detection) overlaps GreyNoise+AbuseIPDB; defer unless proxy-detection becomes a requirement."
+    },
+    {
+      "id": "manual_bgp_he_net",
+      "reason": "bgp.he.net (Hurricane Electric) is a manual web UI with no documented JSON API; covered by BGPView/RIPEstat programmatically."
+    }
+  ]
+}
