@@ -41,7 +41,16 @@ Wire these when keys are available (env vars in `.env.example`). They close real
 - **Companies House** (`COMPANIES_HOUSE_API_KEY`) — UK director/UBO names.
 - **HIBP v3** (`HIBP_API_KEY`, paid ~$3.50/mo) — authoritative breach search.
 
+## CLI tools deferred — need a Go toolchain (not installed here)
+The projectdiscovery/Go CLI tools can't be installed without Go. Install Go, then wire
+them via the same CliTool framework:
+- **subfinder** (passive subdomain enum), **gau** (known-URL discovery), and the real
+  **projectdiscovery httpx** (tech-detect). NOTE: the `httpx` already on PATH is the
+  *Python* httpx library (an HTTP client), NOT the Go tech-detect tool — don't confuse them.
+
 ## To revisit later (lower priority)
-- theHarvester needs the CLI runner (Tier-3) before company recon is wired.
 - Instagram/Telegram profile extraction need the custom/session runner (Tier-4).
 - GraphSense (crypto clustering) is free-but-gated (email request).
+- theHarvester leaves temp JSON reports in the system temp dir (one per query; harmless, not auto-cleaned).
+- naminter runs via a Windows shim (.naminter_shims/) that stubs uvloop/weasyprint;
+  its console script is broken on Windows without it.

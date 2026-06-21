@@ -2,6 +2,8 @@
   "pivot_map": {
     "username": {
       "tools": [
+        "naminter",
+        "linkook",
         "reddit_about",
         "github_user",
         "sherlock",
@@ -307,13 +309,15 @@
       "tool_count": 189,
       "description": "Social media or platform username/handle",
       "implemented_tools": [
+        "naminter",
+        "linkook",
         "reddit_about",
         "github_user",
         "sherlock",
         "maigret",
         "google_dork_generator"
       ],
-      "implemented_count": 5
+      "implemented_count": 7
     },
     "email": {
       "tools": [
@@ -433,6 +437,7 @@
     },
     "domain": {
       "tools": [
+        "theharvester",
         "rdap",
         "whois_lookup",
         "dns_lookup",
@@ -575,6 +580,7 @@
       "tool_count": 70,
       "description": "Domain name",
       "implemented_tools": [
+        "theharvester",
         "rdap",
         "whois_lookup",
         "dns_lookup",
@@ -585,10 +591,11 @@
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 9
+      "implemented_count": 10
     },
     "url": {
       "tools": [
+        "socid_extractor",
         "exiftool",
         "wayback",
         "http_headers",
@@ -828,13 +835,14 @@
       "tool_count": 145,
       "description": "Full URL",
       "implemented_tools": [
+        "socid_extractor",
         "exiftool",
         "wayback",
         "http_headers",
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 5
+      "implemented_count": 6
     },
     "ip_v4": {
       "tools": [
