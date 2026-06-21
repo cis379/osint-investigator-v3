@@ -29,7 +29,7 @@ python -c "
 import sys, json
 sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
 from src.graph.database import InvestigationGraph
-graph = InvestigationGraph('{GRAPH_FILE}')
+graph = InvestigationGraph(r'{GRAPH_FILE}')
 stats = graph.get_stats()
 entities = graph.get_all_entities()
 relationships = graph.get_all_relationships()
@@ -81,7 +81,7 @@ generate_cti_report(
     total_entities={TOTAL_ENTITIES},
     total_relationships={TOTAL_RELS},
     duration_minutes={DURATION},
-    output_path='{REPORT_FILE}',
+    output_path=r'{REPORT_FILE}',
 )
 print('Report generated')
 "
@@ -95,8 +95,8 @@ import sys
 sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
 from src.graph.database import InvestigationGraph
 from src.graph.visualizer import generate_investigation_html
-graph = InvestigationGraph('{GRAPH_FILE}')
-generate_investigation_html(graph, '{GRAPH_HTML}', 'Investigation: {CASE_ID}')
+graph = InvestigationGraph(r'{GRAPH_FILE}')
+generate_investigation_html(graph, r'{GRAPH_HTML}', 'Investigation: {CASE_ID}')
 print('Graph visualization generated')
 "
 ```
@@ -109,7 +109,7 @@ python -c "
 import sys
 sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
 from src.report.html_report import generate_html_report
-path = generate_html_report('{CASE_DIR}')
+path = generate_html_report(r'{CASE_DIR}')
 print(f'HTML report generated: {path}')
 "
 ```
@@ -129,7 +129,7 @@ python -c "
 import sys
 sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
 from src.report.bibliography import generate_bibliography
-path = generate_bibliography('{CASE_DIR}')
+path = generate_bibliography(r'{CASE_DIR}')
 print(f'Bibliography generated: {path}')
 "
 ```

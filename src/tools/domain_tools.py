@@ -187,24 +187,39 @@ class CrtShTool(BaseTool):
 
             if resp.status_code == 200:
                 certs = resp.json()
-                seen_domains = set()
+                seen = set()
+
+                def _looks_like_domain(v):
+                    # crt.sh name_value rows can be SAN emails or CN-description strings
+                    # ("AS207960 Test Intermediate - example.com"); only accept real domains.
+                    return (v and "@" not in v and " " not in v and "." in v
+                            and all(c.isalnum() or c in ".-" for c in v))
+
                 for cert in certs[:100]:
                     name = cert.get("name_value", "")
-                    for domain in name.split("\n"):
-                        domain = domain.strip().lstrip("*.")
-                        if domain and domain not in seen_domains:
-                            seen_domains.add(domain)
+                    meta = {"issuer": cert.get("issuer_name", ""),
+                            "not_before": cert.get("not_before", ""),
+                            "not_after": cert.get("not_after", "")}
+                    for raw in name.split("\n"):
+                        val = raw.strip().lstrip("*.")
+                        if not val:
+                            continue
+                        if "@" in val:  # SAN email — a real finding, just not a domain
+                            if ("email", val) not in seen:
+                                seen.add(("email", val))
+                                entities.append(EntityFound(
+                                    value=val, entity_type="email", confidence="probable",
+                                    source_citation=f"crt.sh cert ID {cert.get('id', '')}: SAN email",
+                                    metadata=meta))
+                            continue
+                        if not _looks_like_domain(val):
+                            continue  # drop CN-description / junk rows
+                        if ("domain", val) not in seen:
+                            seen.add(("domain", val))
                             entities.append(EntityFound(
-                                value=domain,
-                                entity_type="domain",
-                                confidence="confirmed",
-                                source_citation=f"crt.sh cert ID {cert.get('id', 'unknown')}: {domain}",
-                                metadata={
-                                    "issuer": cert.get("issuer_name", ""),
-                                    "not_before": cert.get("not_before", ""),
-                                    "not_after": cert.get("not_after", ""),
-                                },
-                            ))
+                                value=val, entity_type="domain", confidence="confirmed",
+                                source_citation=f"crt.sh cert ID {cert.get('id', 'unknown')}: {val}",
+                                metadata=meta))
 
             return self.make_result(
                 selector, selector_type, raw_output, entities,

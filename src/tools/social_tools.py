@@ -8,7 +8,7 @@ class UrlScanTool(BaseTool):
     name = "urlscan"
     description = "Search urlscan.io for scanned pages"
     input_types = ["domain", "url", "ip_v4"]
-    output_types = ["url", "domain", "ip_v4"]
+    output_types = ["url", "domain", "ip_v4", "ip_v6", "asn"]
     method = "api"
 
     def query(self, selector: str, selector_type: str) -> ToolResult:
@@ -32,30 +32,47 @@ class UrlScanTool(BaseTool):
 
             if resp.status_code == 200:
                 data = resp.json()
+                seen = set()
                 for result in data.get("results", [])[:10]:
-                    page = result.get("page", {})
-                    task = result.get("task", {})
+                    page = result.get("page", {}) or {}
+                    task = result.get("task", {}) or {}
 
-                    if page.get("domain"):
-                        entities.append(EntityFound(
-                            value=page["domain"],
-                            entity_type="domain",
-                            confidence="confirmed",
-                            source_citation=f"urlscan result: {page['domain']} (scanned {task.get('time', '')})",
-                            metadata={
-                                "scan_url": task.get("url", ""),
-                                "server": page.get("server", ""),
-                                "status": page.get("status", ""),
-                            },
-                        ))
+                    # Relevance filter: urlscan search surfaces loosely-related and even
+                    # unrelated recent scans. Only keep results actually tied to the seed,
+                    # or we poison the graph with other people's phishing infra.
+                    haystack = " ".join([page.get("domain", ""), page.get("url", ""),
+                                         task.get("url", ""), task.get("domain", "")]).lower()
+                    if selector_type == "ip_v4":
+                        relevant = page.get("ip", "") == selector
+                    else:
+                        relevant = selector.lower() in haystack
+                    if not relevant:
+                        continue
 
-                    if page.get("ip"):
+                    dom = page.get("domain")
+                    if dom and ("domain", dom) not in seen:
+                        seen.add(("domain", dom))
                         entities.append(EntityFound(
-                            value=page["ip"],
-                            entity_type="ip_v4",
-                            confidence="confirmed",
-                            source_citation=f"urlscan IP: {page['ip']} for {page.get('domain', '')}",
-                        ))
+                            value=dom, entity_type="domain", confidence="probable",
+                            source_citation=f"urlscan result: {dom} (scanned {task.get('time', '')})",
+                            metadata={"scan_url": task.get("url", ""), "server": page.get("server", ""),
+                                      "status": page.get("status", "")}))
+
+                    ip = page.get("ip")
+                    if ip and ("ip", ip) not in seen:
+                        seen.add(("ip", ip))
+                        ip_type = "ip_v6" if ":" in ip else "ip_v4"   # was always ip_v4 (bug)
+                        entities.append(EntityFound(
+                            value=ip, entity_type=ip_type, confidence="probable",
+                            source_citation=f"urlscan IP: {ip} for {page.get('domain', '')}"))
+
+                    # ASN was present in raw but never extracted (capability gap).
+                    asn = page.get("asn")
+                    if asn and ("asn", asn) not in seen:
+                        seen.add(("asn", asn))
+                        entities.append(EntityFound(
+                            value=asn, entity_type="asn", confidence="probable",
+                            source_citation=f"urlscan ASN: {asn} ({page.get('asnname', '')})"))
 
             return self.make_result(
                 selector, selector_type, raw_output, entities,

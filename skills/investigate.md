@@ -45,7 +45,7 @@ Run the logger initialization:
 python -c "
 import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
 from src.logger.investigation_log import InvestigationLogger
-logger = InvestigationLogger('{LOG_FILE}')
+logger = InvestigationLogger(r'{LOG_FILE}')
 logger.init_log('{CASE_ID}', '{VALUE}', '{TYPE}')
 print('Log initialized')
 "

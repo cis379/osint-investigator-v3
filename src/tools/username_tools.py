@@ -4,6 +4,7 @@ import glob
 import shutil
 import tempfile
 from pathlib import Path
+from urllib.parse import urlparse
 from .base import BaseTool, ToolResult, EntityFound
 
 
@@ -89,6 +90,7 @@ class MaigretTool(BaseTool):
         raw_output = (ndjson_text + "\n" + stdout + stderr)[:8000]
         entities = []
         seen = set()
+        seen_domains = set()
 
         def add(value, etype, conf, cite):
             key = (etype, value)
@@ -97,7 +99,7 @@ class MaigretTool(BaseTool):
                 entities.append(EntityFound(value=value, entity_type=etype,
                                             confidence=conf, source_citation=cite))
 
-        # Each ndjson line is one found account: {site, url_user, status:{ids:{...}}}
+        # Each ndjson line is one found account: {site, url_user, status:{status,ids}}
         parsed_ndjson = False
         for line in ndjson_text.splitlines():
             line = line.strip()
@@ -108,12 +110,29 @@ class MaigretTool(BaseTool):
             except json.JSONDecodeError:
                 continue
             parsed_ndjson = True
+
+            # Drop false positives: maigret sometimes flags a site "Claimed" while the
+            # page actually 404'd (Roblox/opensea), and "Available"/error records.
+            status = rec.get("status") or {}
+            status_str = (status.get("status") if isinstance(status, dict) else status) or ""
+            if str(rec.get("http_status")) == "404":
+                continue
+            if status_str and str(status_str).lower() not in ("claimed", "found"):
+                continue
+
             # 'site' is an object; the site NAME is in 'sitename' (or site.source).
             sd = rec.get("site")
             site = rec.get("sitename") or (sd.get("source") if isinstance(sd, dict) else sd) or ""
             url = rec.get("url_user") or rec.get("url") or ""
             if url:
-                add(url, "url", "confirmed", f"maigret: account on {site}")
+                # Collapse per-domain explosions (e.g. OP.GG's ~18 regional URLs).
+                dom = urlparse(url).netloc.lower().lstrip("www.")
+                if dom and dom in seen_domains:
+                    pass
+                else:
+                    if dom:
+                        seen_domains.add(dom)
+                    add(url, "url", "confirmed", f"maigret: account on {site}")
             ids = (rec.get("status") or {}).get("ids") or rec.get("ids") or {}
             for k, v in ids.items():
                 vals = v if isinstance(v, list) else [v]

@@ -128,13 +128,16 @@ Then run:
 python C:/Users/cis37/osint-investigator-v3/src/tools/graph_commit.py --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
 ```
 
-Then log your analysis narrative (the reasoning, corroborations, and gaps):
+Then log your analysis narrative (the reasoning, corroborations, and gaps). NOTE: wrap
+the Windows path in a RAW string `r'...'` — a bare `'C:\Users\...'` raises
+`SyntaxError: unicodeescape` because `\U` is read as an escape. (Or write a small temp
+`.py` with the Write tool if the snippet is fiddly.)
 ```python
 python -c "
 import sys
-sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
+sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3')
 from src.logger.investigation_log import InvestigationLogger
-logger = InvestigationLogger('{LOG_FILE}')
+logger = InvestigationLogger(r'{LOG_FILE}')
 logger.log_analysis('''{ANALYSIS}''')
 "
 ```
@@ -171,8 +174,8 @@ import sys
 sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
 from src.graph.database import InvestigationGraph
 from src.graph.visualizer import generate_investigation_html
-graph = InvestigationGraph('{GRAPH_FILE}')
-generate_investigation_html(graph, '{GRAPH_HTML}', 'Investigation: {CASE_ID}')
+graph = InvestigationGraph(r'{GRAPH_FILE}')
+generate_investigation_html(graph, r'{GRAPH_HTML}', 'Investigation: {CASE_ID}')
 print('Graph HTML generated')
 "
 ```
