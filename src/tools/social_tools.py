@@ -1,6 +1,7 @@
 import json
 import requests
 from .base import BaseTool, ToolResult, EntityFound
+from .credentials import get_key
 
 
 class UrlScanTool(BaseTool):
@@ -75,10 +76,18 @@ class ThreatFoxTool(BaseTool):
         if selector_type not in self.input_types:
             return self.make_result(selector, selector_type, "", [], False, f"ThreatFox doesn't accept {selector_type}")
 
+        # abuse.ch (2024) now requires a free Auth-Key header on the ThreatFox API.
+        # Without it the API returns an auth error; send it when configured.
+        headers = {}
+        api_key = get_key("ABUSE_CH_API_KEY") or get_key("THREATFOX_API_KEY")
+        if api_key:
+            headers["Auth-Key"] = api_key
+
         try:
             resp = requests.post(
                 "https://threatfox-api.abuse.ch/api/v1/",
                 json={"query": "search_ioc", "search_term": selector},
+                headers=headers,
                 timeout=15,
             )
             raw_output = resp.text[:5000]

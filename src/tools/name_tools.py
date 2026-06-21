@@ -63,20 +63,18 @@ class WikipediaSearchTool(BaseTool):
 
 
 class HaveIBeenPwnedNameTool(BaseTool):
+    # NOTE: legacy id "hibp_name_search" is a MISNOMER kept for pivot_map compatibility.
+    # This tool performs NO breach lookup. It generates likely email addresses from a
+    # name (permutation candidates) for downstream checking. Real breach coverage =
+    # holehe (account existence) + HIBP API v3 (keyed) + Hudson Rock (free).
     name = "hibp_name_search"
-    description = "Check if a person's name appears in known data breaches via breach directory"
+    description = "Generate likely email addresses from a name (permutation candidates — NOT a breach lookup)"
     input_types = ["name", "email"]
     output_types = ["email", "url"]
-    method = "api"
+    method = "library"
 
     def query(self, selector: str, selector_type: str) -> ToolResult:
         try:
-            resp = requests.get(
-                f"https://api.pwnedpasswords.com/range/{selector[:5].encode().hex()[:5]}",
-                headers={"User-Agent": "OSINTInvestigator/1.0"},
-                timeout=10,
-            )
-
             parts = selector.strip().lower().split()
             if len(parts) < 2:
                 return self.make_result(selector, selector_type,
@@ -95,7 +93,7 @@ class HaveIBeenPwnedNameTool(BaseTool):
                 f"{first}.{last}@protonmail.com",
             ]
 
-            raw_lines = [f"Generated {len(email_guesses)} email candidates for breach check:"]
+            raw_lines = [f"Generated {len(email_guesses)} email candidates for downstream checking:"]
             entities = []
 
             for email in email_guesses:

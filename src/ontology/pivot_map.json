@@ -419,10 +419,9 @@
       "description": "Email address",
       "implemented_tools": [
         "holehe",
-        "emailrep",
         "google_dork_generator"
       ],
-      "implemented_count": 3
+      "implemented_count": 2
     },
     "domain": {
       "tools": [
@@ -580,6 +579,7 @@
     },
     "url": {
       "tools": [
+        "exiftool",
         "wayback",
         "http_headers",
         "urlscan",
@@ -818,12 +818,13 @@
       "tool_count": 145,
       "description": "Full URL",
       "implemented_tools": [
+        "exiftool",
         "wayback",
         "http_headers",
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 4
+      "implemented_count": 5
     },
     "ip_v4": {
       "tools": [
@@ -2140,6 +2141,7 @@
     },
     "file": {
       "tools": [
+        "exiftool",
         "ext_0045_twitter_archive_parser",
         "ext_0962_exiftool",
         "ext_0968_virustotal"
@@ -2157,8 +2159,10 @@
       ],
       "tool_count": 3,
       "description": "Selector type: file",
-      "implemented_tools": [],
-      "implemented_count": 0
+      "implemented_tools": [
+        "exiftool"
+      ],
+      "implemented_count": 1
     },
     "twitter_archive": {
       "tools": [
@@ -2260,6 +2264,7 @@
     },
     "image": {
       "tools": [
+        "exiftool",
         "ext_0122_search4faces.com_(clubhouse)",
         "ext_0139_repostsleuth",
         "ext_0150_onlyfinder.com",
@@ -2316,8 +2321,10 @@
       ],
       "tool_count": 25,
       "description": "Image file or URL for reverse search",
-      "implemented_tools": [],
-      "implemented_count": 0
+      "implemented_tools": [
+        "exiftool"
+      ],
+      "implemented_count": 1
     },
     "subreddit": {
       "tools": [

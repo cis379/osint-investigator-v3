@@ -299,7 +299,7 @@
       "rate_limit": "limited",
       "free": true,
       "repo": null,
-      "implemented": true
+      "implemented": false
     },
     {
       "id": "phoneinfoga",
@@ -19874,5 +19874,5 @@
     }
   ],
   "total": 1031,
-  "implemented_total": 19
+  "implemented_total": 18
 }

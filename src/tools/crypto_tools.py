@@ -1,6 +1,7 @@
 import json
 import requests
 from .base import BaseTool, ToolResult, EntityFound
+from .credentials import get_key
 
 
 class BlockchainBtcTool(BaseTool):
@@ -87,9 +88,20 @@ class EtherscanTool(BaseTool):
         if selector_type != "crypto_eth":
             return self.make_result(selector, selector_type, "", [], False, "Etherscan only accepts ETH addresses")
 
+        # Etherscan v1 (keyless) was sunset 2025-05-31. v2 requires an API key and a
+        # chainid. Degrade gracefully when no key is configured.
+        api_key = get_key("ETHERSCAN_API_KEY")
+        if not api_key:
+            return self.make_result(
+                selector, selector_type, "", [], False,
+                "Etherscan v2 requires a free API key. Set ETHERSCAN_API_KEY in .env "
+                "(get one at https://etherscan.io/apis).")
+
         try:
             resp = requests.get(
-                f"https://api.etherscan.io/api?module=account&action=txlist&address={selector}&startblock=0&endblock=99999999&sort=desc&page=1&offset=10",
+                "https://api.etherscan.io/v2/api"
+                f"?chainid=1&module=account&action=txlist&address={selector}"
+                f"&startblock=0&endblock=99999999&sort=desc&page=1&offset=10&apikey={api_key}",
                 timeout=15,
             )
             raw_output = resp.text[:5000]

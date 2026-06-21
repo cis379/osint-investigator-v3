@@ -91,4 +91,8 @@ class EmailRepTool(BaseTool):
             return self.make_result(selector, selector_type, "", [], False, str(e))
 
 
-TOOLS = [HoleheTool(), EmailRepTool()]
+# EmailRepTool is DEPRECATED: emailrep.io's free tier was folded into Sublime
+# Security and the public endpoint is effectively dead (returns 401/empty). Removed
+# from the active set so it can't return stale/empty "results". Replacement breach/
+# reputation coverage comes from Hudson Rock Cavalier (free) + HIBP (keyed) — Tier-1/2.
+TOOLS = [HoleheTool()]
