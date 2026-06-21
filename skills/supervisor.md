@@ -182,6 +182,42 @@ print('Graph HTML generated')
 
 2. Spawn the report writer agent to produce the CTI report.
 
+## Pivoting (the engine of the investigation)
+
+An investigation is a chain of pivots. After EVERY collection round you must ask, for
+each new entity: *"what can I run against this, and is it worth it?"* You never hardcode
+this — **the ontology is your pivot guide.** Ask it:
+
+```
+python -c "import sys,json; sys.path.insert(0,'C:/Users/cis37/osint-investigator-v3'); from src.tools.registry import plan_collection; print(json.dumps(plan_collection('VALUE','TYPE'), indent=2))"
+```
+If `plan_collection` returns structured tools or `web_searchable: true` for a newly
+discovered entity, it is a **candidate pivot**. The pivot_map `yields` for a type also
+tells you what a pivot will likely PRODUCE — use it to plan chains several hops ahead.
+
+**How to choose pivots (reason each round, don't follow a fixed script):**
+- **Confidence-gate:** pivot from `confirmed`/`probable` entities first; a `possible`
+  entity is a weaker lead — pivot only if it's the only thread.
+- **Corroboration magnets:** an entity that appeared across multiple sources is the
+  highest-value pivot.
+- **High-yield selector types:** email and username are the richest hubs; a domain
+  expands infrastructure; an IP expands hosting/ASN; a name/handle expands identity.
+- **Close the loop on generated leads:** several tools *produce* candidates that another
+  tool can *verify* — chase those. E.g.:
+  - `name` → `hibp_name_search` emits candidate emails → **verify each with `holehe`**
+    (accounts) and `hudsonrock_email` (breach). (We currently leave these unverified —
+    don't.)
+  - `username` → `maigret`/`github_user` → linked email/real name → pivot those.
+  - `domain` → `dns_lookup` → IP → `ripestat_network`/`greynoise_community` (ASN/noise).
+  - `email` → `holehe` (accounts) + `hudsonrock_email` (breach) → usernames/names.
+- **Avoid loops & noise:** don't re-collect an entity already collected; don't pivot on
+  generic/false-positive `possible` hits just because a tool exists.
+
+**Drive the loop:** each round, (1) collect, (2) analyze + tier, (3) commit, (4) list
+the new entities and the pivots the ontology offers for each, (5) recommend the best
+1–3 pivots to the user with rationale, and continue until pivots stop yielding new
+confirmed/probable signal (or the user stops you). Always be looking for the next pivot.
+
 ## Confidence Tiers (how you grade findings)
 
 You do not hide data and you do not drop weak results — you **tier** them. Every
