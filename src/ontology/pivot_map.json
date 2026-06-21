@@ -2,6 +2,8 @@
   "pivot_map": {
     "username": {
       "tools": [
+        "reddit_about",
+        "github_user",
         "sherlock",
         "maigret",
         "google_dork_generator",
@@ -305,14 +307,18 @@
       "tool_count": 189,
       "description": "Social media or platform username/handle",
       "implemented_tools": [
+        "reddit_about",
+        "github_user",
         "sherlock",
         "maigret",
         "google_dork_generator"
       ],
-      "implemented_count": 3
+      "implemented_count": 5
     },
     "email": {
       "tools": [
+        "disify",
+        "hudsonrock_email",
         "holehe",
         "hibp_breaches",
         "emailrep",
@@ -418,13 +424,16 @@
       "tool_count": 58,
       "description": "Email address",
       "implemented_tools": [
+        "disify",
+        "hudsonrock_email",
         "holehe",
         "google_dork_generator"
       ],
-      "implemented_count": 2
+      "implemented_count": 4
     },
     "domain": {
       "tools": [
+        "rdap",
         "whois_lookup",
         "dns_lookup",
         "crtsh",
@@ -566,6 +575,7 @@
       "tool_count": 70,
       "description": "Domain name",
       "implemented_tools": [
+        "rdap",
         "whois_lookup",
         "dns_lookup",
         "crtsh",
@@ -575,7 +585,7 @@
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 8
+      "implemented_count": 9
     },
     "url": {
       "tools": [
@@ -828,6 +838,9 @@
     },
     "ip_v4": {
       "tools": [
+        "bgpview_ip",
+        "ripestat_network",
+        "greynoise_community",
         "ip_geolocation",
         "reverse_dns",
         "ipinfo",
@@ -907,6 +920,9 @@
       "tool_count": 29,
       "description": "IPv4 address",
       "implemented_tools": [
+        "bgpview_ip",
+        "ripestat_network",
+        "greynoise_community",
         "ip_geolocation",
         "reverse_dns",
         "ipinfo",
@@ -914,10 +930,11 @@
         "threatfox",
         "shodan_internetdb"
       ],
-      "implemented_count": 6
+      "implemented_count": 9
     },
     "ip_v6": {
       "tools": [
+        "ripestat_network",
         "ip_geolocation",
         "reverse_dns",
         "ipinfo",
@@ -943,14 +960,16 @@
       "tool_count": 7,
       "description": "IPv6 address",
       "implemented_tools": [
+        "ripestat_network",
         "ip_geolocation",
         "reverse_dns",
         "ipinfo"
       ],
-      "implemented_count": 3
+      "implemented_count": 4
     },
     "crypto_btc": {
       "tools": [
+        "blockstream_btc",
         "blockchain_btc",
         "ext_0574_wallet_explorer",
         "ext_0575_blockpath.com",
@@ -984,9 +1003,10 @@
       "tool_count": 13,
       "description": "Bitcoin wallet address",
       "implemented_tools": [
+        "blockstream_btc",
         "blockchain_btc"
       ],
-      "implemented_count": 1
+      "implemented_count": 2
     },
     "crypto_eth": {
       "tools": [
@@ -1231,6 +1251,7 @@
     },
     "company": {
       "tools": [
+        "gleif_lei",
         "name_to_username",
         "gravatar_check",
         "hibp_name_search",
@@ -1295,6 +1316,7 @@
       "tool_count": 36,
       "description": "Company or organization name",
       "implemented_tools": [
+        "gleif_lei",
         "name_to_username",
         "gravatar_check",
         "hibp_name_search",
@@ -1302,7 +1324,7 @@
         "wikidata_search",
         "google_dork_generator"
       ],
-      "implemented_count": 6
+      "implemented_count": 7
     },
     "hash_md5": {
       "tools": [
@@ -1893,6 +1915,7 @@
     },
     "coordinates": {
       "tools": [
+        "nominatim_reverse",
         "ext_0001_birdhunt",
         "ext_0565_radio.net",
         "ext_0568_wideband_shortwave_radio_recei",
@@ -2068,8 +2091,10 @@
       ],
       "tool_count": 151,
       "description": "Lat/lon coordinate pair",
-      "implemented_tools": [],
-      "implemented_count": 0
+      "implemented_tools": [
+        "nominatim_reverse"
+      ],
+      "implemented_count": 1
     },
     "geolocation": {
       "tools": [

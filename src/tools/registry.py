@@ -12,6 +12,7 @@ from . import social_tools
 from . import image_tools
 from . import paste_tools
 from . import name_tools
+from . import http_tools
 
 ALL_TOOL_MODULES = [
     username_tools,
@@ -24,6 +25,7 @@ ALL_TOOL_MODULES = [
     image_tools,
     paste_tools,
     name_tools,
+    http_tools,
 ]
 
 _tool_instances: dict[str, BaseTool] = {}
