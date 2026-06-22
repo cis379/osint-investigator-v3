@@ -443,6 +443,8 @@
     },
     "domain": {
       "tools": [
+        "http_title",
+        "tls_cert",
         "dnsrecon",
         "theharvester",
         "rdap",
@@ -587,6 +589,8 @@
       "tool_count": 70,
       "description": "Domain name",
       "implemented_tools": [
+        "http_title",
+        "tls_cert",
         "dnsrecon",
         "theharvester",
         "rdap",
@@ -599,10 +603,11 @@
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 11
+      "implemented_count": 13
     },
     "url": {
       "tools": [
+        "http_title",
         "socid_extractor",
         "exiftool",
         "wayback",
@@ -843,6 +848,7 @@
       "tool_count": 145,
       "description": "Full URL",
       "implemented_tools": [
+        "http_title",
         "socid_extractor",
         "exiftool",
         "wayback",
@@ -850,10 +856,11 @@
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 6
+      "implemented_count": 7
     },
     "ip_v4": {
       "tools": [
+        "reverse_ip",
         "bgpview_ip",
         "ripestat_network",
         "greynoise_community",
@@ -936,6 +943,7 @@
       "tool_count": 29,
       "description": "IPv4 address",
       "implemented_tools": [
+        "reverse_ip",
         "bgpview_ip",
         "ripestat_network",
         "greynoise_community",
@@ -946,7 +954,7 @@
         "threatfox",
         "shodan_internetdb"
       ],
-      "implemented_count": 9
+      "implemented_count": 10
     },
     "ip_v6": {
       "tools": [

@@ -80,11 +80,11 @@ concrete free gaps below.
    "…| Ruptly"). Small custom tool; high signal.
 4. **name→relatives / public-records** — family (Marvin/Brianna Grieff) not recovered (clustrmaps blocked).
 
-## 6. The strategic gap: the internal-data bridge is unbuilt
-Everything in V3 so far is **OSINT pivoting on external selectors**. But the actual job is
-*"take INTERNAL data, pivot on it, and find OSINT."* The `platform_analyst` skill (internal
-SQL → flagged accounts/IPs/emails → seed the OSINT graph) was parked on day one and never
-integrated. It is the unbuilt half of the mission and arguably the highest-value next build.
+## 6. Scope decision: V3 is EXTERNAL-only (2026-06-22)
+V3 does **external OSINT pivoting** only. The internal-data → OSINT bridge (formerly the
+`platform_analyst` skill) is handled by a SEPARATE system and was removed from V3. What V3
+must deliver is the external analysis: take a seed (selector), pivot, and produce a cited
+intelligence graph. Keep V3 focused; do not re-add internal-data tooling here.
 
 ## 7. Recommended roadmap (prioritized)
 **A — pay down debt (no keys, high leverage):**

@@ -13,10 +13,13 @@
         "\"{selector}\" resume OR CV filetype:pdf",
         "\"{selector}\" (attorney OR lawyer OR professor OR director OR engineer OR founder)",
         "\"{selector}\" (university OR college OR \"law school\" OR PhD OR JD OR MBA)",
-        "\"{selector}\" (bar admission OR license OR registration)"
+        "\"{selector}\" (bar admission OR license OR registration)",
+        "\"{selector}\" (address OR phone OR relatives OR \"lives in\")",
+        "\"{selector}\" (clustrmaps OR spokeo OR radaris OR fastpeoplesearch OR thatsthem)"
       ],
-      "fetch_priority": ["linkedin.com", "*.edu", "*.gov", "findlaw.com", "avvo.com", "theorg.com", "clustrmaps.com", "spokeo.com"],
-      "extract": ["email", "phone", "username", "company", "role", "location", "address", "url", "name", "education"]
+      "fetch_priority": ["linkedin.com", "*.edu", "*.gov", "findlaw.com", "avvo.com", "theorg.com", "clustrmaps.com", "spokeo.com", "radaris.com", "fastpeoplesearch.com"],
+      "extract": ["email", "phone", "username", "company", "role", "location", "address", "name", "relatives", "url", "education"],
+      "snippet_note": "People-search aggregators (clustrmaps/spokeo/radaris/...) BLOCK direct fetch but expose co-residents/DOB/phone IN THE SEARCH SNIPPET. Read the snippet; co-residents at one address = the family network. Don't give up on a 403."
     },
     "username": {
       "searchable": true,

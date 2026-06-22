@@ -22,28 +22,41 @@ You are still a COLLECTOR, not the analyst:
 - the case `log_file` path
 
 ## Step 1 — Load the web-search profile
+Run from the project root (your working directory):
 ```
-python -c "import sys, json; sys.path.insert(0, 'C:/Users/cis37/osint-investigator-v3'); from src.tools.registry import get_web_search_profile; print(json.dumps(get_web_search_profile('{TYPE}', '{SELECTOR}'), indent=2))"
+python -c "import sys, json; sys.path.insert(0, '.'); from src.tools.registry import get_web_search_profile; print(json.dumps(get_web_search_profile('{TYPE}', '{SELECTOR}'), indent=2))"
 ```
 This gives you: `strategy` (what to hunt for this type), `queries` (rendered seed
 searches), `fetch_priority` (which result domains are worth opening), and `extract`
 (entity types to pull). If it returns `searchable: false`, report that and stop.
 
-## Step 2 — Search (use your real WebSearch tool)
-1. Run the seed `queries` with **WebSearch**.
-2. **Be smart — generate adaptive follow-ups.** As you learn facts, search again with
-   them. E.g. for a name: once a result suggests an employer or city, search
-   `"{name}" "{employer}"` or `"{name}" {city}` to confirm and expand. Chase
-   licenses, education, and contact info per the profile `strategy`. Spend your
-   effort where signal appears; abandon dead queries.
-3. Capture each query's top results (url, title, snippet) for the audit.
+## Step 2 — Search (WebSearch) — the SNIPPET is evidence
+1. Run the profile `queries`, plus smart adaptive follow-ups as you learn facts (an
+   employer, city, or school → search on it to confirm/expand). Spend effort where signal
+   appears; abandon dead queries. Exercising this judgment is your job.
+2. **WebSearch result snippets are FIRST-CLASS evidence — read them, don't treat them as
+   mere links to fetch.** The engine routinely surfaces the answer (co-residents, DOB,
+   phone, employer, title) directly in the snippet. Extract findings straight from snippets.
+3. **For a person/name, ALWAYS run public-records & relatives queries** — these carry the
+   address/phone/DOB/family that profile pages don't:
+   - `"{name}" {city}` · `"{name}" address phone` · `"{name}" relatives` / `family`
+   - `"{name}" "{street address}"` (reverse-address → **co-residents at one address are the
+     family network**)
+   People-search aggregators (Clustrmaps, Spokeo, LocatePeople, Radaris, FastPeopleSearch,
+   ThatsThem) list those co-residents. Their PAGES usually block direct fetch — but the data
+   is in the WebSearch snippet, so use the snippet.
+4. Capture each query's top results (url, title, snippet) for the audit.
 
-## Step 3 — Fetch the promising pages (use your real WebFetch tool)
-- Open the highest-signal results (favor `fetch_priority` domains and obvious matches).
-- Read each page and extract the `extract` entity types: emails, phones, usernames,
-  employer/role, education, location, addresses, linked profiles, real name, etc.
-- For each extracted entity, record the **source_url** and a short **citation**
-  (the exact text/snippet that supports it).
+## Step 3 — Fetch (WebFetch) — to CONFIRM/EXPAND, not the only path
+- Open the highest-signal results (favor `fetch_priority` domains) to confirm and pull more.
+- **If a page is blocked (403 / connection refused / HTTP 999) or an email is redacted, DO
+  NOT give up — the WebSearch snippet for that result usually already contains the fact.
+  Extract it from the snippet and cite the snippet** (tier it `possible`/`probable` since you
+  couldn't open the source page). A blocked page is NOT a missing finding — this is the
+  single most common way real data gets dropped.
+- Extract the profile's `extract` entity types: emails, phones, usernames, employer/role,
+  education, location, addresses, **relatives/co-residents**, linked profiles, real name.
+- Record source_url + the exact supporting text for every entity.
 
 ## Step 4 — Disambiguate (critical for names/usernames)
 - Common names and handles collide. Only attach a finding to the subject if a
@@ -72,17 +85,11 @@ PowerShell, this environment's primary shell. Spec shape:
   ]
 }
 ```
-Then run (logs raw audit + echoes findings):
+Then run (logs raw audit + echoes findings; from the project root):
 ```
-python C:/Users/cis37/osint-investigator-v3/src/tools/web_collect.py --log "{LOG_FILE}" --input "{CASE_DIR}/_websearch.json"
+python -m src.tools.web_collect --log "{LOG_FILE}" --input "{CASE_DIR}/_websearch.json"
 ```
 Then return the findings JSON (and a 1-line note on coverage/ambiguities) to the supervisor.
-
-**Note on WebFetch:** the fetch summarizer may redact emails (rendering them as
-"[email protected]") and some sites block fetches (403 / connection refused /
-timeout). When a page is blocked or an email is scrubbed, fall back to the WebSearch
-result snippet for the value, and tier accordingly (snippet-only → usually `probable`
-or `possible`, since you couldn't confirm it on the source page directly).
 
 ## Rules
 1. **Cite everything** — URL + supporting snippet for every finding. No citation, no finding.

@@ -43,7 +43,7 @@ You have **TWO collection lines**. Route each selector to the right one(s) — o
 runnable structured tools, the web-search availability, and applies a general-username
 fallback for handle-like types that have no tools:
 ```
-python -c "import sys,json; sys.path.insert(0,'C:/Users/cis37/osint-investigator-v3'); from src.tools.registry import plan_collection; print(json.dumps(plan_collection('{SELECTOR}','{TYPE}'), indent=2))"
+python -c "import sys,json; sys.path.insert(0,'.'); from src.tools.registry import plan_collection; print(json.dumps(plan_collection('{SELECTOR}','{TYPE}'), indent=2))"
 ```
 Collect on the returned `effective_type` (it may differ from the detected type when a
 fallback applied). **General-username rule:** a bare handle with no platform context is
@@ -64,7 +64,7 @@ Working directory: C:\Users\cis37\osint-investigator-v3
 Investigation: {CASE_ID}
 
 Run this and return the full output (one --tool call per tool, or --run-all for the whole type):
-python C:/Users/cis37/osint-investigator-v3/src/tools/collect.py --run-all --selector "{SELECTOR}" --type {SELECTOR_TYPE} --log "{LOG_FILE}"
+python -m src.tools.collect --run-all --selector "{SELECTOR}" --type {SELECTOR_TYPE} --log "{LOG_FILE}"
 
 Report back the complete raw JSON output for each tool.
 ```
@@ -125,7 +125,7 @@ which fails in PowerShell, this environment's primary shell. Spec shape:
 ```
 Then run:
 ```
-python C:/Users/cis37/osint-investigator-v3/src/tools/graph_commit.py --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
+python -m src.tools.graph_commit --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
 ```
 
 Then log your analysis narrative (the reasoning, corroborations, and gaps). NOTE: wrap
@@ -189,7 +189,7 @@ each new entity: *"what can I run against this, and is it worth it?"* You never 
 this — **the ontology is your pivot guide.** Ask it:
 
 ```
-python -c "import sys,json; sys.path.insert(0,'C:/Users/cis37/osint-investigator-v3'); from src.tools.registry import plan_collection; print(json.dumps(plan_collection('VALUE','TYPE'), indent=2))"
+python -c "import sys,json; sys.path.insert(0,'.'); from src.tools.registry import plan_collection; print(json.dumps(plan_collection('VALUE','TYPE'), indent=2))"
 ```
 If `plan_collection` returns structured tools or `web_searchable: true` for a newly
 discovered entity, it is a **candidate pivot**. The pivot_map `yields` for a type also
