@@ -240,6 +240,186 @@ def _extract_naminter(selector, stdout):
     return out
 
 
+# =================== socialscan (email/username -> registered platforms) ===================
+_SS_OUTDIR = _tempfile.gettempdir()
+
+
+def _ss_jsonpath(selector):
+    safe = _re.sub(r"[^A-Za-z0-9._@-]", "_", selector or "x")
+    return _os.path.join(_SS_OUTDIR, f"socialscan_{safe}.json")
+
+
+def _socialscan_extract(selector, stdout):
+    """socialscan --json writes a FILE; emit registered (taken) platforms as url."""
+    path = _ss_jsonpath(selector)
+    data = None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = _json.load(fh)
+    except Exception:
+        for cand in sorted(_glob.glob(path.replace(".json", "*.json"))):
+            try:
+                with open(cand, encoding="utf-8") as fh:
+                    data = _json.load(fh)
+                break
+            except Exception:
+                continue
+    try:
+        _os.remove(path)
+    except Exception:
+        pass
+    if not isinstance(data, dict):
+        return []
+
+    def _truthy(v):
+        return str(v).strip().lower() == "true"
+
+    out, seen = [], set()
+    for query, rows in data.items():
+        if not isinstance(rows, list):
+            continue
+        for r in rows:
+            if not isinstance(r, dict):
+                continue
+            platform = str(r.get("platform", "")).strip()
+            if not (_truthy(r.get("success")) and _truthy(r.get("valid"))
+                    and not _truthy(r.get("available"))):
+                continue
+            link = (r.get("link") or "").strip()
+            value = link or f"{platform}: {query} (registered)"
+            key = ("url", value.lower())
+            if not platform or key in seen:
+                continue
+            seen.add(key)
+            out.append(_E(value, "url", "probable", f"socialscan: {platform} (registered)",
+                          {"platform": platform, "query": query, "selector": selector}))
+    return out
+
+
+# =================== ignorant (phone -> registered accounts; "holehe for phone") ===================
+IGNORANT_SHIM_DIR = r"C:\Users\cis37\osint-investigator-v3\.ignorant_shims"
+IGNORANT_LAUNCHER = _os.path.join(IGNORANT_SHIM_DIR, "ignorant_run.py")
+_IGNORANT_SHIM_SRC = r'''
+import sys, re
+import ignorant.core as _c
+_c.check_update = lambda: None
+raw = sys.argv[1] if len(sys.argv) > 1 else ""
+try:
+    import phonenumbers
+    e164 = raw if raw.strip().startswith("+") else "+" + re.sub(r"[^0-9]", "", raw)
+    p = phonenumbers.parse(e164, None)
+    cc, num = str(p.country_code), str(p.national_number)
+except Exception:
+    s = re.sub(r"[^0-9]", "", raw)
+    cc, num = s[:1], s[1:]
+sys.argv = ["ignorant", "--no-color", "--no-clear", "-T", "12", cc, num]
+_c.main()
+'''
+
+
+def _ensure_ignorant_launcher():
+    try:
+        _os.makedirs(IGNORANT_SHIM_DIR, exist_ok=True)
+        if not _os.path.exists(IGNORANT_LAUNCHER):
+            with open(IGNORANT_LAUNCHER, "w", encoding="utf-8") as fh:
+                fh.write(_IGNORANT_SHIM_SRC)
+    except Exception:
+        pass
+
+
+_ensure_ignorant_launcher()
+
+_IGNORANT_SERVICE_URLS = {"instagram.com": "https://www.instagram.com/",
+                          "amazon.com": "https://www.amazon.com/",
+                          "snapchat.com": "https://www.snapchat.com/"}
+_IGNORANT_LINE = re.compile(r"^\s*\[(?P<mark>[+\-x])\]\s*(?P<svc>[A-Za-z0-9.\-]+\.[A-Za-z]{2,})\s*$")
+
+
+def _ignorant_extract(selector, stdout):
+    """`[+] service` = phone registered there -> url; [-]/[x] ignored."""
+    out, seen = [], set()
+    for line in (stdout or "").splitlines():
+        m = _IGNORANT_LINE.match(line)
+        if not m or m.group("mark") != "+":
+            continue
+        svc = m.group("svc").strip().lower()
+        if svc in seen:
+            continue
+        seen.add(svc)
+        url = _IGNORANT_SERVICE_URLS.get(svc, "https://" + svc + "/")
+        out.append(_E(url, "url", "probable", f"ignorant: {svc} (phone registered)",
+                      {"service": svc, "phone": selector}))
+    return out
+
+
+# =================== dnsrecon (domain -> DNS records + subdomains) ===================
+_DR_HOST_RE = _re.compile(r"^[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_])?\.[A-Za-z]{2,}$")
+_DR_IP4_RE = _re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}$")
+
+
+def _dnsrecon_outpath(selector):
+    safe = _re.sub(r"[^A-Za-z0-9._-]", "_", selector or "x")
+    return _os.path.join(_TH_OUTDIR, f"dnsrecon_{safe}.json")
+
+
+def _dnsrecon_extract(selector, stdout):
+    """Read dnsrecon's JSON array: NS/MX/SOA/A/AAAA hosts -> domain; addresses -> ip."""
+    path = _dnsrecon_outpath(selector)
+    data = None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = _json.load(fh)
+    except Exception:
+        for cand in sorted(_glob.glob(path.replace(".json", "*.json"))):
+            try:
+                with open(cand, encoding="utf-8") as fh:
+                    data = _json.load(fh)
+                break
+            except Exception:
+                continue
+    if not isinstance(data, list):
+        return []
+
+    out, seen = [], set()
+
+    def add(value, etype, cite):
+        value = (value or "").strip().rstrip(".").lower()
+        if not value or (etype, value) in seen:
+            return
+        seen.add((etype, value))
+        out.append(_E(value, etype, "probable", cite, {"selector": selector}))
+
+    def add_host(host, cite):
+        if host and _DR_HOST_RE.match(host.strip()):
+            add(host, "domain", cite)
+
+    def add_addr(addr, cite):
+        addr = (addr or "").strip()
+        if not addr:
+            return
+        if ":" in addr:
+            add(addr, "ip_v6", cite)
+        elif _DR_IP4_RE.match(addr):
+            add(addr, "ip_v4", cite)
+
+    for rec in data:
+        if not isinstance(rec, dict):
+            continue
+        rtype = (rec.get("type") or "").upper()
+        if rtype == "SCANINFO":
+            continue
+        cite = f"dnsrecon: {rtype} record"
+        add_host(rec.get("target"), cite)
+        add_host(rec.get("exchange"), cite)
+        add_host(rec.get("mname"), cite)
+        if rtype in ("A", "AAAA", "CNAME", "PTR", "SRV"):
+            name = (rec.get("name") or "").strip().rstrip(".")
+            if name and name.lower() != (selector or "").strip().lower():
+                add_host(name, cite)
+        add_addr(rec.get("address"), cite)
+    return out[:300]
+
+
 TOOLS = [
     CliTool(
         name="theharvester",
@@ -252,6 +432,36 @@ TOOLS = [
                  "-l", "200", "-n",
                  "-f", _os.path.join(_TH_OUTDIR, "theharvester_{selector}.thv")],
         timeout=180, extract=_theharvester_extract),
+
+    CliTool(
+        name="socialscan",
+        description="Fast async check whether an email/username is registered on platforms "
+                    "(GitHub/GitLab/Instagram/Reddit/Twitter/Tumblr/Pinterest).",
+        input_types=["email", "username"], output_types=["url"],
+        binary="socialscan", install_command="pip install socialscan",
+        command=["socialscan", "{selector}", "--show-urls",
+                 "--json", _os.path.join(_SS_OUTDIR, "socialscan_{selector}.json")],
+        timeout=120, extract=_socialscan_extract, success_substrings=["Completed", "queries in"]),
+
+    CliTool(
+        name="ignorant",
+        description="Phone -> account existence ('holehe for phone'): Instagram/Amazon/Snapchat. "
+                    "Selector is E.164 (+15551234567); launcher splits country code.",
+        input_types=["phone"], output_types=["url"],
+        binary="ignorant", install_command="pip install ignorant phonenumbers",
+        command=["python", IGNORANT_LAUNCHER, "{selector}"],
+        timeout=90, extract=_ignorant_extract,
+        success_substrings=["websites checked", "Phone number used"]),
+
+    CliTool(
+        name="dnsrecon",
+        description="Domain DNS recon: SOA/NS/MX/A/AAAA/SRV records -> nameserver/mail/subdomain "
+                    "hosts + their IPs (std records, no brute force; fast).",
+        input_types=["domain"], output_types=["domain", "ip_v4", "ip_v6"],
+        binary="dnsrecon", install_command="pip install dnsrecon",
+        command=["dnsrecon", "-d", "{selector}", "-t", "std", "--lifetime", "5",
+                 "-j", _os.path.join(_TH_OUTDIR, "dnsrecon_{selector}.json")],
+        timeout=120, extract=_dnsrecon_extract, success_substrings=["Records Found", "Performing"]),
 
     CliTool(
         name="linkook",

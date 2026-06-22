@@ -14,6 +14,7 @@ from . import paste_tools
 from . import name_tools
 from . import http_tools
 from . import cli_tools
+from . import extra_tools
 
 ALL_TOOL_MODULES = [
     username_tools,
@@ -28,6 +29,7 @@ ALL_TOOL_MODULES = [
     name_tools,
     http_tools,
     cli_tools,
+    extra_tools,
 ]
 
 _tool_instances: dict[str, BaseTool] = {}

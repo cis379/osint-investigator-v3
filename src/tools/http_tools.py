@@ -206,6 +206,102 @@ def _derive_coords(sel, stype):
     return {"lat": parts[0], "lon": parts[1]}
 
 
+# ---------------- arsenal additions (free) ----------------
+def _ex_xposedornot(sel, d):
+    out = []
+    details = ((d.get("ExposedBreaches") or {}).get("breaches_details")) or []
+    seen = set()
+    for b in details[:25]:
+        name, domain = b.get("breach"), b.get("domain")
+        meta = {"breach": name, "breach_date": b.get("xposed_date"),
+                "exposed_data": b.get("xposed_data"), "industry": b.get("industry"),
+                "records": b.get("xposed_records")}
+        cite = f"XposedOrNot breach: {name}"
+        if domain and domain not in seen:
+            seen.add(domain)
+            out.append(_E(domain, "url", "probable", cite, meta))
+        elif name:
+            out.append(_E(name, "breach", "probable", cite, meta))
+    if details:
+        out.append(_E(sel, "email", "probable",
+                      f"Email exposed in {len(details)} breach(es) per XposedOrNot",
+                      {"breach_count": len(details)}))
+    return out
+
+
+_EDGAR_CIK_RE = re.compile(r"\s*\(CIK\s*(\d+)\)\s*$", re.I)
+_EDGAR_TICKER_RE = re.compile(r"\s*\(([A-Z0-9.\-]{1,7}(?:,\s*[A-Z0-9.\-]{1,12})*)\)\s*$")
+
+
+def _ex_edgar(sel, d):
+    out, seen = [], set()
+    for h in (((d.get("hits") or {}).get("hits")) or [])[:40]:
+        s = h.get("_source", {}) or {}
+        form, adsh, fdate = s.get("form", ""), s.get("adsh", ""), s.get("file_date", "")
+        ciks = s.get("ciks") or []
+        for raw in (s.get("display_names") or []):
+            m = _EDGAR_CIK_RE.search(raw)
+            cik = m.group(1) if m else (ciks[0] if ciks else None)
+            name = _EDGAR_CIK_RE.sub("", raw).strip()
+            tm = _EDGAR_TICKER_RE.search(name)
+            if tm:
+                name = _EDGAR_TICKER_RE.sub("", name).strip()
+            if not name or (name.lower(), cik) in seen:
+                continue
+            seen.add((name.lower(), cik))
+            out.append(_E(name, "company", "probable",
+                          f"SEC EDGAR full-text: {form} {adsh} ({fdate})".strip(),
+                          {"cik": cik, "form": form, "accession": adsh}))
+    return out
+
+
+def _ex_aleph(sel, d):
+    out = []
+    for it in (d.get("results") or [])[:10]:
+        schema = it.get("schema") or ""
+        props = it.get("properties", {}) or {}
+        names = list(props.get("name") or [])
+        if it.get("caption"):
+            names = [it["caption"]] + [n for n in names if n != it["caption"]]
+        etype = "name" if schema in ("Person", "LegalEntity") else "company"
+        for nm in names[:3]:
+            if nm:
+                out.append(_E(nm, etype, "possible", f"OCCRP Aleph {schema} entity",
+                              {"schema": schema, "aleph_id": it.get("id")}))
+        for em in (props.get("email") or [])[:3]:
+            if "@" in str(em):
+                out.append(_E(em, "email", "probable", f"OCCRP Aleph {schema} email"))
+    return out
+
+
+def _split_parties(caption):
+    if not caption:
+        return []
+    out = []
+    for p in re.split(r"\s+v\.?\s+", caption, flags=re.IGNORECASE):
+        p = re.sub(r"^(In re:?|Ex parte|United States ex rel\.)\s+", "", p.strip(" .,"),
+                   flags=re.IGNORECASE).strip()
+        if 2 <= len(p) <= 80 and not p.lower().startswith(("et al", "et. al")):
+            out.append(p)
+    return out
+
+
+def _ex_courtlistener(sel, d):
+    out = []
+    for r in (d.get("results") or [])[:10]:
+        cap = r.get("caseName") or r.get("caseNameFull")
+        au = r.get("absolute_url")
+        if au:
+            full = "https://www.courtlistener.com" + au if au.startswith("/") else au
+            out.append(_E(full, "url", "confirmed",
+                          f"CourtListener opinion: {cap} ({r.get('court','')} {r.get('dateFiled','')})".strip(),
+                          {"case_name": cap, "docket": r.get("docketNumber")}))
+        for nm in _split_parties(cap):
+            if sel.strip().lower() not in nm.lower():
+                out.append(_E(nm, "name", "possible", f"CourtListener case party: {cap}"))
+    return out
+
+
 # ---------------- Tier-1 tool specs (free / no key) ----------------
 TOOLS = [
     HttpTool(name="rdap", description="RDAP domain registration (structured WHOIS)",
@@ -259,4 +355,26 @@ TOOLS = [
              input_types=["coordinates"], output_types=["location"],
              url="https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json",
              derive=_derive_coords, extract=_ex_nominatim),
+
+    # --- arsenal additions (free) ---
+    HttpTool(name="xposedornot_email", description="XposedOrNot: data breaches an email appears in (free, no key)",
+             input_types=["email"], output_types=["url", "breach", "email"],
+             url="https://api.xposedornot.com/v1/breach-analytics?email={selector}",
+             extract=_ex_xposedornot, success_codes=(200, 404)),
+
+    HttpTool(name="sec_edgar_fts", description="SEC EDGAR full-text search: company name -> filers (CIK/form). Free, needs UA.",
+             input_types=["company"], output_types=["company", "name"],
+             url='https://efts.sec.gov/LATEST/search-index?q=%22{selector}%22',
+             user_agent="osint-investigator research research@example.com", extract=_ex_edgar),
+
+    HttpTool(name="aleph_occrp", description="OCCRP Aleph entity search: name/company -> leaked/corporate records (free public search)",
+             input_types=["name", "company"], output_types=["name", "company", "email"],
+             url="https://aleph.occrp.org/api/2/entities?q={selector}&limit=10&filter:schemata=Thing",
+             auth_key="ALEPH_API_KEY", auth_header="Authorization", key_required=False, extract=_ex_aleph),
+
+    HttpTool(name="courtlistener_search", description="CourtListener: US court opinions mentioning a name/company (free; optional token)",
+             input_types=["name", "company"], output_types=["url", "name"],
+             url="https://www.courtlistener.com/api/rest/v4/search/?q={selector}&type=o",
+             auth_key="COURTLISTENER_API_TOKEN", auth_header="Authorization", key_required=False,
+             extract=_ex_courtlistener),
 ]
