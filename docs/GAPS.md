@@ -9,6 +9,24 @@ Living list of deferred work and capability gaps. Updated as we go.
   elevated shell, OR drop the portable Windows exe into `tools_installed/` and add
   it to PATH. Until then, `image`/`file`/`url` EXIF extraction is unavailable.
 
+## From the 2026-06-22 re-test (51 tools) — actionable
+- **reverse_ip free quota is too small.** HackerTarget's no-key tier dies after ~2 calls
+  ("API count exceeded"), so it couldn't test the IPs where viory co-tenancy lived. The
+  supervisor proved co-tenancy anyway via dns co-resolution (ruptly.video + ruptly.agency
+  → 5.101.71.73). FIX: add a HackerTarget key OR auto-fallback to dns co-resolution +
+  retry/backoff; treat reverse_ip as a lead, not a batch tool.
+- **No retry/backoff/fallback for flaky HTTP** (reverse_ip 429, crtsh 30s timeout, rdap).
+  One transient failure kills the pivot. Needs a shared resilience policy.
+- **http_title is static-HTML only** — JS-rendered SPAs (Next.js: ruptly.video) return an
+  empty <title>, a silent false-negative. FIX: when title is empty but status 200, note
+  "title empty; likely JS-rendered" in raw_output.
+- **holehe rate-limited to uselessness** — returns [x] on ~all sites in one run, so its
+  negatives are meaningless and the name→email→holehe verification can't actually verify.
+  Needs proxies/key or downgrade its role.
+- **Hygiene:** sherlock dumps `<username>.txt` into the project ROOT (should be the case
+  dir); the init_log call/skill swaps seed_type/case_id in the log header; no init_log CLI.
+- **whois_lookup** has no `.video`/many-TLD support (rdap covers it — prefer rdap).
+
 ## Hard capability gaps (no free structured tool — from the capability research)
 - **Reverse-image / face search** — money-or-manual (TinEye paid; Yandex/Lens/PimEyes manual).
 - **Structured SERP / dorking APIs** — collapsed 2025–26 (Bing retired, Brave paid,
