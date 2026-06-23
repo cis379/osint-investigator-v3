@@ -179,6 +179,17 @@ State: **51 runnable tools · 18/90 selector types runnable · 5 skills · 3 sys
 - FIXED this round: HTTP retry/backoff (rdap/crt.sh/reverse_ip), http_title JS-note, log auto-init
   (init_log header swap), sherlock `<user>.txt` → temp (root hygiene), hardcoded paths → `python -m`.
 
+## 8. Maintenance layer — the System Manager (runs in its own session)
+A second agent maintains the system without breaking it (`skills/system_manager.md`, launch
+`/system-manager`). Its durable memory is files in `system/` (VISION, CAPABILITY-LOCK, BACKLOG,
+CHANGELOG, intake/). Every change is health-gated by `scripts/health_check.py` (registry load +
+tool-count floor + 3 suites), done on a branch, reverted on red; bugs/wiring are autonomous,
+architecture needs user sign-off. It triages the BACKLOG, intakes new OSINT resources (classify →
+wire/backlog/manual-guide/reject), owns the ontology, and runs a READ-ONLY daily audit
+(`/osint-daily-review`). The supervisor feeds it: it logs gaps it hits to BACKLOG and writes
+operator **manual guides** (`guides/`) for key-gated/manual capabilities. Skills are now 6
+(+ system_manager). Stable baseline tag: `v3-baseline-2026-06-23`.
+
 ## 7. What's solid (protect)
 The raw/analysis split (collectors fetch, supervisor tiers+graphs); two collection lines (both
 proven essential); ontology-driven routing + pivoting; confidence tiering (catches FPs every run);
