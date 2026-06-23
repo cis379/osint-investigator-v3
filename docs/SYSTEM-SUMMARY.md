@@ -170,6 +170,12 @@ State: **51 runnable tools · 18/90 selector types runnable · 5 skills · 3 sys
 - **maigret self-stamps "confirmed"** on collision sites (mitigated by tier doctrine; wrapper still lies).
 - **whois_lookup** has no `.video`/many-TLD support (rdap covers it — prefer rdap).
 - **aleph/sec_edgar** sparse/500 without keys/UAE coverage (expected; keys are TODO).
+- **report.md is lossy vs report.html** (report-writer validated 2026-06-23, works end-to-end but):
+  (a) `cti_report.py` doesn't escape `|` in entity values → a value like `Trending News | Viory`
+  breaks the markdown table; (b) entity values truncated to 40 chars in report.md (full in HTML);
+  (c) **citations + the relationship table never reach report.md** (only report.html) and report.md
+  references a `graph.png` that is never generated (dead image link). report.html is the complete,
+  citation-rich product; report.md needs the pipe-escape + relationship/citation surfacing.
 - FIXED this round: HTTP retry/backoff (rdap/crt.sh/reverse_ip), http_title JS-note, log auto-init
   (init_log header swap), sherlock `<user>.txt` → temp (root hygiene), hardcoded paths → `python -m`.
 
