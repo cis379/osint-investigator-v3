@@ -14,6 +14,7 @@ import requests
 
 from .base import BaseTool, EntityFound
 from .credentials import get_key
+from .nethttp import http_get
 
 DEFAULT_UA = "osint-investigator/3.0 (security research tool)"
 
@@ -24,7 +25,8 @@ class HttpTool(BaseTool):
     def __init__(self, *, name, description, input_types, output_types, url,
                  http_method="GET", headers=None, user_agent=DEFAULT_UA,
                  auth_key=None, auth_header=None, key_required=False,
-                 body=None, derive=None, extract=None, success_codes=(200,)):
+                 body=None, derive=None, extract=None, success_codes=(200,),
+                 timeout=20):
         self.name = name
         self.description = description
         self.input_types = input_types
@@ -40,6 +42,7 @@ class HttpTool(BaseTool):
         self._derive = derive
         self._extract = extract
         self._success_codes = success_codes
+        self._timeout = timeout
 
     def query(self, selector, selector_type):
         if selector_type not in self.input_types:
@@ -71,9 +74,9 @@ class HttpTool(BaseTool):
 
         try:
             if self._http_method == "POST":
-                resp = requests.post(url, json=self._body, headers=headers, timeout=20)
+                resp = requests.post(url, json=self._body, headers=headers, timeout=self._timeout)
             else:
-                resp = requests.get(url, headers=headers, timeout=20)
+                resp = http_get(url, headers=headers, timeout=self._timeout)  # retries transient failures
         except requests.RequestException as e:
             return self.make_result(selector, selector_type, "", [], False, str(e))
 
@@ -306,7 +309,7 @@ def _ex_courtlistener(sel, d):
 TOOLS = [
     HttpTool(name="rdap", description="RDAP domain registration (structured WHOIS)",
              input_types=["domain"], output_types=["domain", "company", "email"],
-             url="https://rdap.org/domain/{selector}", extract=_ex_rdap),
+             url="https://rdap.org/domain/{selector}", extract=_ex_rdap, timeout=30),
 
     HttpTool(name="hudsonrock_email", description="Hudson Rock infostealer exposure for an email (free)",
              input_types=["email"], output_types=["email", "url"],

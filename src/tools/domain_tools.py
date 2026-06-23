@@ -2,6 +2,7 @@ import json
 import socket
 import requests
 from .base import BaseTool, ToolResult, EntityFound
+from .nethttp import http_get
 
 
 class WhoisTool(BaseTool):
@@ -178,9 +179,9 @@ class CrtShTool(BaseTool):
             return self.make_result(selector, selector_type, "", [], False, "crt.sh only accepts domains")
 
         try:
-            resp = requests.get(
+            resp = http_get(
                 f"https://crt.sh/?q=%.{selector}&output=json",
-                timeout=30,
+                timeout=30,  # crt.sh is slow + flaky; http_get retries timeouts/5xx
             )
             raw_output = resp.text[:5000]
             entities = []

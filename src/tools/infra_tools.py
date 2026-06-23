@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from .base import BaseTool, EntityFound
+from .nethttp import http_get
 
 BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
@@ -35,7 +36,7 @@ class ReverseIpTool(BaseTool):
                                     "reverse_ip only accepts ip_v4 (free reverse-IP has no IPv6)")
         url = f"https://api.hackertarget.com/reverseiplookup/?q={selector}"
         try:
-            resp = requests.get(url, timeout=20, headers={"User-Agent": "osint-investigator/1.0"})
+            resp = http_get(url, timeout=20, retries=1, headers={"User-Agent": "osint-investigator/1.0"})
         except requests.RequestException as e:
             return self.make_result(selector, selector_type, "", [], False, str(e))
 
@@ -226,9 +227,14 @@ class HttpTitleTool(BaseTool):
                                         source_citation=f"http_title generator: {generator} at {final_url}",
                                         metadata={"final_url": final_url}))
 
+        # A 200 with no <title> usually means a JS-rendered SPA (BeautifulSoup sees no
+        # static title) — flag it so the supervisor doesn't read "no title" as "no brand".
+        js_note = ""
+        if not title and 200 <= status < 400:
+            js_note = "\nnote=title empty at status 200; likely JS-rendered (SPA) — branding not in static HTML"
         raw = (f"final_url={final_url}\nstatus={status}\nserver={server or '-'}\n"
                f"x_powered_by={powered_by or '-'}\ntitle={title or '-'}\n"
-               f"og:site_name={og_site or '-'}\napplication-name={app_name or '-'}\ngenerator={generator or '-'}")
+               f"og:site_name={og_site or '-'}\napplication-name={app_name or '-'}\ngenerator={generator or '-'}{js_note}")
         ok = 200 <= status < 400 or bool(title)
         return self.make_result(selector, selector_type, raw, entities, success=ok,
                                 error="" if ok else f"HTTP {status}")

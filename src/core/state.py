@@ -37,6 +37,15 @@ def create_investigation(seed_value: str, seed_type: str) -> dict:
     }
 
     save_state(state)
+
+    # Initialize the investigation log here so callers don't have to make a separate,
+    # error-prone init_log() call (which had a history of swapped case_id/seed args).
+    try:
+        from src.logger.investigation_log import InvestigationLogger
+        InvestigationLogger(state["log_file"]).init_log(case_id, seed_value, seed_type)
+    except Exception:
+        pass  # non-fatal; the log will still be appended to on first tool run
+
     return state
 
 

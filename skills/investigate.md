@@ -38,18 +38,10 @@ Run the state creation script:
 python -c "import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3'); from src.core.state import create_investigation; s = create_investigation('{VALUE}', '{TYPE}'); print(f'Case: {s[\"case_id\"]}'); print(f'Dir: {s[\"case_dir\"]}')"
 ```
 
-## Step 4: Initialize Investigation Log
+## Step 4: Investigation Log (automatic)
 
-Run the logger initialization:
-```
-python -c "
-import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
-from src.logger.investigation_log import InvestigationLogger
-logger = InvestigationLogger(r'{LOG_FILE}')
-logger.init_log('{CASE_ID}', '{VALUE}', '{TYPE}')
-print('Log initialized')
-"
-```
+`create_investigation()` now initializes `investigation.md` itself — you do NOT need a
+separate `init_log()` call. The log is ready the moment Step 3 returns.
 
 ## Step 5: Become the Supervisor
 

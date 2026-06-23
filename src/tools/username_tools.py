@@ -24,10 +24,20 @@ class SherlockTool(BaseTool):
         if selector_type != "username":
             return self.make_result(selector, selector_type, "", [], False, "Sherlock only accepts usernames")
 
-        stdout, stderr, code = self.run_command(
-            ["sherlock", selector, "--print-found", "--no-color", "--timeout", "15"],
-            timeout=180,
-        )
+        # Sherlock writes a "<username>.txt" report to CWD by default (litters the project
+        # root). Redirect it to a temp file and delete it — we parse stdout, not the file.
+        out_file = Path(tempfile.gettempdir()) / f"sherlock_{re.sub(r'[^A-Za-z0-9._-]', '_', selector)}.txt"
+        try:
+            stdout, stderr, code = self.run_command(
+                ["sherlock", selector, "--print-found", "--no-color", "--timeout", "15",
+                 "--output", str(out_file)],
+                timeout=180,
+            )
+        finally:
+            try:
+                out_file.unlink(missing_ok=True)
+            except OSError:
+                pass
 
         raw_output = stdout + stderr
         entities = []
