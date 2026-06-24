@@ -6,7 +6,13 @@ from .base import BaseTool, ToolResult, EntityFound
 
 class HoleheTool(BaseTool):
     name = "holehe"
-    description = "Check if email is registered on various sites"
+    # B4: holehe is heavily rate-limited (most sites return [x]/error per run), so a
+    # NEGATIVE is meaningless — only POSITIVES carry signal, and even those are
+    # tool-self-claimed (supervisor re-tiers). Role downgraded to a lead generator.
+    name_role = "lead-only"
+    description = ("Check whether an email is REGISTERED on sites (account-existence). "
+                   "Rate-limited: only [+] positives are signal; [x]/negatives are unreliable "
+                   "(not absence). Positives emitted as `probable`, never confirmed.")
     input_types = ["email"]
     output_types = ["url", "username"]
     method = "cli"
@@ -36,7 +42,7 @@ class HoleheTool(BaseTool):
                     entities.append(EntityFound(
                         value=site_match.group(0),
                         entity_type="domain",
-                        confidence="confirmed",
+                        confidence="probable",  # B4: tool-self-claimed; supervisor re-tiers
                         source_citation=line,
                         metadata={"registration_status": "registered"},
                     ))

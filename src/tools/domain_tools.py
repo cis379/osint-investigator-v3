@@ -7,7 +7,9 @@ from .nethttp import http_get
 
 class WhoisTool(BaseTool):
     name = "whois_lookup"
-    description = "WHOIS registration data for domains"
+    description = ("WHOIS registration data for domains. NOTE: python-whois lacks parsers for "
+                  "many newer TLDs (.video, etc.) and returns empty there — `rdap` is the "
+                  "preferred structured-WHOIS source and runs alongside; treat whois as a supplement.")
     input_types = ["domain"]
     output_types = ["name", "email", "phone", "company", "domain"]
     method = "library"

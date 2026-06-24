@@ -289,18 +289,38 @@ def _split_parties(caption):
     return out
 
 
+_CL_STOP = {"the", "inc", "llc", "ltd", "corp", "co", "company", "group", "and"}
+
+
+def _cl_tokens(sel):
+    """Significant (>=3 char, non-stopword) tokens of the seed for relevance gating."""
+    return [t for t in re.split(r"\W+", (sel or "").lower()) if len(t) >= 3 and t not in _CL_STOP]
+
+
 def _ex_courtlistener(sel, d):
+    # B3 precision gate: CourtListener's BM25 is fuzzy and returns unrelated cases for
+    # short names ("Robin", "Ruptly"). Only surface a case whose caption/full-name
+    # actually contains ALL the seed's significant tokens — otherwise it's a fuzzy
+    # false positive. A matched opinion is still only `probable` (could be a namesake),
+    # never `confirmed` (we haven't proven it's OUR subject).
+    toks = _cl_tokens(sel)
+    sel_low = (sel or "").strip().lower()
     out = []
     for r in (d.get("results") or [])[:10]:
-        cap = r.get("caseName") or r.get("caseNameFull")
+        cap = r.get("caseName") or r.get("caseNameFull") or ""
+        full_name = (r.get("caseNameFull") or "") + " " + (cap or "")
+        hay = full_name.lower()
+        relevant = all(t in hay for t in toks) if toks else (sel_low in hay)
+        if not relevant:
+            continue
         au = r.get("absolute_url")
         if au:
             full = "https://www.courtlistener.com" + au if au.startswith("/") else au
-            out.append(_E(full, "url", "confirmed",
-                          f"CourtListener opinion: {cap} ({r.get('court','')} {r.get('dateFiled','')})".strip(),
+            out.append(_E(full, "url", "probable",
+                          f"CourtListener opinion (name-matched): {cap} ({r.get('court','')} {r.get('dateFiled','')})".strip(),
                           {"case_name": cap, "docket": r.get("docketNumber")}))
         for nm in _split_parties(cap):
-            if sel.strip().lower() not in nm.lower():
+            if sel_low not in nm.lower():
                 out.append(_E(nm, "name", "possible", f"CourtListener case party: {cap}"))
     return out
 

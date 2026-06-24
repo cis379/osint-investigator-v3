@@ -486,7 +486,10 @@ TOOLS = [
     CliTool(
         name="socid_extractor",
         description="Extract a structured identity record (name, username, email, ids) from a "
-                    "social/profile URL. Key url->identity pivot tool; 100+ sites.",
+                    "SERVER-RENDERED profile URL (GitHub, VK, classic forums/blogs, Gravatar). "
+                    "SCOPE LIMIT (B2): inert on JS-rendered / auth-gated socials "
+                    "(Bluesky/Threads/X/Instagram) and on ASU/Cornell-style pages — for those, "
+                    "use the web-search line, not this tool. A non-result is NOT proof of absence.",
         input_types=["url"], output_types=["name", "email", "username", "url"],
         binary="socid_extractor", install_command="pip install socid-extractor",
         command=["socid_extractor", "--url", "{selector}"], timeout=60, extract=_socid_extract),
