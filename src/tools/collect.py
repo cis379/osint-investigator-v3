@@ -47,11 +47,18 @@ def collect_tool(tool_name: str, selector: str, selector_type: str, log_file: st
     return rd
 
 
-def collect_all(selector: str, selector_type: str, log_file: str = "") -> list[dict]:
-    """Run every tool registered for the selector type. No graph writes."""
+def collect_all(selector: str, selector_type: str, log_file: str = "",
+                exclude: set | None = None) -> list[dict]:
+    """Run every tool registered for the selector type. No graph writes.
+
+    `exclude` is an optional set of tool names to skip (e.g. network-heavy tools the
+    fast regression gate doesn't need to exercise)."""
+    exclude = exclude or set()
     results = []
     for tool in get_tools_for_selector(selector_type):
         tool_name = tool.name if hasattr(tool, "name") else str(tool)
+        if tool_name in exclude:
+            continue
         try:
             rd = collect_tool(tool_name, selector, selector_type, log_file)
         except Exception as e:
@@ -68,15 +75,24 @@ def main():
     parser.add_argument("--selector", required=True, help="The selector value")
     parser.add_argument("--type", required=True, dest="selector_type", help="Selector type")
     parser.add_argument("--log", default="", help="investigation.md path for raw audit logging")
+    parser.add_argument("--exclude", default="", help="Comma-separated tool names to skip (--run-all)")
 
     args = parser.parse_args()
 
+    # B1: ONE output schema for both modes — {"selector","type","results":[{tool,result}]}.
+    # A single-tool run is just a one-element results list, so the supervisor parses
+    # the same shape whether one tool or all ran.
     if args.run_all:
-        print(json.dumps(collect_all(args.selector, args.selector_type, args.log), indent=2))
+        exclude = {t.strip() for t in args.exclude.split(",") if t.strip()}
+        results = collect_all(args.selector, args.selector_type, args.log, exclude=exclude)
     elif args.tool:
-        print(json.dumps(collect_tool(args.tool, args.selector, args.selector_type, args.log), indent=2))
+        rd = collect_tool(args.tool, args.selector, args.selector_type, args.log)
+        results = [{"tool": args.tool, "result": rd}]
     else:
         parser.error("Either --tool or --run-all is required")
+
+    print(json.dumps({"selector": args.selector, "type": args.selector_type,
+                      "results": results}, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

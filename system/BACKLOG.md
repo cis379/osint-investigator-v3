@@ -21,6 +21,16 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 - [B6] (bug/low/open) — `whois_lookup` no `.video`/many-TLD support (rdap covers; prefer rdap). — viory test.
 - [B7] (bug/low/wontfix-ish) — maigret/sherlock/name_to_username self-stamp `confidence=confirmed`
   in-wrapper (mitigated by the supervisor tier doctrine; cosmetic). — multiple tests.
+- [B8] (bug/HIGH/open) — `threatfox` returns `{"error":"Unauthorized"}` (abuse.ch made the API
+  auth-mandatory). It is ROUTED into 4 types (domain, ip_v4, hash_sha256, hash_md5) and silently
+  FAILS on every domain/IP investigation — a dead tool burning a slot. Fix: add free `ABUSE_CH_API_KEY`
+  (Auth-Key header, graceful degrade) OR drop it from routing until keyed. — review 2026-06-24 (live-confirmed).
+- [B9] (bug/med/open) — `cloud_buckets` runs ~80 live HTTP probes inside `replay_baseline` (domain
+  run-all on example.com), pushing the health gate past 2 min. The gate tests PLUMBING, not coverage —
+  exclude network-heavy tools from the baseline replay, or trim cloud_buckets' probe budget. — review 2026-06-24.
+- [B10] (bug/low/open) — `certspotter` free tier is rate-limited (HTTP 429 after a handful of calls/hr).
+  Healthy now, but heavy investigations / repeated gate runs will see it degrade. Add a free Cert Spotter
+  token to Tier-2 (graceful) or cache per-domain. — review 2026-06-24.
 
 ## GAPS — intel (capability; many are structural/paid)
 - [G1] (gap/high/partly-mitigated) — reverse_ip free quota (HackerTarget ~2 calls) too small.
@@ -54,7 +64,9 @@ YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on 
 
 ## Supervisor-logged gaps (appended by investigation sessions)
 <!-- The supervisor appends `[GAP-<date>-NN] (gap/priority/open) — <what it needed and couldn't do> — INV-<case> -->
-(none yet)
+- [GAP-20260624-01] (gap/high/open) — reverse-WHOIS: no way to enumerate ALL domains by a registrant org/EIN (e.g. "The Walker Tours LLC" / EIN 37-2091569). Needs paid API (DomainTools/SecurityTrails/WhoisXML reverse-whois). This is the main blocker to mapping a full scam-domain network from its registrant. — INV-20260624-001
+- [GAP-20260624-02] (gap/med/open) — threatfox tool returns `{"error":"Unauthorized"}` (needs ABUSE_CH_API_KEY). No IOC-reputation verdict available for domains/IPs. — INV-20260624-001
+- [GAP-20260624-03] (gap/low/open) — crt.sh (404) and wayback (503) both failed this run; transient but recurrent. CT-history fell back to certspotter; no archive snapshots retrieved. — INV-20260624-001
 
 ## Recently DONE (Manager closes items here)
 - SpiderFoot intake: +4 free no-key tools (certspotter, robtex_ip, cloud_buckets, pgp_keyserver)

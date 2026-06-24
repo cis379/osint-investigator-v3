@@ -45,17 +45,20 @@ def check(cond, msg):
         failures.append(msg)
 
 
-# (label, seed, selector_type, collection strategy)
+# (label, seed, selector_type, collection strategy, exclude)
 #   "all"  -> run every tool for the type (fast for domain/name)
 #   "dork" -> run only google_dork_generator (fast username plumbing check)
+#   exclude -> tool names skipped in "all" mode; this suite tests the split PLUMBING,
+#              not coverage, so network-heavy tools (cloud_buckets fires ~80 probes)
+#              are excluded to keep the gate fast. Their plumbing is identical to peers.
 CASES = [
-    ("domain",   "example.com",  "domain",   "all"),
-    ("name",     "Robin Grieff", "name",     "all"),
-    ("username", "allthespills", "username", "dork"),
+    ("domain",   "example.com",  "domain",   "all",  {"cloud_buckets"}),
+    ("name",     "Robin Grieff", "name",     "all",  set()),
+    ("username", "allthespills", "username", "dork", set()),
 ]
 
 
-def run_case(label, seed, stype, strategy, workdir):
+def run_case(label, seed, stype, strategy, exclude, workdir):
     print(f"\n--- case: {label} ({seed!r} / {stype}) ---")
     log_file = str(workdir / "investigation.md")
     graph_file = str(workdir / "graph.json")
@@ -64,7 +67,7 @@ def run_case(label, seed, stype, strategy, workdir):
 
     # Part A: collection writes no graph
     if strategy == "all":
-        results = collect_all(seed, stype, log_file)
+        results = collect_all(seed, stype, log_file, exclude=exclude)
     else:
         results = [{"tool": "google_dork_generator",
                     "result": collect_tool("google_dork_generator", seed, stype, log_file)}]
@@ -124,8 +127,8 @@ def main():
     print("=== V3 baseline regression suite (3 cases) ===")
     with tempfile.TemporaryDirectory(prefix="v3baseline_") as tmp:
         root = Path(tmp)
-        for i, (label, seed, stype, strategy) in enumerate(CASES):
-            run_case(label, seed, stype, strategy, root / f"case{i}_{label}")
+        for i, (label, seed, stype, strategy, exclude) in enumerate(CASES):
+            run_case(label, seed, stype, strategy, exclude, root / f"case{i}_{label}")
         tier_render_check(root / "tier")
 
     print("\n=== RESULT ===")

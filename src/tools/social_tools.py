@@ -84,7 +84,7 @@ class UrlScanTool(BaseTool):
 
 class ThreatFoxTool(BaseTool):
     name = "threatfox"
-    description = "ThreatFox IOC search"
+    description = "ThreatFox IOC search (abuse.ch; needs free ABUSE_CH_API_KEY — degrades gracefully)"
     input_types = ["ip_v4", "domain", "hash_md5", "hash_sha256", "url"]
     output_types = ["ip_v4", "domain", "hash_md5", "hash_sha256"]
     method = "api"
@@ -93,12 +93,16 @@ class ThreatFoxTool(BaseTool):
         if selector_type not in self.input_types:
             return self.make_result(selector, selector_type, "", [], False, f"ThreatFox doesn't accept {selector_type}")
 
-        # abuse.ch (2024) now requires a free Auth-Key header on the ThreatFox API.
-        # Without it the API returns an auth error; send it when configured.
-        headers = {}
+        # abuse.ch (2024) made the ThreatFox API auth-mandatory (free Auth-Key header).
+        # Without a key every call returns {"error":"Unauthorized"} — so when no key is
+        # configured, SKIP the doomed request and return a clear, non-noisy "needs key"
+        # result instead of a mystery failure. It auto-activates once the key is set (B8).
         api_key = get_key("ABUSE_CH_API_KEY") or get_key("THREATFOX_API_KEY")
-        if api_key:
-            headers["Auth-Key"] = api_key
+        if not api_key:
+            return self.make_result(
+                selector, selector_type, "", [], False,
+                "ThreatFox skipped: needs free ABUSE_CH_API_KEY (Tier-2; set it to enable).")
+        headers = {"Auth-Key": api_key}
 
         try:
             resp = requests.post(
