@@ -323,6 +323,7 @@
     },
     "email": {
       "tools": [
+        "pgp_keyserver",
         "socialscan",
         "xposedornot_email",
         "disify",
@@ -432,6 +433,7 @@
       "tool_count": 58,
       "description": "Email address",
       "implemented_tools": [
+        "pgp_keyserver",
         "socialscan",
         "xposedornot_email",
         "disify",
@@ -439,10 +441,12 @@
         "holehe",
         "google_dork_generator"
       ],
-      "implemented_count": 6
+      "implemented_count": 7
     },
     "domain": {
       "tools": [
+        "certspotter",
+        "cloud_buckets",
         "http_title",
         "tls_cert",
         "dnsrecon",
@@ -589,6 +593,8 @@
       "tool_count": 70,
       "description": "Domain name",
       "implemented_tools": [
+        "certspotter",
+        "cloud_buckets",
         "http_title",
         "tls_cert",
         "dnsrecon",
@@ -603,7 +609,7 @@
         "urlscan",
         "threatfox"
       ],
-      "implemented_count": 13
+      "implemented_count": 15
     },
     "url": {
       "tools": [
@@ -860,6 +866,7 @@
     },
     "ip_v4": {
       "tools": [
+        "robtex_ip",
         "reverse_ip",
         "bgpview_ip",
         "ripestat_network",
@@ -943,6 +950,7 @@
       "tool_count": 29,
       "description": "IPv4 address",
       "implemented_tools": [
+        "robtex_ip",
         "reverse_ip",
         "bgpview_ip",
         "ripestat_network",
@@ -954,7 +962,7 @@
         "threatfox",
         "shodan_internetdb"
       ],
-      "implemented_count": 10
+      "implemented_count": 11
     },
     "ip_v6": {
       "tools": [
@@ -1283,6 +1291,7 @@
     },
     "company": {
       "tools": [
+        "cloud_buckets",
         "courtlistener_search",
         "aleph_occrp",
         "sec_edgar_fts",
@@ -1351,6 +1360,7 @@
       "tool_count": 36,
       "description": "Company or organization name",
       "implemented_tools": [
+        "cloud_buckets",
         "courtlistener_search",
         "aleph_occrp",
         "sec_edgar_fts",
@@ -1362,7 +1372,7 @@
         "wikidata_search",
         "google_dork_generator"
       ],
-      "implemented_count": 10
+      "implemented_count": 11
     },
     "hash_md5": {
       "tools": [
@@ -1449,6 +1459,7 @@
     },
     "keyword": {
       "tools": [
+        "cloud_buckets",
         "ext_0000_stweet",
         "ext_0009_scoutzen",
         "ext_0010_one_million_tweet_map",
@@ -1902,8 +1913,10 @@
       ],
       "tool_count": 326,
       "description": "Search keyword or phrase",
-      "implemented_tools": [],
-      "implemented_count": 0
+      "implemented_tools": [
+        "cloud_buckets"
+      ],
+      "implemented_count": 1
     },
     "hashtag": {
       "tools": [

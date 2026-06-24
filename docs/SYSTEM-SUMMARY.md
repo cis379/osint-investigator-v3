@@ -1,10 +1,10 @@
 # osint-investigator-v3 — Complete System Summary
 
-The definitive "what is this and how does it work" reference. Updated 2026-06-23.
+The definitive "what is this and how does it work" reference. Updated 2026-06-24.
 **External OSINT only.** Take a seed selector → pivot through tools → produce a cited,
 confidence-tiered intelligence graph + CTI report.
 
-State: **51 runnable tools · 18/90 selector types runnable · 5 skills · 3 system tests PASS.**
+State: **55 runnable tools · 19/90 selector types runnable · 6 skills · 3 system tests PASS.**
 
 ---
 
@@ -99,7 +99,8 @@ State: **51 runnable tools · 18/90 selector types runnable · 5 skills · 3 sys
 - Tool modules (51 tools): `username_tools`(2) `email_tools`(1) `domain_tools`(5) `ip_tools`(4)
   `phone_tools`(1) `crypto_tools`(2) `social_tools`(3) `image_tools`(1) `name_tools`(5) +
   the **declarative runners**: `http_tools`(15, `HttpTool` specs) `cli_tools`(7, `CliTool` specs)
-  `extra_tools`(2, library) `infra_tools`(3, reverse_ip/tls_cert/http_title).
+  `extra_tools`(2, library) `infra_tools`(3, reverse_ip/tls_cert/http_title) +
+  `sf_derived_tools`(4, SpiderFoot-derived, MIT: certspotter/robtex_ip/cloud_buckets/pgp_keyserver).
 
 ### Graph / Logger / Report
 - **graph/database.py** — `InvestigationGraph` (NetworkX, add_entity/relationship, save/load,
@@ -129,24 +130,28 @@ State: **51 runnable tools · 18/90 selector types runnable · 5 skills · 3 sys
 
 ---
 
-## 4. Tool coverage (18 runnable selector types)
+## 4. Tool coverage (19 runnable selector types)
 | Strong | Tools |
 |---|---|
-| **domain** (13) | whois, rdap, dns_lookup, dnsrecon, crtsh, wayback, http_headers, theharvester, tls_cert, http_title, urlscan, threatfox, google_dork |
-| **ip_v4** (10) | ip_geolocation, ipinfo, shodan_internetdb, reverse_dns, ripestat, bgpview, greynoise, reverse_ip, urlscan, threatfox |
-| **company** (10) | gleif_lei, sec_edgar, aleph, courtlistener, wikipedia, wikidata, theharvester(via domain)… |
+| **domain** (15) | whois, rdap, dns_lookup, dnsrecon, crtsh, **certspotter** (cert history+subdomains), wayback, http_headers, theharvester, tls_cert, http_title, urlscan, threatfox, google_dork, **cloud_buckets** (S3/GCS) |
+| **ip_v4** (11) | ip_geolocation, ipinfo, shodan_internetdb, reverse_dns, ripestat, bgpview, greynoise, reverse_ip, **robtex_ip** (passive DNS), urlscan, threatfox |
+| **company** (11) | gleif_lei, sec_edgar, aleph, courtlistener, wikipedia, wikidata, theharvester(via domain), **cloud_buckets**… |
 | **username** (8) | sherlock, maigret, naminter, linkook, socialscan, github_user, reddit_about, google_dork |
 | **name** (8) | web-search-primary + gravatar, hibp_name_search(gen), wikipedia, wikidata, name_to_username, aleph, courtlistener |
-| **email** (6) | holehe, disify, hudsonrock, xposedornot, socialscan, gravatar |
+| **email** (7) | holehe, disify, hudsonrock, xposedornot, socialscan, gravatar, **pgp_keyserver** (alt emails/name) |
+| **keyword** (1) | **cloud_buckets** (S3/GCS bucket discovery) — first runnable tool for this type |
 | also | url, ip_v6, phone (phonenumbers/ignorant/phoneinfoga), crypto_btc/eth, hashes, coordinates, image/file, email_header/eml |
 
 ---
 
 ## 5. GAPS — INTEL (capabilities we lack; mostly structural)
-- **Reverse-IP at scale** — reverse_ip works but HackerTarget's free quota dies after ~2 calls;
-  needs a key or auto-fallback to dns co-resolution.
-- **Cert-history correlation** — tls_cert reads the LIVE cert; historical shared-cert evidence
-  (the real smoking gun) needs crt.sh cert-history (which times out) — no robust path yet.
+- **Reverse-IP at scale** — reverse_ip + now **robtex_ip** (2nd free passive-DNS source, 2026-06-24);
+  for true scale a key/auto-fallback to dns co-resolution is still the long-term fix.
+- **Cert-history correlation** — tls_cert reads the LIVE cert; **certspotter** (2026-06-24) now
+  retrieves CT issuance history (issuers/dates + tbs/pubkey fingerprints), so shared-cert evidence
+  is recoverable; cross-domain correlation is supervisor-side (compare fingerprints across runs).
+- **Dark-web (.onion) search** — Ahmia clearnet is JS-rendered (no-JS HTML empty); SpiderFoot's own
+  dark-web modules need a Tor SOCKS proxy. Path: local Tor proxy + Ahmia/onionsearchengine runner (G12).
 - **JS-rendered branding** — http_title can't see SPA titles (flagged, not solved).
 - **People identity last-mile** — handle/name → verified real person is paid/manual (Pipl/Spokeo/
   OSINT Industries). Web-search snippets + relatives queries get far but stay `probable`.
