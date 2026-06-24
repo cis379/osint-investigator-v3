@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -13,10 +15,28 @@ class ExifToolWrapper(BaseTool):
     input_types = ["image", "file", "url"]
     output_types = ["coordinates", "date"]
     method = "cli"
-    install_command = "choco install exiftool -y"
+    # choco needs elevation; winget user-scope works without it (G11).
+    install_command = "winget install OliverBetz.ExifTool --scope user"
+
+    # Known install locations so we resolve the binary even when a freshly-installed
+    # exiftool isn't yet on the *current* process's PATH (winget updates user PATH, but
+    # already-running processes keep the stale one until restart) — G11.
+    _CANDIDATE_PATHS = [
+        os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "ExifTool", "ExifTool.exe"),
+        r"C:\ProgramData\chocolatey\bin\exiftool.exe",
+    ]
+
+    def _bin(self) -> str:
+        found = shutil.which("exiftool")
+        if found:
+            return found
+        for p in self._CANDIDATE_PATHS:
+            if p and os.path.isfile(p):
+                return p
+        return "exiftool"  # last resort; will fail cleanly if truly absent
 
     def check_installed(self) -> bool:
-        stdout, stderr, code = self.run_command(["exiftool", "-ver"])
+        stdout, stderr, code = self.run_command([self._bin(), "-ver"])
         return code == 0
 
     def _resolve_to_path(self, selector: str, selector_type: str):
@@ -41,7 +61,7 @@ class ExifToolWrapper(BaseTool):
 
         try:
             # -j JSON, -n numeric (decimal GPS instead of DMS strings)
-            stdout, stderr, code = self.run_command(["exiftool", "-j", "-n", path], timeout=30)
+            stdout, stderr, code = self.run_command([self._bin(), "-j", "-n", path], timeout=30)
             raw_output = (stdout + stderr)[:8000]
             entities = []
 

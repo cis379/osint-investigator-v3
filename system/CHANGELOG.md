@@ -2,6 +2,23 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-24 (backlog sweep)
+- Worked the bug/addressable-gap backlog in 3 health-gated batches (all GREEN):
+  - **B8** threatfox: abuse.ch made the API auth-mandatory → it 401'd on every domain/IP run;
+    now skips gracefully with a clear "needs free ABUSE_CH_API_KEY" message (live-confirmed by a
+    concurrent investigation, GAP-20260624-02). **B1** collect.py CLI → one `{"results":[…]}` schema
+    (+`--exclude`). **B9** health gate fast again (baseline excludes cloud_buckets' ~80 probes).
+  - **B3** courtlistener name-match gate (BM25 fuzzy FPs gone; matches `probable` not `confirmed`).
+    **B2** socid scope narrowed; **B4** holehe → lead-only (positives `probable`, negatives unreliable);
+    **B6** whois prefers rdap for new TLDs.
+  - **B5** report.md de-lossied (pipe-escape, full values, Citation column, relationship table, no
+    dead graph.png) + report-writer passes `relationships`. **B10** certspotter optional Bearer token
+    (HttpTool gained `auth_prefix`). **G13** cloud_buckets adds Azure Blob + DigitalOcean Spaces.
+  - **G11** exiftool installed via winget user-scope (no elevation); wrapper resolves the binary off
+    a stale PATH → all 12/12 CLI tools now READY.
+  Note: a concurrent supervisor session (INV-20260624-001) was committing with `git add -A` on the
+  shared working tree — it bundled some of this sweep's early changes; nothing lost.
+
 ## 2026-06-24
 - Intake: **SpiderFoot** (github.com/smicallef/spiderfoot, MIT). Decision: do NOT adopt the
   engine/CLI (a second correlation brain → collides with our raw/analysis split + needs sign-off);

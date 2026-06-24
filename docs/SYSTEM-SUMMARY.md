@@ -164,25 +164,19 @@ State: **55 runnable tools · 19/90 selector types runnable · 6 skills · 3 sys
 - **Enterprise threat-intel + UAE registries + Go tools (subfinder/amass/httpx/gau)** — keys/Go toolchain.
 
 ## 6. BUGS — SYSTEM (things we can address)
-- **collect.py output schema inconsistency** — single-tool returns `{tool,...}`, `--run-all`
-  returns `{"results":[...]}`. Consumers must handle both. (Unify — open.)
-- **socid_extractor under-delivers** — inert on JS/auth-gated socials (Bluesky/Threads/X) and on
-  ASU/Cornell page types; the url→identity pivot it advertises rarely fires. (Narrow scope or fix.)
-- **courtlistener low precision** — BM25 fuzzy → unrelated cases for short names (Robin, "Ruptly").
-  Needs a relevance gate. (Open.)
-- **holehe rate-limited to uselessness** — [x] on ~all sites per run; negatives meaningless, so the
-  name→email→holehe verification can't verify. Needs proxy/key or role downgrade. (Open.)
-- **maigret self-stamps "confirmed"** on collision sites (mitigated by tier doctrine; wrapper still lies).
-- **whois_lookup** has no `.video`/many-TLD support (rdap covers it — prefer rdap).
+- **maigret self-stamps "confirmed"** on collision sites (mitigated by tier doctrine; cosmetic — B7 wontfix-ish).
 - **aleph/sec_edgar** sparse/500 without keys/UAE coverage (expected; keys are TODO).
-- **report.md is lossy vs report.html** (report-writer validated 2026-06-23, works end-to-end but):
-  (a) `cti_report.py` doesn't escape `|` in entity values → a value like `Trending News | Viory`
-  breaks the markdown table; (b) entity values truncated to 40 chars in report.md (full in HTML);
-  (c) **citations + the relationship table never reach report.md** (only report.html) and report.md
-  references a `graph.png` that is never generated (dead image link). report.html is the complete,
-  citation-rich product; report.md needs the pipe-escape + relationship/citation surfacing.
-- FIXED this round: HTTP retry/backoff (rdap/crt.sh/reverse_ip), http_title JS-note, log auto-init
-  (init_log header swap), sherlock `<user>.txt` → temp (root hygiene), hardcoded paths → `python -m`.
+- FIXED 2026-06-24 (backlog sweep): **B8** threatfox 401 → graceful no-key skip (was failing every
+  domain/IP run); **B1** collect.py CLI unified to one `{"results":[…]}` schema; **B9** health gate
+  fast again (cloud_buckets excluded from baseline replay); **B3** courtlistener name-match gate
+  (kills BM25 fuzzy FPs; matches now `probable` not `confirmed`); **B2** socid_extractor scope
+  narrowed (honest about JS/auth-gated socials); **B4** holehe downgraded to lead-only (positives
+  `probable`, negatives flagged unreliable); **B6** whois description prefers rdap for new TLDs;
+  **B5** report.md no longer lossy (pipe-escape, full values, Citation column, relationship table,
+  dead graph.png removed); **B10** certspotter optional Bearer token; **G11** exiftool installed
+  (winget user-scope) + wrapper resolves the binary off-PATH; **G13** cloud_buckets adds Azure/DO.
+- FIXED 2026-06-23: HTTP retry/backoff (rdap/crt.sh/reverse_ip), http_title JS-note, log auto-init,
+  sherlock `<user>.txt` → temp, hardcoded paths → `python -m`.
 
 ## 8. Maintenance layer — the System Manager (runs in its own session)
 A second agent maintains the system without breaking it (`skills/system_manager.md`, launch
