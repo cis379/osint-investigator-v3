@@ -58,6 +58,32 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 - [G13] (gap/low/done) — cloud_buckets covers AWS S3 + GCS; Azure Blob + DigitalOcean Spaces not yet
   probed (different account/container + region model). Extend cloud_buckets when needed. — SpiderFoot intake.
 
+## DIRECTED INITIATIVES — operator 2026-06-24 (full brief: intake/2026-06-24-operator-directives.md)
+Source: ground-truth comparison of INV-20260624-001 vs the Indicator/Maldita "ticket trap"
+investigation. Suggested sequence: D1+RT1 → R1 → G14+A1 → G15/G16/F1. [architectural] = design-confirm
+with operator first; mandate given.
+- [D1] (doctrine/CRITICAL/open) — STOP OVER-MERGING. Co-tenancy ≠ co-ownership: never merge entities
+  into "one operator" on shared-hosting alone; require an INDEPENDENT corroborator (shared registrant
+  OR tracker/analytics ID OR unique contact) first; flag "may be one of N clusters." Operator's #1
+  concern (61 entities/100 edges = a wrong merge can't be hand-verified). Update supervisor.md doctrine.
+- [RT1] (architectural/new-agent/open) — RED-TEAM skill (skills/red_team.md): adversarially reviews the
+  supervisor's findings before the report; challenges every merge/inference, flags over-merges + weak
+  single-source "confirmed"s, returns down-tiers/splits. The process control for D1.
+- [R1] (architectural/report/open) — Report-writer overhaul: report.md/html must be a NARRATIVE STORY
+  of the investigation (how we got there; key pivots + decisions + when), structured data -> APPENDICES.
+  BLUF -> Narrative -> Key findings -> Appendices. The share-with-humans product. (B5 fix done; this is bigger.)
+- [G14] (gap/HIGH/open) — WEB-TECH tracker-ID fingerprinting: active extractor (GA/AdSense/Pixel/Salesforce/
+  Brevo/Yandex IDs -> identifier entities) + reverse-lookup (PublicWWW/SpyOnWeb/web-search). The reused-infra
+  unlock; ALSO gives D1 its independent corroborator. Would have linked cluster-2 via its Salesforce org ID.
+- [A1] (architectural/new-agent/open) — ACTIVE COLLECTION skill (skills/active_collector.md), SEPARATE from
+  web_searcher: actively touches the target's (potentially malicious) infra (live source, web-tech extractor);
+  bespoke + OPSEC-aware (leaves logs on target; build room for future proxy/sandbox; NOT cyber/hacking; scams ok now).
+- [G15] (gap/med/open) — outside-in TTP playbook in web_searcher.md (adversary-pattern checks by category:
+  fraud=ad-transparency+reviews+is-it-official; influence=syndication; phishing=lookalikes). TTP-keyed, repeatable.
+- [G16] (gap/med/open) — traffic/reach analytics (SimilarWeb-style) + app-store scale signals (harm sizing).
+- [F1] (standing/open) — supervisor analysis-quality evaluation: compare more runs to ground truth; tighten
+  merge/precision/tiering doctrine from findings.
+
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
 YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on when keyed.
