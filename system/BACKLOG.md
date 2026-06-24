@@ -7,28 +7,28 @@ The System Manager triages + fixes from here (test-gated). Supervisor sessions A
 Format: `[ID] (type/priority/status) — description — source`. status: open | in-progress | done | wontfix.
 
 ## BUGS — system (addressable; Manager can fix test-gated)
-- [B1] (bug/med/open) — `collect.py` output schema inconsistent: single-tool returns `{tool,...}`,
+- [B1] (bug/med/done) — `collect.py` output schema inconsistent: single-tool returns `{tool,...}`,
   `--run-all` returns `{"results":[...]}`. Unify to one shape. — design review.
-- [B2] (bug/med/open) — `socid_extractor` inert on JS/auth-gated socials (Bluesky/Threads/X) and
+- [B2] (bug/med/done) — `socid_extractor` inert on JS/auth-gated socials (Bluesky/Threads/X) and
   on ASU/Cornell page types; the url→identity pivot rarely fires. Narrow advertised scope or fix. — system test.
-- [B3] (bug/med/open) — `courtlistener_search` low precision: BM25 fuzzy → unrelated cases for short
+- [B3] (bug/med/done) — `courtlistener_search` low precision: BM25 fuzzy → unrelated cases for short
   names (Robin, "Ruptly"). Add a relevance/name-match gate. — re-test (2 seeds).
-- [B4] (bug/med/open) — `holehe` rate-limited to [x] on ~all sites per run → negatives meaningless,
+- [B4] (bug/med/done) — `holehe` rate-limited to [x] on ~all sites per run → negatives meaningless,
   name→email→holehe verification can't verify. Add proxy/key or downgrade its role. — re-test.
-- [B5] (bug/low/open) — `report.md` lossy vs `report.html`: cti_report.py doesn't escape `|` (breaks
+- [B5] (bug/low/done) — `report.md` lossy vs `report.html`: cti_report.py doesn't escape `|` (breaks
   tables); truncates values to 40 chars; drops citations + the relationship table; dead `graph.png` ref.
   — report-writer validation.
-- [B6] (bug/low/open) — `whois_lookup` no `.video`/many-TLD support (rdap covers; prefer rdap). — viory test.
+- [B6] (bug/low/done) — `whois_lookup` no `.video`/many-TLD support (rdap covers; prefer rdap). — viory test.
 - [B7] (bug/low/wontfix-ish) — maigret/sherlock/name_to_username self-stamp `confidence=confirmed`
   in-wrapper (mitigated by the supervisor tier doctrine; cosmetic). — multiple tests.
-- [B8] (bug/HIGH/open) — `threatfox` returns `{"error":"Unauthorized"}` (abuse.ch made the API
+- [B8] (bug/HIGH/done) — `threatfox` returns `{"error":"Unauthorized"}` (abuse.ch made the API
   auth-mandatory). It is ROUTED into 4 types (domain, ip_v4, hash_sha256, hash_md5) and silently
   FAILS on every domain/IP investigation — a dead tool burning a slot. Fix: add free `ABUSE_CH_API_KEY`
   (Auth-Key header, graceful degrade) OR drop it from routing until keyed. — review 2026-06-24 (live-confirmed).
-- [B9] (bug/med/open) — `cloud_buckets` runs ~80 live HTTP probes inside `replay_baseline` (domain
+- [B9] (bug/med/done) — `cloud_buckets` runs ~80 live HTTP probes inside `replay_baseline` (domain
   run-all on example.com), pushing the health gate past 2 min. The gate tests PLUMBING, not coverage —
   exclude network-heavy tools from the baseline replay, or trim cloud_buckets' probe budget. — review 2026-06-24.
-- [B10] (bug/low/open) — `certspotter` free tier is rate-limited (HTTP 429 after a handful of calls/hr).
+- [B10] (bug/low/done) — `certspotter` free tier is rate-limited (HTTP 429 after a handful of calls/hr).
   Healthy now, but heavy investigations / repeated gate runs will see it degrade. Add a free Cert Spotter
   token to Tier-2 (graceful) or cache per-domain. — review 2026-06-24.
 
@@ -51,11 +51,11 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
   `certspotter` adds CT-based passive subdomain breadth (Python/HTTP, no Go); crt.sh+certspotter
   now cover much of what subfinder's CT sources do.** Non-CT passive sources (AnubisDB/rapiddns)
   were non-viable (Cloudflare 403 / sparse). — design.
-- [G11] (gap/low/open) — exiftool binary not installed (wrapper ready; choco needs elevation).
+- [G11] (gap/low/done) — exiftool binary not installed (wrapper ready; choco needs elevation).
 - [G12] (gap/med/open) — dark-web (.onion) search. Ahmia clearnet is JS-rendered (no-JS HTML empty);
   SpiderFoot's own dark-web modules require a Tor SOCKS proxy. **Path: run a local Tor proxy + route
   Ahmia/onionsearchengine through it (custom runner).** Not faked. — SpiderFoot intake 2026-06-24.
-- [G13] (gap/low/open) — cloud_buckets covers AWS S3 + GCS; Azure Blob + DigitalOcean Spaces not yet
+- [G13] (gap/low/done) — cloud_buckets covers AWS S3 + GCS; Azure Blob + DigitalOcean Spaces not yet
   probed (different account/container + region model). Extend cloud_buckets when needed. — SpiderFoot intake.
 
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
@@ -67,8 +67,15 @@ YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on 
 - [GAP-20260624-01] (gap/high/open) — reverse-WHOIS: no way to enumerate ALL domains by a registrant org/EIN (e.g. "The Walker Tours LLC" / EIN 37-2091569). Needs paid API (DomainTools/SecurityTrails/WhoisXML reverse-whois). This is the main blocker to mapping a full scam-domain network from its registrant. — INV-20260624-001
 - [GAP-20260624-02] (gap/med/open) — threatfox tool returns `{"error":"Unauthorized"}` (needs ABUSE_CH_API_KEY). No IOC-reputation verdict available for domains/IPs. — INV-20260624-001
 - [GAP-20260624-03] (gap/low/open) — crt.sh (404) and wayback (503) both failed this run; transient but recurrent. CT-history fell back to certspotter; no archive snapshots retrieved. — INV-20260624-001
+- [GAP-20260624-04] (gap/med/open) — `reverse_ip` (HackerTarget) quota exhausted after ~2 IPs; the 3rd/4th network IPs (18.190.207.230, 143.47.57.203) had NO co-host enumeration except robtex+urlscan (incomplete). Reinforces G1 — a keyed/rotating reverse-IP source is needed to fully enumerate multi-IP scam estates. — INV-20260624-001
+- [GAP-20260624-05] (gap/low/open) — `shodan_internetdb` returned "No information available" for all three AWS EC2 IPs (only the Oracle IP had data) — AWS-hosted hosts give no port/service fingerprint via InternetDB. — INV-20260624-001
+- [GAP-20260624-06] (gap/low/open) — `bgpview_ip` DNS resolution failed ("getaddrinfo failed" for api.bgpview.io) on this run; ASN data came from urlscan/robtex instead. Transient network/DNS issue. — INV-20260624-001
 
 ## Recently DONE (Manager closes items here)
+- Backlog sweep (3 batches, all health-gated GREEN): B8 threatfox auth-skip, B1 collect schema,
+  B9 gate speed, B3 courtlistener name-gate, B2 socid scope, B4 holehe lead-only, B6 whois->rdap,
+  B5 report.md de-lossied, B10 certspotter token, G13 cloud_buckets Azure/DO, G11 exiftool installed
+  (winget user-scope; 12/12 CLI tools READY). — 2026-06-24.
 - SpiderFoot intake: +4 free no-key tools (certspotter, robtex_ip, cloud_buckets, pgp_keyserver)
   in `sf_derived_tools.py`; 51→55 tools, +`keyword` runnable; G1/G2/G10 partly-mitigated; dark-web
   logged as G12 (not faked). Engine/CLI rejected (architecture). — 2026-06-24.
