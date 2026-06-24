@@ -24,7 +24,9 @@ do not ask the user a question or request direction without the briefing first.
 5. **Brief the user** via the Decision Briefing (the path so far + findings + pivot options, with teaching) before any request for direction
 6. **Respond to user direction** - they can redirect, inject seeds, or ask questions anytime
 7. **Decide when to stop** based on user input
-8. **Launch report writer** when investigation is complete
+8. **Red-team the analysis** before any report (dispatch `skills/red_team.md`) and reconcile its
+   challenges — and run it on demand mid-investigation when you or the user want a hardening pass
+9. **Launch report writer** when investigation is complete (only AFTER the red-team pass)
 
 ## Investigation Loop
 
@@ -213,9 +215,47 @@ The user may:
 
 Respond to whatever they need. You are conversational.
 
+### Phase 5.5: Red-Team Review (adversarial hardening — MANDATORY before every report)
+
+Before you generate ANY report, you put the analysis through the red team. You may also run
+this pass mid-investigation any time you or the user want to pressure-test the current graph
+(e.g. right after a big merge, or when the user asks "how solid is this?"). The red team is the
+process control for the anti-over-merge doctrine — it is how the graph earns its confidence.
+
+**The harden loop (up to ~2 rounds):**
+1. **Dispatch the red-team agent** (background Agent) — it reads the graph + log and returns a
+   structured critique. It is READ-ONLY; it never writes the graph (you do).
+```
+You are the OSINT RED TEAM. Read C:/Users/cis37/osint-investigator-v3/skills/red_team.md and follow it EXACTLY.
+
+Working directory: C:\Users\cis37\osint-investigator-v3
+Investigation: {CASE_ID} | case_dir: {CASE_DIR}
+Graph: {GRAPH_FILE} | Log: {LOG_FILE} | Commit spec: {CASE_DIR}/_commit.json
+
+Adversarially review the analysis. Challenge every merge and inference — especially
+operated_by / same_operator_as built on shared infrastructure alone. Write your critique to
+{CASE_DIR}/_redteam.json, log a RED-TEAM REVIEW narrative to the investigation log, and return
+the critique JSON. Do NOT modify the graph.
+```
+2. **Reconcile every challenge** — for each item in `_redteam.json`, you either:
+   - **APPLY it**: re-commit the affected entities/relationships via `graph_commit.py` at the new
+     tier/label (e.g. relabel `operated_by` → `co_hosted_with` + keep it as the infra fact;
+     down-tier an ownership inference to `possible`; split a cluster into "possible cluster A / B").
+     **Keep, don't drop** — relabel and re-tier; only remove a claim the red team showed has no
+     supporting citation. Add the red team's reasoning to the citation so the audit trail shows why.
+   - **DEFEND it**: if you have evidence the red team missed, keep the claim and record the specific
+     corroborator that justifies the tier. ("Upheld: shared mail IP serves both operators' domains.")
+3. **Re-run if needed:** if you applied material changes, dispatch the red team once more to confirm
+   the over-merges are resolved. Stop after ~2 rounds or when no top-tier claim rests on infra alone.
+4. **Tell the user what changed** in your next briefing: what the red team challenged, what you
+   down-tiered/relabeled, and what you upheld and why. This is part of the method the user learns.
+
+Only after this pass do you proceed to Phase 6.
+
 ### Phase 6: Generate Report
 
-When the user says to stop or you've exhausted useful pivots:
+When the user says to stop or you've exhausted useful pivots (and the Phase 5.5 red-team pass has
+run on the current graph):
 
 1. Generate the HTML graph visualization:
 ```python

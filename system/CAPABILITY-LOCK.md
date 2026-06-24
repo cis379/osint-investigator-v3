@@ -21,6 +21,10 @@ regress the capabilities below. A change that breaks a lock item is reverted, no
 5. **Honest ontology** — implemented-vs-catalog flags stay consistent (annotate_implemented).
 6. **Declarative runners** — HttpTool / CliTool: a new tool is a spec, not bespoke plumbing.
 7. **Report last-mile** — graph.json/html + bibliography + report.md/html generate.
+8. **Red-team gate** (`skills/red_team.md`) — adversarial, READ-ONLY review that runs before
+   every report (and on demand mid-investigation). It challenges merges/inferences; the supervisor
+   reconciles (relabel/down-tier/split, keep-don't-drop). The process control for #4's "no over-merge"
+   discipline — do not remove or make it bypassable-by-default without USER sign-off.
 
 ## Locked capabilities — the GOLDEN investigations (periodic live re-test)
 These must keep working (the deterministic gate is fast; these are the real-world proof,

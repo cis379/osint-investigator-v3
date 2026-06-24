@@ -4,7 +4,7 @@ The definitive "what is this and how does it work" reference. Updated 2026-06-24
 **External OSINT only.** Take a seed selector → pivot through tools → produce a cited,
 confidence-tiered intelligence graph + CTI report.
 
-State: **55 runnable tools · 19/90 selector types runnable · 6 skills · 3 system tests PASS.**
+State: **55 runnable tools · 19/90 selector types runnable · 7 skills · 3 system tests PASS.**
 
 ---
 
@@ -54,6 +54,10 @@ State: **55 runnable tools · 19/90 selector types runnable · 6 skills · 3 sys
      domain→ip→reverse_ip/ripestat, username→linked email→verify). Loop until dry.
                                      │
                                      ▼
+ [skill: red_team.md]  ── RED-TEAM GATE (read-only; mandatory before report, on-demand anytime)
+   │                   ── challenges over-merges / single-source "highly likely" / verb drift
+   │                   ── writes _redteam.json; SUPERVISOR reconciles (relabel/down-tier/split,
+   ▼                      keep-don't-drop) and re-commits via graph_commit; ~2 rounds
  [skill: report-writer.md]  → report.md (report/cti_report.py)
                               + report.html (report/html_report.py)
                               + bibliography.html (report/bibliography.py)
@@ -124,7 +128,8 @@ State: **55 runnable tools · 19/90 selector types runnable · 6 skills · 3 sys
 | **supervisor.md** | Analyst brain (main thread) | route via `plan_collection`; dispatch both lines; analyze; **Confidence-Tier doctrine** (re-grade, never drop, corroboration upgrades); commit via graph_commit; **Pivoting doctrine** (ontology-guided, verify-the-leads loop); launch report-writer |
 | **gatherer.md** | Structured collector | skilled OPERATOR: run `collect.py` with judgment (pick tools, slow→individual, retry-once transient), return raw; NO analysis/graph |
 | **web_searcher.md** | Web-search collector | WebSearch/WebFetch; **snippet IS evidence** (blocked page ≠ missing finding); relatives/public-records queries; cite everything; log via web_collect; NO graph |
-| **report-writer.md** | CTI product | read graph+log → report.md/html + bibliography; evidence-based, BLUF-first |
+| **red_team.md** | Adversarial reviewer | READ-ONLY pre-report gate (+ on-demand mid-investigation); challenges every merge/inference (over-merges, single-source "highly likely", attribution-verb drift, missed cluster splits); returns down-tier/relabel/split recs in `_redteam.json`; supervisor reconciles. Process control for the anti-over-merge doctrine. NO graph writes |
+| **report-writer.md** | CTI product | read graph+log → report.md/html + bibliography; evidence-based, BLUF-first; runs only AFTER the red-team pass |
 
 (`.claude/commands/investigate.md` is the slash-command entry that mirrors investigate.md.)
 
@@ -186,8 +191,9 @@ tool-count floor + 3 suites), done on a branch, reverted on red; bugs/wiring are
 architecture needs user sign-off. It triages the BACKLOG, intakes new OSINT resources (classify →
 wire/backlog/manual-guide/reject), owns the ontology, and runs a READ-ONLY daily audit
 (`/osint-daily-review`). The supervisor feeds it: it logs gaps it hits to BACKLOG and writes
-operator **manual guides** (`guides/`) for key-gated/manual capabilities. Skills are now 6
-(+ system_manager). Stable baseline tag: `v3-baseline-2026-06-23`.
+operator **manual guides** (`guides/`) for key-gated/manual capabilities. Skills are now 7
+(supervisor, gatherer, web_searcher, red_team, report-writer, investigate, + system_manager).
+Stable baseline tag: `v3-baseline-2026-06-23`.
 
 ## 7. What's solid (protect)
 The raw/analysis split (collectors fetch, supervisor tiers+graphs); two collection lines (both

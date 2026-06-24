@@ -73,9 +73,15 @@ with operator first; mandate given.
   only via a shared Salesforce/tracker ID) was missed — the proof-of-need for G14. Also renamed the
   estimative tiers confirmed→**highly_likely** (probable/possible unchanged) and made "raw tool tags are
   not your tiers" explicit. RT1 (red-team agent) is the process control for this and remains open.
-- [RT1] (architectural/new-agent/open) — RED-TEAM skill (skills/red_team.md): adversarially reviews the
+- [RT1] (architectural/new-agent/done) — RED-TEAM skill (skills/red_team.md): adversarially reviews the
   supervisor's findings before the report; challenges every merge/inference, flags over-merges + weak
-  single-source "confirmed"s, returns down-tiers/splits. The process control for D1.
+  single-source "highly likely"s, returns down-tiers/splits. The process control for D1. **DONE
+  2026-06-24 (user sign-off):** read-only reviewer; MANDATORY pre-report gate + on-demand mid-
+  investigation (human or supervisor); 5 review dimensions (over-merge, single-source top-tier,
+  attribution-verb drift, citation drift, missed disconfirmers/cluster-splits); writes `_redteam.json`,
+  supervisor reconciles via graph_commit (relabel/down-tier/split, KEEP-don't-drop) over ~2 rounds.
+  Wired into supervisor.md Phase 5.5; locked in CAPABILITY-LOCK. Next: G14 gives it a real tracker-ID
+  corroborator to test merges against.
 - [R1] (architectural/report/open) — Report-writer overhaul: report.md/html must be a NARRATIVE STORY
   of the investigation (how we got there; key pivots + decisions + when), structured data -> APPENDICES.
   BLUF -> Narrative -> Key findings -> Appendices. The share-with-humans product. (B5 fix done; this is bigger.)

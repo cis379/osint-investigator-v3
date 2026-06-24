@@ -2,6 +2,23 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-24 (RT1 — red-team reviewer agent)
+- **RT1 done (architectural, user sign-off):** added `skills/red_team.md`, a READ-ONLY adversarial
+  reviewer that hardens the analysis before it ships. Prime directive = break every conclusion;
+  default verb = down-tier/relabel, never delete (keep weak-but-real as `possible`, clearly labeled —
+  "be clear on what it actually is"). Reviews 5 dimensions, led by OVER-MERGES (co-tenancy ≠ co-
+  ownership; every `operated_by` on shared infra alone must show an independent corroborator or be
+  relabeled `co_hosted_with` + down-tiered): single-source top-tier, attribution-verb drift, citation
+  drift, missed disconfirmers/cluster-splits. Outputs `_redteam.json` (challenges + upheld + missed
+  hypotheses) and logs a RED-TEAM REVIEW to investigation.md; it never writes the graph.
+- **Wired into supervisor.md as Phase 5.5** — a MANDATORY gate before every report PLUS on-demand
+  mid-investigation (human or supervisor). Harden loop: dispatch → supervisor reconciles each
+  challenge (apply via graph_commit OR defend with the missed corroborator) → re-run ~2 rounds →
+  report. Supervisor briefs the user on what was challenged / down-tiered / upheld.
+- Locked as CAPABILITY-LOCK item 8 (process control for the no-over-merge discipline). SYSTEM-SUMMARY
+  updated (7 skills; red-team gate in the flow). Health + 3 suites GREEN. Next: G14 (tracker-ID
+  extractor) gives the red team a real independent corroborator to test merges against.
+
 ## 2026-06-24 (D1 — attribution doctrine + estimative language)
 - **D1 done (doctrine):** added an "Attribution discipline — DON'T OVER-MERGE" section to
   `skills/supervisor.md`. Co-tenancy (shared IP/ASN/registrar/NS/template/cert) ≠ co-ownership;
