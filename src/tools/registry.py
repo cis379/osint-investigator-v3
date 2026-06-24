@@ -16,6 +16,7 @@ from . import http_tools
 from . import cli_tools
 from . import extra_tools
 from . import infra_tools
+from . import sf_derived_tools
 
 ALL_TOOL_MODULES = [
     username_tools,
@@ -32,6 +33,7 @@ ALL_TOOL_MODULES = [
     cli_tools,
     extra_tools,
     infra_tools,
+    sf_derived_tools,
 ]
 
 _tool_instances: dict[str, BaseTool] = {}

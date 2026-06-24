@@ -23,10 +23,12 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
   in-wrapper (mitigated by the supervisor tier doctrine; cosmetic). — multiple tests.
 
 ## GAPS — intel (capability; many are structural/paid)
-- [G1] (gap/high/open) — reverse_ip free quota (HackerTarget ~2 calls) too small for an investigation.
-  Add a key OR auto-fallback to dns co-resolution + spacing. — viory re-test.
-- [G2] (gap/med/open) — cert-HISTORY correlation: tls_cert reads live cert; historical shared-cert
-  evidence needs crt.sh cert-history (times out). No robust path yet. — viory.
+- [G1] (gap/high/partly-mitigated) — reverse_ip free quota (HackerTarget ~2 calls) too small.
+  **2026-06-24: added `robtex_ip` as a 2nd free passive-DNS/reverse-IP source.** Still no key;
+  for scale a key/auto-fallback is the long-term fix. — viory re-test.
+- [G2] (gap/med/partly-mitigated) — cert-HISTORY correlation. **2026-06-24: added `certspotter`
+  (CT issuance history: issuers/dates + tbs/pubkey fingerprints in metadata).** History is now
+  retrievable; cross-domain shared-cert correlation is supervisor-side (compare fingerprints). — viory.
 - [G3] (gap/med/open) — JS-rendered branding: http_title can't see SPA `<title>` (now flagged, not solved). — viory.
 - [G4] (gap/high/structural) — people identity last-mile (handle/name → verified real person) is paid
   (Pipl/Spokeo/OSINT Industries). Web-search snippets + relatives queries get far but stay `probable`.
@@ -35,8 +37,16 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 - [G7] (gap/med/structural) — deep breach (cracked creds): paid (DeHashed/Snusbase). Have free breach (xposedornot/Hudson Rock).
 - [G8] (gap/med/open) — Telegram deep / Instagram content: needs an account/session (custom runner, not built).
 - [G9] (gap/med/open) — non-US/UAE corporate registries (a UAE free-zone entity is invisible to sec_edgar/courtlistener).
-- [G10] (gap/low/open) — Go toolchain → subfinder/amass/projectdiscovery-httpx/gau (no Go installed).
+- [G10] (gap/low/partly-mitigated) — Go toolchain → subfinder/amass/httpx/gau (no Go). **2026-06-24:
+  `certspotter` adds CT-based passive subdomain breadth (Python/HTTP, no Go); crt.sh+certspotter
+  now cover much of what subfinder's CT sources do.** Non-CT passive sources (AnubisDB/rapiddns)
+  were non-viable (Cloudflare 403 / sparse). — design.
 - [G11] (gap/low/open) — exiftool binary not installed (wrapper ready; choco needs elevation).
+- [G12] (gap/med/open) — dark-web (.onion) search. Ahmia clearnet is JS-rendered (no-JS HTML empty);
+  SpiderFoot's own dark-web modules require a Tor SOCKS proxy. **Path: run a local Tor proxy + route
+  Ahmia/onionsearchengine through it (custom runner).** Not faked. — SpiderFoot intake 2026-06-24.
+- [G13] (gap/low/open) — cloud_buckets covers AWS S3 + GCS; Azure Blob + DigitalOcean Spaces not yet
+  probed (different account/container + region model). Extend cloud_buckets when needed. — SpiderFoot intake.
 
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
@@ -47,6 +57,9 @@ YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on 
 (none yet)
 
 ## Recently DONE (Manager closes items here)
+- SpiderFoot intake: +4 free no-key tools (certspotter, robtex_ip, cloud_buckets, pgp_keyserver)
+  in `sf_derived_tools.py`; 51→55 tools, +`keyword` runnable; G1/G2/G10 partly-mitigated; dark-web
+  logged as G12 (not faked). Engine/CLI rejected (architecture). — 2026-06-24.
 - HTTP retry/backoff (rdap/crt.sh/reverse_ip), http_title JS-note, log auto-init, sherlock txt→temp,
   hardcoded paths → `python -m` — 2026-06-23.
 - 9 arsenal additions + 3 infra tools (51 tools); family-recovery snippet fix — 2026-06-22.
