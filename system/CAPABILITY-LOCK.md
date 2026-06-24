@@ -14,8 +14,10 @@ regress the capabilities below. A change that breaks a lock item is reverted, no
    they NEVER write the graph. The supervisor tiers + commits via `graph_commit.py`.
 2. **Two collection lines** — structured (gatherer) + web-search (web_searcher). Both kept.
 3. **Ontology-driven routing** — `plan_collection` + `pivot_map`. No hardcoded routing.
-4. **Confidence tiering** — confirmed/probable/possible; supervisor re-grades tool output;
-   weak hits kept as `possible`, never dropped.
+4. **Confidence tiering** — three estimative tiers `highly_likely`/`probable`/`possible`
+   (legacy `confirmed` == `highly_likely`, still accepted); supervisor re-grades tool output
+   (raw tool tags are not verdicts); weak hits kept as `possible`, never dropped. The
+   MECHANISM (3 tiers, re-grade, never-drop) is locked; the labels were renamed 2026-06-24.
 5. **Honest ontology** — implemented-vs-catalog flags stay consistent (annotate_implemented).
 6. **Declarative runners** — HttpTool / CliTool: a new tool is a spec, not bespoke plumbing.
 7. **Report last-mile** — graph.json/html + bibliography + report.md/html generate.

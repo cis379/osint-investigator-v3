@@ -54,6 +54,7 @@ def generate_investigation_html(graph: InvestigationGraph, output_path: str, tit
             display: inline-block; padding: 1px 8px; border-radius: 10px;
             font-size: 11px; font-weight: 600;
         }}
+        .badge-highly_likely {{ background: #238636; color: #fff; }}
         .badge-confirmed {{ background: #238636; color: #fff; }}
         .badge-probable {{ background: #9e6a03; color: #fff; }}
         .badge-possible {{ background: #6e4014; color: #fff; }}
@@ -237,9 +238,13 @@ def generate_investigation_html(graph: InvestigationGraph, output_path: str, tit
 
         // Node click details
         function badgeClass(conf) {{
-            if (conf === 'confirmed') return 'badge-confirmed';
+            if (conf === 'highly_likely' || conf === 'confirmed') return 'badge-highly_likely';
             if (conf === 'probable') return 'badge-probable';
             return 'badge-possible';
+        }}
+        function confLabel(conf) {{
+            return ({{highly_likely: 'Highly likely', confirmed: 'Highly likely',
+                      probable: 'Probable', possible: 'Possible'}})[conf] || conf;
         }}
 
         network.on('click', (params) => {{
@@ -248,13 +253,13 @@ def generate_investigation_html(graph: InvestigationGraph, output_path: str, tit
                 const nodeId = params.nodes[0];
                 const node = graphData.nodes.find(n => n.id === nodeId);
                 if (node) {{
-                    const conf = node.confidence || 'confirmed';
+                    const conf = node.confidence || 'highly_likely';
                     const sources = (node.source_tools || []).join(', ');
                     detailsEl.innerHTML = `
                         <h3>Entity Details</h3>
                         <div class="detail-row"><strong>Value:</strong> <span class="detail-value">${{node.entityValue}}</span></div>
                         <div class="detail-row"><strong>Type:</strong> <span class="detail-value">${{node.type}}</span></div>
-                        <div class="detail-row"><strong>Confidence:</strong> <span class="detail-badge ${{badgeClass(conf)}}">${{conf}}</span></div>
+                        <div class="detail-row"><strong>Confidence:</strong> <span class="detail-badge ${{badgeClass(conf)}}">${{confLabel(conf)}}</span></div>
                         <div class="detail-row"><strong>Sources:</strong> <span class="detail-value">${{sources}}</span></div>
                         <div class="detail-row"><strong>Depth:</strong> <span class="detail-value">${{node.depth}}</span></div>
                         <div class="detail-row"><strong>Citation:</strong> <span class="detail-value">${{node.citation || 'N/A'}}</span></div>

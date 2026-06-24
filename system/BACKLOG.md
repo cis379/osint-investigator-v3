@@ -62,10 +62,17 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 Source: ground-truth comparison of INV-20260624-001 vs the Indicator/Maldita "ticket trap"
 investigation. Suggested sequence: D1+RT1 → R1 → G14+A1 → G15/G16/F1. [architectural] = design-confirm
 with operator first; mandate given.
-- [D1] (doctrine/CRITICAL/open) — STOP OVER-MERGING. Co-tenancy ≠ co-ownership: never merge entities
+- [D1] (doctrine/CRITICAL/done) — STOP OVER-MERGING. Co-tenancy ≠ co-ownership: never merge entities
   into "one operator" on shared-hosting alone; require an INDEPENDENT corroborator (shared registrant
   OR tracker/analytics ID OR unique contact) first; flag "may be one of N clusters." Operator's #1
-  concern (61 entities/100 edges = a wrong merge can't be hand-verified). Update supervisor.md doctrine.
+  concern (61 entities/100 edges = a wrong merge can't be hand-verified). **DONE 2026-06-24:** added
+  "Attribution discipline — DON'T OVER-MERGE" section to supervisor.md (infra-fact vs ownership-claim,
+  independent-corroborator rule, cluster-hypothesis flag). Confirmed against ground truth: INV-20260624-001
+  merged ~20 co-hosted lookalikes under THE WALKER TOURS LLC on shared-IP + shared-registrar alone; truth
+  = TWO operators sharing infra, and the 2nd (My Top Tour / Al Andalus = MNPQ Gestores / LA BIBI, findable
+  only via a shared Salesforce/tracker ID) was missed — the proof-of-need for G14. Also renamed the
+  estimative tiers confirmed→**highly_likely** (probable/possible unchanged) and made "raw tool tags are
+  not your tiers" explicit. RT1 (red-team agent) is the process control for this and remains open.
 - [RT1] (architectural/new-agent/open) — RED-TEAM skill (skills/red_team.md): adversarially reviews the
   supervisor's findings before the report; challenges every merge/inference, flags over-merges + weak
   single-source "confirmed"s, returns down-tiers/splits. The process control for D1.

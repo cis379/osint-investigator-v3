@@ -64,8 +64,8 @@ searches), `fetch_priority` (which result domains are worth opening), and `extra
   photo, linked handle, etc.).
 - If a match is plausible but unconfirmed, KEEP it but set `confidence_hint` to
   `"possible"` and say why it's ambiguous. Do not silently drop it; do not assert it.
-- You may set `confidence_hint` ("confirmed"/"probable"/"possible") as a SUGGESTION.
-  The supervisor makes the final call.
+- You may set `confidence_hint` ("highly_likely"/"probable"/"possible") as a SUGGESTION.
+  The supervisor makes the final call (it re-grades; your hint is not a verdict).
 
 ## Step 5 — Log + return
 **Write** the JSON spec to `{CASE_DIR}/_websearch.json` using your file-writing tool

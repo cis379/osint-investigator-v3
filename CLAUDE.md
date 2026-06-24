@@ -80,7 +80,7 @@ python src/tools/collect.py --run-all --selector example.com --type domain \
 python src/tools/graph_commit.py --graph investigations/INV-xxx/graph.json \
     --regen-html investigations/INV-xxx/graph.html --case INV-xxx --input findings.json
 # findings.json: {"entities":[{value,type,tool,confidence,citation,depth}], "relationships":[...]}
-# confidence is one of: confirmed | probable | possible
+# confidence is one of: highly_likely | probable | possible  (legacy "confirmed" == highly_likely)
 ```
 
 ### Legacy — `execute.py` (all-in-one; auto-graphs everything as "confirmed"):

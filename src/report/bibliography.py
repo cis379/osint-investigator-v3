@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote_plus
 
+from src.graph.confidence import normalize as _conf_norm, humanize as _conf_human, TIER_RANK
+
 
 # For each entity type, generate actionable investigation URLs
 def _investigation_links(value: str, entity_type: str) -> list[dict]:
@@ -124,7 +126,8 @@ TYPE_COLORS = {
     "telegram_handle": "#00695c", "discord_id": "#5c6bc0",
 }
 
-CONF_PRIORITY = {"confirmed": 0, "probable": 1, "possible": 2}
+# strongest -> weakest, for sorting (canonical keys; legacy "confirmed" normalized in)
+CONF_PRIORITY = TIER_RANK
 
 
 def generate_bibliography(case_dir: str) -> str:
@@ -137,7 +140,7 @@ def generate_bibliography(case_dir: str) -> str:
     nodes = graph_data.get("nodes", [])
 
     nodes_sorted = sorted(nodes, key=lambda n: (
-        CONF_PRIORITY.get(n.get("confidence", "confirmed"), 9),
+        CONF_PRIORITY.get(_conf_norm(n.get("confidence"), default="highly_likely"), 9),
         n.get("depth", 0),
         n.get("type", ""),
     ))
@@ -161,7 +164,7 @@ def generate_bibliography(case_dir: str) -> str:
 
         for n in entities:
             value = n.get("value", "")
-            conf = n.get("confidence", "confirmed")
+            conf = _conf_norm(n.get("confidence"), default="highly_likely")
             depth = n.get("depth", 0)
             sources = ", ".join(n.get("source_tools", []))
             citation = n.get("citation", "")
@@ -176,7 +179,7 @@ def generate_bibliography(case_dir: str) -> str:
             cards_html += f"""<div class="entity-card" data-type="{entity_type}" data-conf="{conf}" data-depth="{depth}">
     <div class="entity-header">
         <span class="entity-value">{value}</span>
-        <span class="badge {conf_class}">{conf}</span>
+        <span class="badge {conf_class}">{_conf_human(conf)}</span>
     </div>
     <div class="entity-meta">
         <span>Source: {sources}</span> | <span>Depth: {depth}</span>
@@ -188,9 +191,9 @@ def generate_bibliography(case_dir: str) -> str:
 
     # Count stats
     total = len(nodes)
-    confirmed = sum(1 for n in nodes if n.get("confidence") == "confirmed")
-    probable = sum(1 for n in nodes if n.get("confidence") == "probable")
-    possible = sum(1 for n in nodes if n.get("confidence") == "possible")
+    highly_likely = sum(1 for n in nodes if _conf_norm(n.get("confidence")) == "highly_likely")
+    probable = sum(1 for n in nodes if _conf_norm(n.get("confidence")) == "probable")
+    possible = sum(1 for n in nodes if _conf_norm(n.get("confidence")) == "possible")
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -274,6 +277,7 @@ def generate_bibliography(case_dir: str) -> str:
             padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600;
             white-space:nowrap;
         }}
+        .conf-highly_likely {{ background:#238636; color:#fff; }}
         .conf-confirmed {{ background:#238636; color:#fff; }}
         .conf-probable {{ background:#9e6a03; color:#fff; }}
         .conf-possible {{ background:#6e4014; color:#fff; }}
@@ -295,7 +299,7 @@ def generate_bibliography(case_dir: str) -> str:
 
 <div class="stats">
     <div class="stat"><div class="num">{total}</div><div class="lbl">Entities</div></div>
-    <div class="stat"><div class="num">{confirmed}</div><div class="lbl">Confirmed</div></div>
+    <div class="stat"><div class="num">{highly_likely}</div><div class="lbl">Highly likely</div></div>
     <div class="stat"><div class="num">{probable}</div><div class="lbl">Probable</div></div>
     <div class="stat"><div class="num">{possible}</div><div class="lbl">Possible</div></div>
 </div>
@@ -304,7 +308,7 @@ def generate_bibliography(case_dir: str) -> str:
     <input type="text" id="search" placeholder="Filter entities..." />
     <label>Confidence:</label>
     <span class="filter-btn active" data-filter="conf" data-val="all">All</span>
-    <span class="filter-btn" data-filter="conf" data-val="confirmed">Confirmed</span>
+    <span class="filter-btn" data-filter="conf" data-val="highly_likely">Highly likely</span>
     <span class="filter-btn" data-filter="conf" data-val="probable">Probable</span>
     <span class="filter-btn" data-filter="conf" data-val="possible">Possible</span>
 </div>

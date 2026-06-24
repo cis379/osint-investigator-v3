@@ -5,6 +5,8 @@ from pathlib import Path
 
 import networkx as nx
 
+from .confidence import normalize as _conf_norm, humanize as _conf_human
+
 
 class InvestigationGraph:
     def __init__(self, graph_file: str | None = None):
@@ -17,7 +19,7 @@ class InvestigationGraph:
         return hashlib.sha256(f"{entity_type}:{value}".encode()).hexdigest()[:16]
 
     def add_entity(self, value: str, entity_type: str, source_tool: str,
-                   depth: int = 0, confidence: str = "confirmed",
+                   depth: int = 0, confidence: str = "highly_likely",
                    citation: str = "", metadata: dict | None = None) -> str:
         node_id = self._node_id(value, entity_type)
 
@@ -46,7 +48,7 @@ class InvestigationGraph:
     def add_relationship(self, source_value: str, source_type: str,
                          target_value: str, target_type: str,
                          relationship: str, source_tool: str,
-                         confidence: str = "confirmed", citation: str = ""):
+                         confidence: str = "highly_likely", citation: str = ""):
         src_id = self._node_id(source_value, source_type)
         tgt_id = self._node_id(target_value, target_type)
 
@@ -184,20 +186,20 @@ class InvestigationGraph:
             if len(label) > 40:
                 label = label[:37] + "..."
             depth = data.get("depth", 0)
-            confidence = data.get("confidence", "confirmed")
+            confidence = _conf_norm(data.get("confidence"), default="highly_likely")
             sources = ", ".join(data.get("source_tools", []))
 
             border_color = type_colors.get(entity_type, "#9E9E9E")
             bg_color = border_color + "33"
-            # Weak tiers (probable/possible) get a dashed border so strong (confirmed)
-            # entities stand out. "possible" is the weakest — kept visible as a pivot,
-            # not hidden — see graph_commit.py.
+            # Weak tiers (probable/possible) get a dashed border so strong
+            # (highly_likely) entities stand out. "possible" is the weakest — kept
+            # visible as a pivot, not hidden — see graph_commit.py.
             border_style = confidence in ("probable", "possible")
 
             nodes.append({
                 "id": node_id,
                 "label": label,
-                "title": f"Type: {entity_type}\nValue: {value}\nConfidence: {confidence}\nSource: {sources}\nDepth: {depth}\nCitation: {data.get('citation', '')}",
+                "title": f"Type: {entity_type}\nValue: {value}\nConfidence: {_conf_human(confidence)}\nSource: {sources}\nDepth: {depth}\nCitation: {data.get('citation', '')}",
                 "color": {
                     "background": bg_color,
                     "border": border_color,
@@ -226,11 +228,11 @@ class InvestigationGraph:
 
         edges = []
         for src, tgt, data in self.graph.edges(data=True):
-            conf = data.get("confidence", "confirmed")
-            # 3-tier edge styling: confirmed (strong/solid) -> probable (dashed amber)
+            conf = _conf_norm(data.get("confidence"), default="highly_likely")
+            # 3-tier edge styling: highly_likely (strong/solid) -> probable (dashed amber)
             # -> possible (faint dotted). Weak links stay visible, just clearly weaker.
             edge_style = {
-                "confirmed": {"color": "#8b949e", "opacity": 0.9, "width": 2, "dashes": False},
+                "highly_likely": {"color": "#8b949e", "opacity": 0.9, "width": 2, "dashes": False},
                 "probable": {"color": "#f0883e", "opacity": 0.8, "width": 1, "dashes": True},
                 "possible": {"color": "#b06a2c", "opacity": 0.45, "width": 1, "dashes": [2, 4]},
             }.get(conf, {"color": "#f0883e", "opacity": 0.8, "width": 1, "dashes": True})

@@ -5,10 +5,12 @@ It takes entities/relationships the supervisor has judged real — each with a
 supervisor-assigned confidence tier — writes them to the graph, then regenerates
 the graph HTML and bibliography.
 
-Confidence tiers (strong -> weak), rendered distinctly in the graph:
-    confirmed  - corroborated / definitive (strong; solid, prominent)
-    probable   - likely but single-source or inferred (dashed)
-    possible   - weak / likely-noise candidate, KEPT as a pivot, not hidden (faint, dashed)
+Confidence tiers (strong -> weak), rendered distinctly in the graph. These are the
+supervisor's ESTIMATIVE likelihood judgments — NOT a collection tool's self-stamp:
+    highly_likely  - corroborated by independent evidence / authoritative (strong; solid)
+    probable       - likely but single-source or inferred (dashed)
+    possible       - weak / likely-noise candidate, KEPT as a pivot, not hidden (faint, dashed)
+("confirmed" is still accepted as a legacy alias for "highly_likely".)
 
 Design intent: nothing the tools returned is hidden (the full raw output lives in
 investigation.md). The supervisor does not drop data — it *tiers* it, so strong
@@ -18,14 +20,14 @@ Input: a JSON spec via --input FILE or stdin:
 {
   "entities": [
     {"value": "...", "type": "...", "tool": "...",
-     "confidence": "confirmed|probable|possible", "citation": "...",
+     "confidence": "highly_likely|probable|possible", "citation": "...",
      "depth": 1, "metadata": {}}
   ],
   "relationships": [
     {"source_value": "...", "source_type": "...",
      "target_value": "...", "target_type": "...",
      "relationship": "...", "tool": "...",
-     "confidence": "confirmed|probable|possible", "citation": "..."}
+     "confidence": "highly_likely|probable|possible", "citation": "..."}
   ]
 }
 
@@ -45,16 +47,17 @@ sys.path.insert(0, str(BASE))
 
 from src.graph.database import InvestigationGraph
 from src.graph.visualizer import generate_investigation_html
+from src.graph.confidence import normalize as _normalize_conf
 from src.report.bibliography import generate_bibliography
-
-VALID_CONFIDENCE = {"confirmed", "probable", "possible"}
 
 
 def _norm_conf(conf: str, label: str, warnings: list) -> str:
-    if conf not in VALID_CONFIDENCE:
+    # Maps the supervisor's tier to canonical form (incl. legacy "confirmed" alias).
+    norm = _normalize_conf(conf, default="")
+    if not norm:
         warnings.append(f"{label}: unknown confidence {conf!r}; coercing to 'possible' (weakest)")
         return "possible"
-    return conf
+    return norm
 
 
 def commit(spec: dict, graph_file: str, html_file: str = "", case_id: str = "") -> dict:

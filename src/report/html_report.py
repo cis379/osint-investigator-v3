@@ -15,6 +15,8 @@ import sys
 BASE = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE))
 
+from src.graph.confidence import normalize as _conf_norm, humanize as _conf_human
+
 
 def generate_html_report(case_dir: str) -> str:
     case_dir = Path(case_dir)
@@ -41,9 +43,9 @@ def generate_html_report(case_dir: str) -> str:
         "telegram_handle": "#00695c", "discord_id": "#5c6bc0",
     }
 
-    confirmed_nodes = [n for n in nodes if n.get("confidence") == "confirmed"]
-    probable_nodes = [n for n in nodes if n.get("confidence") == "probable"]
-    possible_nodes = [n for n in nodes if n.get("confidence") == "possible"]
+    highly_likely_nodes = [n for n in nodes if _conf_norm(n.get("confidence")) == "highly_likely"]
+    probable_nodes = [n for n in nodes if _conf_norm(n.get("confidence")) == "probable"]
+    possible_nodes = [n for n in nodes if _conf_norm(n.get("confidence")) == "possible"]
 
     type_counts = {}
     for n in nodes:
@@ -81,7 +83,7 @@ def generate_html_report(case_dir: str) -> str:
     for n in sorted(nodes, key=lambda x: (x.get("depth", 0), x.get("type", ""))):
         val = n.get("value", "")
         ntype = n.get("type", "")
-        conf = n.get("confidence", "confirmed")
+        conf = _conf_norm(n.get("confidence"), default="highly_likely")
         sources = ", ".join(n.get("source_tools", []))
         depth = n.get("depth", 0)
         citation = n.get("citation", "")
@@ -92,7 +94,7 @@ def generate_html_report(case_dir: str) -> str:
             <td style="max-width:300px;word-break:break-all;">{val}</td>
             <td><span class="type-badge" style="background:{color};">{ntype}</span></td>
             <td>{sources}</td>
-            <td><span class="{conf_class}">{conf}</span></td>
+            <td><span class="{conf_class}">{_conf_human(conf)}</span></td>
             <td>{depth}</td>
             <td class="citation">{citation}</td>
         </tr>\n"""
@@ -102,14 +104,14 @@ def generate_html_report(case_dir: str) -> str:
     for e in edges:
         src_node = next((n for n in nodes if n.get("id") == e.get("source")), {})
         tgt_node = next((n for n in nodes if n.get("id") == e.get("target")), {})
-        conf = e.get("confidence", "confirmed")
+        conf = _conf_norm(e.get("confidence"), default="highly_likely")
         conf_class = f"conf-{conf}"
         rel_rows += f"""<tr>
             <td>{src_node.get('value', '?')}</td>
             <td class="rel-type">{e.get('relationship', '')}</td>
             <td>{tgt_node.get('value', '?')}</td>
             <td>{e.get('source_tool', '')}</td>
-            <td><span class="{conf_class}">{conf}</span></td>
+            <td><span class="{conf_class}">{_conf_human(conf)}</span></td>
             <td class="citation">{e.get('citation', '')}</td>
         </tr>\n"""
 
@@ -206,6 +208,7 @@ def generate_html_report(case_dir: str) -> str:
             display: inline-block; padding: 2px 8px; border-radius: 10px;
             color: #fff; font-size: 11px; font-weight: 600;
         }}
+        .conf-highly_likely {{ color: #15803d; font-weight: 600; }}
         .conf-confirmed {{ color: #15803d; font-weight: 600; }}
         .conf-probable {{ color: #b45309; font-weight: 600; }}
         .conf-possible {{ color: #9f1239; font-weight: 600; }}
@@ -296,8 +299,8 @@ def generate_html_report(case_dir: str) -> str:
             <div class="stat-label">Relationships</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{len(confirmed_nodes)}</div>
-            <div class="stat-label">Confirmed</div>
+            <div class="stat-number">{len(highly_likely_nodes)}</div>
+            <div class="stat-label">Highly likely</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">{len(probable_nodes)}</div>

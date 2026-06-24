@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
+from src.graph.confidence import humanize as _conf_human
+
 
 def _md_cell(value, width: int = 160) -> str:
     """Make a value safe for a markdown table cell (B5): escape pipes so they don't
@@ -35,23 +37,25 @@ def generate_cti_report(
         findings_md += (f"{i}. **{_md_cell(f.get('title', 'Finding'))}** - "
                         f"{f.get('description', '')} "
                         f"[Source: {f.get('source', 'unknown')}, "
-                        f"Confidence: {f.get('confidence', 'unknown')}]\n")
+                        f"Confidence: {_conf_human(f['confidence']) if f.get('confidence') else 'unknown'}]\n")
 
     # B5: escape pipes, keep FULL values (no 40-char truncation), and surface the
     # per-entity citation that previously only reached report.html.
     entity_rows = ""
     for e in entity_table[:100]:
         cite = e.get('citation') or e.get('source', '')
+        conf_disp = _conf_human(e['confidence']) if e.get('confidence') else ''
         entity_rows += (f"| `{_md_cell(e.get('value', ''))}` | {_md_cell(e.get('type', ''))} "
-                        f"| {_md_cell(e.get('source', ''))} | {_md_cell(e.get('confidence', ''))} "
+                        f"| {_md_cell(e.get('source', ''))} | {_md_cell(conf_disp)} "
                         f"| {_md_cell(e.get('depth', ''))} | {_md_cell(cite)} |\n")
 
     # B5: render the relationship table in report.md too (was report.html-only).
     rel_rows = ""
     for r in (relationships or [])[:100]:
+        rconf_disp = _conf_human(r['confidence']) if r.get('confidence') else ''
         rel_rows += (f"| {_md_cell(r.get('source', '?'))} | {_md_cell(r.get('relationship', ''))} "
                      f"| {_md_cell(r.get('target', '?'))} | {_md_cell(r.get('source_tool', ''))} "
-                     f"| {_md_cell(r.get('confidence', ''))} | {_md_cell(r.get('citation', ''))} |\n")
+                     f"| {_md_cell(rconf_disp)} | {_md_cell(r.get('citation', ''))} |\n")
 
     report = f"""# Cyber Threat Intelligence Report
 

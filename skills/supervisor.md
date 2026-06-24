@@ -126,7 +126,7 @@ which fails in PowerShell, this environment's primary shell. Spec shape:
 {
   "entities": [
     {"value": "ns1.example.com", "type": "domain", "tool": "dns_lookup",
-     "confidence": "confirmed", "citation": "dns_lookup NS record", "depth": 1},
+     "confidence": "highly_likely", "citation": "dns_lookup NS record", "depth": 1},
     {"value": "admin@example.com", "type": "email", "tool": "whois_lookup",
      "confidence": "possible", "citation": "whois registrant field (privacy-masked, low trust)", "depth": 1}
   ],
@@ -134,7 +134,7 @@ which fails in PowerShell, this environment's primary shell. Spec shape:
     {"source_value": "example.com", "source_type": "domain",
      "target_value": "ns1.example.com", "target_type": "domain",
      "relationship": "uses_nameserver", "tool": "dns_lookup",
-     "confidence": "confirmed", "citation": "dns_lookup NS record"}
+     "confidence": "highly_likely", "citation": "dns_lookup NS record"}
   ]
 }
 ```
@@ -171,7 +171,7 @@ for input without it; never make the user reconstruct the path from raw logs.
    the user learns the method — the "why it mattered" on each PAST step is the tradecraft, shown
    on real moves, so they understand how you got here.
 
-**2. Where that leaves us** — the synthesized current picture by tier (confirmed / probable /
+**2. Where that leaves us** — the synthesized current picture by tier (highly likely / probable /
    possible), plus the KEY OPEN QUESTIONS (what we still don't know).
 
 **3. Pivot options** — the candidate next moves. Each as:
@@ -252,7 +252,7 @@ discovered entity, it is a **candidate pivot**. The pivot_map `yields` for a typ
 tells you what a pivot will likely PRODUCE — use it to plan chains several hops ahead.
 
 **How to choose pivots (reason each round, don't follow a fixed script):**
-- **Confidence-gate:** pivot from `confirmed`/`probable` entities first; a `possible`
+- **Confidence-gate:** pivot from `highly_likely`/`probable` entities first; a `possible`
   entity is a weaker lead — pivot only if it's the only thread.
 - **Corroboration magnets:** an entity that appeared across multiple sources is the
   highest-value pivot.
@@ -272,7 +272,7 @@ tells you what a pivot will likely PRODUCE — use it to plan chains several hop
 **Drive the loop:** each round, (1) collect, (2) analyze + tier, (3) commit, (4) list
 the new entities and the pivots the ontology offers for each, (5) recommend the best
 1–3 pivots to the user with rationale, and continue until pivots stop yielding new
-confirmed/probable signal (or the user stops you). Always be looking for the next pivot.
+highly-likely/probable signal (or the user stops you). Always be looking for the next pivot.
 
 ## Documenting gaps & creating manual guides
 
@@ -304,17 +304,30 @@ do it themselves NOW. Write a short step-by-step guide to `guides/<capability>.m
 Point the user to the guide. Reuse an existing guide if one already covers the capability. This
 bridges missing-key gaps short-term AND builds the user's own expertise.
 
-## Confidence Tiers (how you grade findings)
+## Estimative Confidence Tiers (how you grade findings)
 
-You do not hide data and you do not drop weak results — you **tier** them. Every
+These tiers are **YOUR estimative likelihood judgments** — words of estimative
+probability, not certainty stamps. In OSINT almost nothing is truly "confirmed";
+you are estimating how likely a claim is from the evidence in front of you. You do
+not hide data and you do not drop weak results — you **tier** them. Every
 entity/relationship you commit gets one of three tiers, which the graph renders
 distinctly (strong stands out; weak stays visible but clearly weaker):
 
-| Tier | Meaning | Use when |
+| Tier (commit value) | Meaning | Use when |
 |------|---------|----------|
-| `confirmed` | Strong. Corroborated or definitive. | Multiple tools agree, or the source is authoritative and unambiguous. |
-| `probable` | Likely, but single-source or inferred. | One credible tool reports it; reasonable but not cross-checked. |
-| `possible` | Weak / candidate / likely false-positive. | Noisy result (e.g. one of 300 username hits), low-trust field, or a guess worth keeping as a pivot. |
+| `highly_likely` | Strongest. Corroborated by INDEPENDENT evidence, or an authoritative/unambiguous source. | Two *independent* lines of evidence agree (not the same fact restated), or the source is authoritative and unambiguous. |
+| `probable` | Likely, but single-source or inferred. | One credible tool/source reports it; reasonable but not cross-checked. |
+| `possible` | Weak / candidate / likely false-positive. | Noisy result (e.g. one of 300 username hits), low-trust field, an inference from shared infrastructure alone, or a guess worth keeping as a pivot. |
+
+Write the tier in `_commit.json` as `highly_likely` / `probable` / `possible`. When
+you SPEAK to the user, say "highly likely / probable / possible." (The legacy value
+`confirmed` is still accepted and means `highly_likely`, but use the new words.)
+
+**Raw tool tags are NOT your tiers.** The gatherers and tool wrappers attach their
+own `confidence`/`confidence_hint` on the raw returns — IGNORE those as verdicts.
+They are just tool output. YOU re-classify every finding into the estimative tiers
+above from the evidence. The two are different things: the tool tag says "this string
+exists"; your tier says "how likely is this claim true and attributed to the subject."
 
 Rules:
 - **Never drop a returned result to "clean up" the graph.** A weak hit may be the
@@ -322,20 +335,64 @@ Rules:
   human can rule it out with you.
 - **The full raw output is always in the log** regardless of tier — that is the
   human audit trail. Tiering controls *prominence in the graph*, not *whether data exists*.
-- **Don't over-claim.** Reserve `confirmed` for genuinely corroborated links.
-  When unsure, go one tier weaker.
-- **Corroboration upgrades.** If a second tool independently confirms a `possible`
-  or `probable` finding, re-commit it as `confirmed` with both citations.
+- **Don't over-claim.** Reserve `highly_likely` for genuinely, INDEPENDENTLY corroborated
+  links. When unsure, go one tier weaker. "One source restated twice" is not corroboration.
+- **Corroboration upgrades — only if INDEPENDENT.** If a second *independent* source
+  confirms a `possible`/`probable` finding, re-commit it as `highly_likely` with both
+  citations. Two tools reading the SAME underlying fact (e.g. two sites both echoing one
+  WHOIS record) is one source, not two.
 - **Tool-reported confidence is NOT authoritative.** Several wrappers stamp EVERY
   hit `confirmed` in code (e.g. sherlock, maigret, name_to_username) — that only
   means "the account/string exists," never "attributed to the subject." Ignore the
   tool's self-grade. Re-grade every finding yourself from the evidence: start
   conservative (`possible`/`probable`) and promote UP the chain only when
-  corroboration or direct verification earns it.
+  independent corroboration or direct verification earns it.
 - **Web-search findings** arrive with a `confidence_hint` (a suggestion, not a
   verdict). Tier them yourself: a single page → usually `probable`; the same fact on
-  independent, reputable pages → `confirmed`; a plausible-but-unconfirmed identity
+  independent, reputable pages → `highly_likely`; a plausible-but-unconfirmed identity
   match → `possible`. Keep the `source_url` as the citation when you commit.
+
+## Attribution discipline — DON'T OVER-MERGE (co-tenancy ≠ co-ownership)
+
+This is the #1 way an OSINT graph goes wrong: collapsing many entities into "one
+operator" on weak shared-infrastructure signals. A large graph (dozens of entities,
+hundreds of edges) cannot be hand-verified, so a single bad merge silently corrupts the
+whole picture. Be ruthless here.
+
+**Shared infrastructure is NOT shared ownership.** Each of these, ALONE, is co-tenancy —
+commit it as the *infra fact* it is, not as an ownership claim:
+- same hosting IP / IP range / ASN (shared servers, CDNs, and clouds host unrelated parties);
+- same registrar (OVH, GoDaddy… host millions of unrelated domains);
+- same nameserver provider (AWS Route 53, Cloudflare…);
+- same boilerplate template / CMS / favicon / cert issuer (Let's Encrypt is universal).
+
+**To assert common ownership/operation you need an INDEPENDENT corroborator** — something
+that ties the parties specifically, not just "they're in the same building":
+- a shared *registrant* identity (same org/email/phone in WHOIS, when not privacy-masked);
+- a shared **tracker / analytics ID** (Google Analytics / AdSense, Meta Pixel, a Salesforce
+  org ID, Brevo/Yandex code) — the gold standard (see backlog G14; not yet automated — pull
+  it from page source by hand / web-search when you can);
+- a unique shared contact (a non-generic email, phone, support handle);
+- an explicit cross-reference (one site's legal page names the other; shared mail backbone
+  serving BOTH parties' own domains).
+
+**How to tier merges:**
+- Co-hosted only → relationship `co_hosted_with` / `shares_infra_with`, tier on the DNS/IP
+  evidence (often `highly_likely` that they're co-hosted) — but DO NOT add `operated_by`.
+- Want `operated_by` / `same_operator_as` → requires an independent corroborator above.
+  With one such corroborator → `probable`; with two independent ones → `highly_likely`.
+  With none → it stays `possible` at most, phrased as an inference.
+- **Flag the cluster hypothesis.** When N domains share infra, say so explicitly:
+  "these N co-host on one IP; they may be ONE operator OR several operators sharing a host
+  /reseller — undetermined without an independent link." Never silently assume one owner.
+- **Name your inference verb.** "co-hosted," "shares a registrant," "shares a tracker ID"
+  are facts; "same operator" is a conclusion that must be earned. Keep them distinct in the
+  graph and the briefing.
+
+*(This doctrine comes from a ground-truth review: an investigation merged ~20 co-hosted
+lookalike domains under one company on shared IP + shared registrar alone, when the truth
+was TWO independent operators sharing infrastructure — and the real second operator, only
+findable via a shared tracker ID, was missed entirely.)*
 
 ## Analysis Guidelines
 

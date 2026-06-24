@@ -2,6 +2,28 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-24 (D1 — attribution doctrine + estimative language)
+- **D1 done (doctrine):** added an "Attribution discipline — DON'T OVER-MERGE" section to
+  `skills/supervisor.md`. Co-tenancy (shared IP/ASN/registrar/NS/template/cert) ≠ co-ownership;
+  asserting `operated_by`/`same_operator_as` now REQUIRES an independent corroborator (shared
+  registrant identity, a tracker/analytics ID, a unique contact, or an explicit cross-reference);
+  co-hosting alone commits as `co_hosted_with` (infra fact), not ownership; supervisor must flag the
+  "may be one of N clusters" hypothesis. Grounded in a ground-truth review of INV-20260624-001, which
+  over-merged ~20 co-hosted lookalike ticket-scam domains under one company (THE WALKER TOURS LLC) on
+  shared IP + shared OVH registrar alone — truth was TWO independent Spanish operators sharing infra,
+  and the second (My Top Tour / Al Andalus = MNPQ Gestores Turísticos SL / LA BIBI), linkable only via
+  a shared Salesforce/tracker ID, was missed entirely. That miss is the concrete proof-of-need for G14.
+- **Estimative language renamed** (operator request — "confirmed" read as certainty and invited
+  over-claiming): top tier `confirmed` → **`highly_likely`** across the pipeline; `probable`/`possible`
+  unchanged. New `src/graph/confidence.py` is the single source of truth (canonical tiers, legacy
+  `confirmed`→`highly_likely` alias, `normalize()`/`humanize()`/`TIER_RANK`). Threaded through
+  graph_commit, graph/database, visualizer, cti_report, html_report, bibliography, web_searcher.md,
+  and the baseline test. Display shows "Highly likely"; old graphs (INV-20260624-001) still render via
+  the alias. Made explicit in supervisor doctrine that raw gatherer/tool `confidence` tags are NOT the
+  supervisor's tiers — the supervisor re-classifies every finding into the estimative tiers itself.
+  CAPABILITY-LOCK item 4 updated (mechanism locked, labels renamed). Health + 3 suites GREEN.
+  RT1 (red-team review agent — the process control for D1) remains open.
+
 ## 2026-06-24 (backlog sweep)
 - Worked the bug/addressable-gap backlog in 3 health-gated batches (all GREEN):
   - **B8** threatfox: abuse.ch made the API auth-mandatory → it 401'd on every domain/IP run;
