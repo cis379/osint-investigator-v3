@@ -24,7 +24,7 @@ class HttpTool(BaseTool):
 
     def __init__(self, *, name, description, input_types, output_types, url,
                  http_method="GET", headers=None, user_agent=DEFAULT_UA,
-                 auth_key=None, auth_header=None, key_required=False,
+                 auth_key=None, auth_header=None, auth_prefix="", key_required=False,
                  body=None, derive=None, extract=None, success_codes=(200,),
                  timeout=20):
         self.name = name
@@ -37,6 +37,7 @@ class HttpTool(BaseTool):
         self._user_agent = user_agent
         self._auth_key = auth_key
         self._auth_header = auth_header
+        self._auth_prefix = auth_prefix  # e.g. "Bearer " for Authorization tokens
         self._key_required = key_required
         self._body = body
         self._derive = derive
@@ -65,7 +66,7 @@ class HttpTool(BaseTool):
                 return self.make_result(selector, selector_type, "", [], False,
                                         f"{self.name} needs {self._auth_key} in .env")
             if key and self._auth_header:
-                headers[self._auth_header] = key
+                headers[self._auth_header] = f"{self._auth_prefix}{key}"
 
         try:
             url = self._url.format(**vars_)

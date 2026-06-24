@@ -82,6 +82,7 @@ generate_cti_report(
     total_relationships={TOTAL_RELS},
     duration_minutes={DURATION},
     output_path=r'{REPORT_FILE}',
+    relationships={RELATIONSHIPS},  # list of {{source,relationship,target,source_tool,confidence,citation}} from graph.json edges (B5: surfaces the rel table + citations in report.md)
 )
 print('Report generated')
 "

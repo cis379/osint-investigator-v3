@@ -77,11 +77,14 @@ def _ex_certspotter(sel, data):
 certspotter = HttpTool(
     name="certspotter",
     description="Cert Spotter: CT-logged certificate ISSUANCE HISTORY + subdomains for a "
-                "domain (free, no key, rate-limited). Cert-history correlation + passive subdomains.",
+                "domain (free, rate-limited; optional CERTSPOTTER_API_KEY raises the limit). "
+                "Cert-history correlation + passive subdomains.",
     input_types=["domain"], output_types=["domain"],
     url="https://api.certspotter.com/v1/issuances?domain={selector}"
         "&include_subdomains=true&expand=dns_names&expand=issuer",
-    extract=_ex_certspotter, timeout=30)
+    # B10: free tier is rate-limited; send a Bearer token when one is configured (graceful — works keyless).
+    auth_key="CERTSPOTTER_API_KEY", auth_header="Authorization", auth_prefix="Bearer ",
+    key_required=False, extract=_ex_certspotter, timeout=30)
 
 
 # ============================ robtex_ip (HttpTool) ============================
@@ -121,13 +124,15 @@ robtex_ip = HttpTool(
 
 # ============================ cloud_buckets (custom) ============================
 class CloudBucketsTool(BaseTool):
-    """Permute likely bucket names from a domain/company/keyword and probe AWS S3 +
-    Google Cloud Storage for existence/exposure. Path-style S3 is used to avoid the
-    SSL hostname mismatch on dotted bucket names. (Ported from SpiderFoot's
-    sfp_s3bucket / sfp_googleobjectstorage technique.)"""
+    """Permute likely bucket names from a domain/company/keyword and probe AWS S3,
+    Google Cloud Storage, Azure Blob, and DigitalOcean Spaces for existence/exposure.
+    Path-style S3 is used to avoid the SSL hostname mismatch on dotted bucket names.
+    (Ported from SpiderFoot's sfp_s3bucket / sfp_googleobjectstorage /
+    sfp_azureblobstorage / sfp_digitaloceanspace technique.)"""
     name = "cloud_buckets"
-    description = ("Discover exposed AWS S3 / Google Cloud Storage buckets by permuting names "
-                   "from a domain/company/keyword and probing existence (free, no key).")
+    description = ("Discover exposed AWS S3 / Google Cloud Storage / Azure Blob / DigitalOcean "
+                   "Spaces buckets by permuting names from a domain/company/keyword and probing "
+                   "existence (free, no key).")
     input_types = ["domain", "company", "keyword", "url"]
     output_types = ["url"]
     method = "api"
@@ -136,6 +141,7 @@ class CloudBucketsTool(BaseTool):
                 "assets", "media", "static", "data", "files", "uploads", "public",
                 "private", "logs", "cdn", "images", "archive", "storage", "app", "internal"]
     MAX_CANDIDATES = 40
+    DO_REGIONS = ["nyc3", "ams3"]   # most common DigitalOcean Spaces regions
     TIMEOUT = 8
 
     def _bases(self, selector, selector_type):
@@ -170,33 +176,52 @@ class CloudBucketsTool(BaseTool):
                     cands.append(name)
         return cands[:self.MAX_CANDIDATES]
 
-    def _probe(self, name):
-        """Return list of (provider, url, status, state) for a candidate bucket name."""
-        found = []
-        targets = [
-            ("s3", f"https://s3.amazonaws.com/{name}?max-keys=1"),
-            ("gcs", f"https://storage.googleapis.com/{name}?max-keys=1"),
-        ]
-        for provider, url in targets:
-            try:
-                r = requests.get(url, timeout=self.TIMEOUT,
-                                 headers={"User-Agent": DEFAULT_UA})
-            except requests.RequestException:
-                continue
-            sc = r.status_code
-            body = (r.text or "")[:300]
-            if sc == 200:
-                state = "listable"
-            elif sc == 403 or "AccessDenied" in body:
-                state = "exists_private"
-            elif sc in (301, 307) or "PermanentRedirect" in body:
-                state = "exists_other_region"
-            else:
-                state = None  # 404 NoSuchBucket / 400 invalid = absent
-            if state:
-                clean = url.split("?")[0]
-                found.append((provider, clean, sc, state))
-        return found
+    PROVIDER_LABELS = {"s3": "AWS S3", "gcs": "Google Cloud Storage",
+                       "azure": "Azure Blob", "do": "DigitalOcean Spaces"}
+
+    @staticmethod
+    def _s3compat_state(sc, body):
+        """Existence state for an S3-compatible endpoint (S3 / GCS / DO Spaces)."""
+        if sc == 200:
+            return "listable"
+        if sc == 403 or "AccessDenied" in body:
+            return "exists_private"
+        if sc in (301, 307) or "PermanentRedirect" in body:
+            return "exists_other_region"
+        return None  # 404 NoSuchBucket / 400 invalid = absent
+
+    def _targets(self, candidates, bases):
+        """Flat list of (provider, label, url) probes. S3+GCS for every candidate;
+        Azure + DigitalOcean bounded to the BASE names (Azure account names can't carry
+        hyphens; keeps request count + false-positive noise down)."""
+        targets = []
+        for name in candidates:
+            targets.append(("s3", name, f"https://s3.amazonaws.com/{name}?max-keys=1"))
+            targets.append(("gcs", name, f"https://storage.googleapis.com/{name}?max-keys=1"))
+        for base in bases:
+            alnum = re.sub(r"[^a-z0-9]", "", base)
+            if 3 <= len(alnum) <= 24:  # Azure storage-account naming rules
+                targets.append(("azure", alnum,
+                                f"https://{alnum}.blob.core.windows.net/?comp=list"))
+            for region in self.DO_REGIONS:
+                targets.append(("do", f"{base} ({region})",
+                                f"https://{base}.{region}.digitaloceanspaces.com/?max-keys=1"))
+        return targets
+
+    def _probe_target(self, target):
+        provider, label, url = target
+        try:
+            r = requests.get(url, timeout=self.TIMEOUT, headers={"User-Agent": DEFAULT_UA})
+        except requests.RequestException:
+            return None  # DNS/conn failure (incl. Azure NXDOMAIN) = absent
+        sc, body = r.status_code, (r.text or "")[:300]
+        if provider == "azure":
+            # the host resolving means the storage ACCOUNT exists; 200 = public listing.
+            state = "listable" if sc == 200 else (
+                "exists_account" if sc in (400, 403, 404, 409) else None)
+        else:
+            state = self._s3compat_state(sc, body)
+        return (provider, label, url.split("?")[0], sc, state) if state else None
 
     def query(self, selector, selector_type):
         if selector_type not in self.input_types:
@@ -207,29 +232,30 @@ class CloudBucketsTool(BaseTool):
             return self.make_result(selector, selector_type, "", [], False,
                                     "could not derive a bucket base name from selector")
         candidates = self._candidates(bases)
+        targets = self._targets(candidates, bases)
 
         hits = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
-            for res in ex.map(self._probe, candidates):
-                hits.extend(res)
+            for res in ex.map(self._probe_target, targets):
+                if res:
+                    hits.append(res)
 
         entities = []
-        for provider, url, sc, state in hits:
+        for provider, label, url, sc, state in hits:
             conf = "probable" if state == "listable" else "possible"
-            label = {"s3": "AWS S3", "gcs": "Google Cloud Storage"}[provider]
             entities.append(EntityFound(
                 value=url, entity_type="url", confidence=conf,
-                source_citation=f"cloud_buckets: {label} bucket {state} (HTTP {sc})",
+                source_citation=f"cloud_buckets: {self.PROVIDER_LABELS[provider]} {state} (HTTP {sc})",
                 metadata={"provider": provider, "status": sc, "state": state,
-                          "listable": state == "listable", "seed": selector}))
+                          "listable": state == "listable", "candidate": label, "seed": selector}))
 
-        raw = (f"bases={bases}\ncandidates_probed={len(candidates)} (S3+GCS)\n"
+        raw = (f"bases={bases}\ncandidates={len(candidates)} · targets_probed={len(targets)} "
+               f"(S3+GCS per candidate; Azure+DO[{','.join(self.DO_REGIONS)}] on bases)\n"
                f"buckets_found={len(hits)}\n" +
-               "\n".join(f"  [{st}] HTTP {sc} {prov}: {url}"
-                         for prov, url, sc, st in hits) +
+               "\n".join(f"  [{st}] HTTP {sc} {self.PROVIDER_LABELS[prov]}: {url}"
+                         for prov, lbl, url, sc, st in hits) +
                ("" if hits else "  (no existing buckets matched the permutations)"))
-        return self.make_result(selector, selector_type, raw, entities,
-                                success=True)
+        return self.make_result(selector, selector_type, raw, entities, success=True)
 
 
 # ============================ pgp_keyserver (custom) ============================

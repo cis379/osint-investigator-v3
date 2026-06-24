@@ -2,6 +2,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+def _md_cell(value, width: int = 160) -> str:
+    """Make a value safe for a markdown table cell (B5): escape pipes so they don't
+    break the table, flatten newlines, and cap absurd widths (no lossy 40-char chop)."""
+    s = str(value if value is not None else "").replace("|", "\\|")
+    s = s.replace("\r", " ").replace("\n", " ").strip()
+    if width and len(s) > width:
+        s = s[:width - 1] + "…"
+    return s
+
+
 def generate_cti_report(
     case_id: str,
     seed_value: str,
@@ -16,16 +26,32 @@ def generate_cti_report(
     total_relationships: int,
     duration_minutes: int,
     output_path: str,
+    relationships: list[dict] | None = None,
 ):
     now = datetime.now(timezone.utc).strftime('%Y-%m-%d')
 
     findings_md = ""
     for i, f in enumerate(findings, 1):
-        findings_md += f"{i}. **{f.get('title', 'Finding')}** - {f.get('description', '')} [Source: {f.get('source', 'unknown')}, Confidence: {f.get('confidence', 'unknown')}]\n"
+        findings_md += (f"{i}. **{_md_cell(f.get('title', 'Finding'))}** - "
+                        f"{f.get('description', '')} "
+                        f"[Source: {f.get('source', 'unknown')}, "
+                        f"Confidence: {f.get('confidence', 'unknown')}]\n")
 
+    # B5: escape pipes, keep FULL values (no 40-char truncation), and surface the
+    # per-entity citation that previously only reached report.html.
     entity_rows = ""
-    for e in entity_table[:50]:
-        entity_rows += f"| `{e.get('value', '')[:40]}` | {e.get('type', '')} | {e.get('source', '')} | {e.get('confidence', '')} | {e.get('depth', '')} |\n"
+    for e in entity_table[:100]:
+        cite = e.get('citation') or e.get('source', '')
+        entity_rows += (f"| `{_md_cell(e.get('value', ''))}` | {_md_cell(e.get('type', ''))} "
+                        f"| {_md_cell(e.get('source', ''))} | {_md_cell(e.get('confidence', ''))} "
+                        f"| {_md_cell(e.get('depth', ''))} | {_md_cell(cite)} |\n")
+
+    # B5: render the relationship table in report.md too (was report.html-only).
+    rel_rows = ""
+    for r in (relationships or [])[:100]:
+        rel_rows += (f"| {_md_cell(r.get('source', '?'))} | {_md_cell(r.get('relationship', ''))} "
+                     f"| {_md_cell(r.get('target', '?'))} | {_md_cell(r.get('source_tool', ''))} "
+                     f"| {_md_cell(r.get('confidence', ''))} | {_md_cell(r.get('citation', ''))} |\n")
 
     report = f"""# Cyber Threat Intelligence Report
 
@@ -66,15 +92,17 @@ def generate_cti_report(
 
 ## Entity Summary
 
-| Entity | Type | Source | Confidence | Depth |
-|--------|------|--------|------------|-------|
-{entity_rows if entity_rows else "| (none) | - | - | - | - |"}
+| Entity | Type | Source | Confidence | Depth | Citation |
+|--------|------|--------|------------|-------|----------|
+{entity_rows if entity_rows else "| (none) | - | - | - | - | - |"}
 
 ---
 
 ## Relationship Map
 
-![Investigation Graph](./graph.png)
+| Source | Relationship | Target | Tool | Confidence | Citation |
+|--------|--------------|--------|------|------------|----------|
+{rel_rows if rel_rows else "| (no relationships recorded) | - | - | - | - | - |"}
 
 [Open Interactive Graph](./graph.html)
 
