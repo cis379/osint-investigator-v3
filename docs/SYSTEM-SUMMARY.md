@@ -4,7 +4,7 @@ The definitive "what is this and how does it work" reference. Updated 2026-06-24
 **External OSINT only.** Take a seed selector → pivot through tools → produce a cited,
 confidence-tiered intelligence graph + CTI report.
 
-State: **55 runnable tools · 19/90 selector types runnable · 7 skills · 3 system tests PASS.**
+State: **57 runnable tools · 20/92 selector types runnable · 8 skills · 3 system tests PASS.**
 
 ---
 
@@ -23,17 +23,22 @@ State: **55 runnable tools · 19/90 selector types runnable · 7 skills · 3 sys
    │  ROUTE via the ONTOLOGY:  registry.plan_collection(selector, type)
    │     → which structured tools run? is it web-searchable? general-username fallback?
    │
-   ├─────────────── dispatches TWO COLLECTION LINES (background agents) ───────────────┐
+   ├─────────────── dispatches up to THREE COLLECTION LINES (background agents) ────────┐
    │                                                                                    │
    ▼ STRUCTURED LINE                                          ▼ WEB-SEARCH LINE          │
  [skill: gatherer.md]                                     [skill: web_searcher.md]      │
    runs  python -m src.tools.collect                        uses WebSearch + WebFetch   │
-   → registry runs the typed tools (51)                     → snippet IS evidence;      │
+   → registry runs the typed tools (57)                     → snippet IS evidence;      │
    → logs RAW output to investigation.md                      runs relatives/public-    │
    → returns raw JSON (NO graph, NO analysis)                 records queries; extracts │
                                                               CITED findings            │
    slow tools run individually; flaky HTTP retries            → python -m src.tools.    │
    (nethttp.http_get); operator judgment                       web_collect (logs + echo)│
+   │                                                                    │               │
+   ▼ ACTIVE-COLLECTION LINE  [skill: active_collector.md]  (domain/url; ownership question)│
+   touches the TARGET's live infra: web_tech_fingerprint → tracker/analytics IDs + favicon │
+   → tracker_reverse → other domains sharing the id = INDEPENDENT ownership corroborator    │
+   OPSEC: passive-first (Wayback) then 1 minimal live GET; proxy seam; logs raw; NO graph   │
    │                                                                    │               │
    └──────────────────────────► raw findings ◄─────────────────────────┘               │
                                      │                                                  │
@@ -128,6 +133,7 @@ State: **55 runnable tools · 19/90 selector types runnable · 7 skills · 3 sys
 | **supervisor.md** | Analyst brain (main thread) | route via `plan_collection`; dispatch both lines; analyze; **Confidence-Tier doctrine** (re-grade, never drop, corroboration upgrades); commit via graph_commit; **Pivoting doctrine** (ontology-guided, verify-the-leads loop); launch report-writer |
 | **gatherer.md** | Structured collector | skilled OPERATOR: run `collect.py` with judgment (pick tools, slow→individual, retry-once transient), return raw; NO analysis/graph |
 | **web_searcher.md** | Web-search collector | WebSearch/WebFetch; **snippet IS evidence** (blocked page ≠ missing finding); relatives/public-records queries; cite everything; log via web_collect; NO graph |
+| **active_collector.md** | Active collector (3rd line) | ACTIVELY touches the target's own infra: `web_tech_fingerprint` (live source → tracker/analytics/ownership IDs + favicon hash) + `tracker_reverse` (id → co-using domains) — the **independent ownership corroborator**. OPSEC-aware (passive-first, proxy seam, fraud-scope). Logs raw via collect.py; NO graph |
 | **red_team.md** | Adversarial reviewer | READ-ONLY pre-report gate (+ on-demand mid-investigation); challenges every merge/inference (over-merges, single-source "highly likely", attribution-verb drift, missed cluster splits); returns down-tier/relabel/split recs in `_redteam.json`; supervisor reconciles. Process control for the anti-over-merge doctrine. NO graph writes |
 | **report-writer.md** | CTI product | read graph+log → report.md/html + bibliography; evidence-based, BLUF-first; runs only AFTER the red-team pass |
 
@@ -135,17 +141,18 @@ State: **55 runnable tools · 19/90 selector types runnable · 7 skills · 3 sys
 
 ---
 
-## 4. Tool coverage (19 runnable selector types)
+## 4. Tool coverage (20 runnable selector types)
 | Strong | Tools |
 |---|---|
-| **domain** (15) | whois, rdap, dns_lookup, dnsrecon, crtsh, **certspotter** (cert history+subdomains), wayback, http_headers, theharvester, tls_cert, http_title, urlscan, threatfox, google_dork, **cloud_buckets** (S3/GCS) |
+| **domain** (16) | whois, rdap, dns_lookup, dnsrecon, crtsh, **certspotter** (cert history+subdomains), wayback, http_headers, theharvester, tls_cert, http_title, urlscan, threatfox, google_dork, **cloud_buckets** (S3/GCS), **web_tech_fingerprint** (tracker/analytics IDs + favicon) |
 | **ip_v4** (11) | ip_geolocation, ipinfo, shodan_internetdb, reverse_dns, ripestat, bgpview, greynoise, reverse_ip, **robtex_ip** (passive DNS), urlscan, threatfox |
 | **company** (11) | gleif_lei, sec_edgar, aleph, courtlistener, wikipedia, wikidata, theharvester(via domain), **cloud_buckets**… |
 | **username** (8) | sherlock, maigret, naminter, linkook, socialscan, github_user, reddit_about, google_dork |
 | **name** (8) | web-search-primary + gravatar, hibp_name_search(gen), wikipedia, wikidata, name_to_username, aleph, courtlistener |
 | **email** (7) | holehe, disify, hudsonrock, xposedornot, socialscan, gravatar, **pgp_keyserver** (alt emails/name) |
 | **keyword** (1) | **cloud_buckets** (S3/GCS bucket discovery) — first runnable tool for this type |
-| also | url, ip_v6, phone (phonenumbers/ignorant/phoneinfoga), crypto_btc/eth, hashes, coordinates, image/file, email_header/eml |
+| **tracker_id** (1) | **tracker_reverse** (shared GA/AdSense/Pixel id → other co-using domains; the independent ownership corroborator) — fed by `web_tech_fingerprint` on domain/url |
+| also | url (+**web_tech_fingerprint**), ip_v6, phone (phonenumbers/ignorant/phoneinfoga), crypto_btc/eth, hashes, coordinates, image/file, email_header/eml |
 
 ---
 
@@ -191,9 +198,9 @@ tool-count floor + 3 suites), done on a branch, reverted on red; bugs/wiring are
 architecture needs user sign-off. It triages the BACKLOG, intakes new OSINT resources (classify →
 wire/backlog/manual-guide/reject), owns the ontology, and runs a READ-ONLY daily audit
 (`/osint-daily-review`). The supervisor feeds it: it logs gaps it hits to BACKLOG and writes
-operator **manual guides** (`guides/`) for key-gated/manual capabilities. Skills are now 7
-(supervisor, gatherer, web_searcher, red_team, report-writer, investigate, + system_manager).
-Stable baseline tag: `v3-baseline-2026-06-23`.
+operator **manual guides** (`guides/`) for key-gated/manual capabilities. Skills are now 8
+(supervisor, gatherer, web_searcher, active_collector, red_team, report-writer, investigate,
++ system_manager). Stable baseline tag: `v3-baseline-2026-06-23`.
 
 ## 7. What's solid (protect)
 The raw/analysis split (collectors fetch, supervisor tiers+graphs); two collection lines (both

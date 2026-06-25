@@ -2,6 +2,27 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-25 (A1 + G14 — active collection + tracker-ID fingerprinting)
+- Preceded by an off-the-shelf survey (build vs buy): off-the-shelf fingerprinters (Wappalyzer family,
+  webanalyze) throw away the RAW id and/or need Go/Node; maintained reverse-lookup is paid/flaky.
+  Decision: **BUILD extraction in-house, WIRE free reverse-lookup with graceful degradation.**
+- **G14 done — two tools (+2 -> 57; floor 57):** `web_tech_fingerprint` (domain/url -> tracker_id +
+  favicon_hash): fetches page source PASSIVE-FIRST (Wayback) and auto-escalates to one minimal live GET;
+  extracts 15 id kinds (GA UA-/G-, GTM, AdSense ca-pub-, Meta Pixel, Salesforce, Yandex, Hotjar, Clarity,
+  Matomo, TikTok, reCAPTCHA, ...) each tagged id_kind + ownership_strength, + favicon mmh3 hash; proxy seam
+  `OSINT_PROXY`. `tracker_reverse` (tracker_id -> domains): PublicWWW free + optional SpyOnWeb key, degrades
+  to guides/tracker-id-reverse-lookup.md, never fabricates. Ontology: umbrella type `tracker_id` (id_kind in
+  metadata) + `favicon_hash`; domain/url yield+route into the extractor; selector.py detects UA-/G-/GTM-/AW-/
+  ca-pub-. Dep mmh3 (optional-degrading). Extractor+reverse excluded from baseline replay (network-heavy).
+- **A1 done (architectural, user sign-off) — `skills/active_collector.md`, the THIRD collection line.**
+  Actively touches the target's own infra to recover the INDEPENDENT ownership corroborator a shared host
+  can't prove. OPSEC: passive-first auto-escalate, generic UA, no crawl, proxy seam, fraud/scam scope-guard.
+  Keeps the raw/analysis split (collects+logs via collect.py, never graphs). Wired into supervisor.md: 3rd
+  line; the domain/url -> web_tech_fingerprint -> tracker_id -> tracker_reverse ownership-corroborator chain;
+  shared strong id upgrades co_hosted_with -> same_operator_as, different ids SPLIT a cluster; red-team
+  `demand_corroborator` now triggers an active-collection pass. Locked as CAPABILITY-LOCK item 9. Health GREEN.
+  This is the capability that would have separated the two operators in INV-20260624-001 (the Salesforce org id).
+
 ## 2026-06-24 (RT1 — red-team reviewer agent)
 - **RT1 done (architectural, user sign-off):** added `skills/red_team.md`, a READ-ONLY adversarial
   reviewer that hardens the analysis before it ships. Prime directive = break every conclusion;

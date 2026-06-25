@@ -25,6 +25,11 @@ regress the capabilities below. A change that breaks a lock item is reverted, no
    every report (and on demand mid-investigation). It challenges merges/inferences; the supervisor
    reconciles (relabel/down-tier/split, keep-don't-drop). The process control for #4's "no over-merge"
    discipline — do not remove or make it bypassable-by-default without USER sign-off.
+9. **Active-collection line** (`skills/active_collector.md` + `web_tech_fingerprint`/`tracker_reverse`)
+   — the third collection line; recovers the INDEPENDENT ownership corroborator (shared tracker/analytics
+   IDs) that #4 requires before a merge. Keeps the raw/analysis split (collects + logs, never graphs) and
+   the OPSEC posture (passive-first, minimal live footprint, proxy seam). Don't remove/regress the line,
+   the passive-first default, or the proxy seam without USER sign-off.
 
 ## Locked capabilities — the GOLDEN investigations (periodic live re-test)
 These must keep working (the deterministic gate is fast; these are the real-world proof,
@@ -40,7 +45,7 @@ re-run on the daily audit / before a release):
 sherlock, maigret, naminter, linkook, holehe, theharvester, whois/rdap, dns_lookup/dnsrecon,
 crtsh, urlscan, shodan_internetdb, ripestat, greynoise, reverse_ip, tls_cert, http_title,
 gleif_lei, sec_edgar, hudsonrock_email, xposedornot, blockstream_btc, exiftool, phonenumbers,
-email_header_analyzer + the web-search line.
+email_header_analyzer, web_tech_fingerprint, tracker_reverse + the web-search line.
 
 ## Change protocol (Manager)
 1. health_check GREEN before starting. 2. Work on a branch. 3. Make the scoped change.

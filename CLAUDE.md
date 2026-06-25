@@ -125,7 +125,7 @@ tools = get_tools_for_selector('domain')
 
 ## Dependencies
 
-Python packages: `networkx`, `python-whois`, `dnspython`, `requests`, `beautifulsoup4`
+Python packages: `networkx`, `python-whois`, `dnspython`, `requests`, `beautifulsoup4`, `mmh3` (favicon hash; optional-degrading)
 Optional CLI tools: `sherlock-project`, `maigret`, `holehe` (installed on-demand)
 
 ## vis.js Note

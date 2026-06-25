@@ -46,7 +46,7 @@ do not ask the user a question or request direction without the briefing first.
 
 ### Phase 2: Data Collection
 
-You have **TWO collection lines**. Route each selector to the right one(s) — often both:
+You have **THREE collection lines**. Route each selector to the right one(s) — often more than one:
 - **Structured line** (gatherer → `collect.py`): fixed, typed tools. Use whenever
   `get_selector_capability(type).implemented` is non-empty.
 - **Web-search line** (web-search collector → `skills/web_searcher.md`): unstructured
@@ -55,6 +55,13 @@ You have **TWO collection lines**. Route each selector to the right one(s) — o
   `"primary"` (e.g. `name`, `company`, `telegram_handle`) it is the MAIN line — the
   structured tools are thin or absent, and web search is how you recover the real
   identity/affiliation. (A `name` seed yields almost nothing without it.)
+- **Active-collection line** (active collector → `skills/active_collector.md`): ACTIVELY
+  touches the target's OWN infrastructure (live page source) to recover **tracker/analytics/
+  ownership IDs** + a favicon hash — the INDEPENDENT corroborators of common ownership. Use it
+  on a `domain`/`url` when **ownership is the question** — to corroborate or refute a suspected
+  merge, or when the red team demanded a corroborator. It is OPSEC-aware (passive-first, leaves a
+  footprint on the target) and scoped to fraud/scam/impersonation targets — see its skill. Dispatch
+  it as a background Agent that reads `skills/active_collector.md` and follows it EXACTLY.
 
 **Let the ontology decide what can run** — call `plan_collection`, which returns the
 runnable structured tools, the web-search availability, and applies a general-username
@@ -245,6 +252,11 @@ the critique JSON. Do NOT modify the graph.
      supporting citation. Add the red team's reasoning to the citation so the audit trail shows why.
    - **DEFEND it**: if you have evidence the red team missed, keep the claim and record the specific
      corroborator that justifies the tier. ("Upheld: shared mail IP serves both operators' domains.")
+   - **GO GET the corroborator**: when the red team flags `demand_corroborator` on a merge built on
+     shared infra, dispatch the **active-collection line** (`web_tech_fingerprint` on the contested
+     domains, then `tracker_reverse`) to look for a shared tracker ID. A shared strong id → re-commit
+     the link as `same_operator_as` (probable/highly_likely); different ids → split the cluster; none
+     found → relabel to `co_hosted_with` and down-tier as the red team asked.
 3. **Re-run if needed:** if you applied material changes, dispatch the red team once more to confirm
    the over-merges are resolved. Stop after ~2 rounds or when no top-tier claim rests on infra alone.
 4. **Tell the user what changed** in your next briefing: what the red team challenged, what you
@@ -305,6 +317,11 @@ tells you what a pivot will likely PRODUCE — use it to plan chains several hop
     don't.)
   - `username` → `maigret`/`github_user` → linked email/real name → pivot those.
   - `domain` → `dns_lookup` → IP → `ripestat_network`/`greynoise_community` (ASN/noise).
+  - `domain`/`url` → **`web_tech_fingerprint`** (active line) → `tracker_id` → **`tracker_reverse`**
+    → other domains embedding the SAME id. This is the **ownership-corroborator chain**: a shared
+    strong tracker id (GA `UA-`/`G-`, AdSense `ca-pub-`, Yandex) is the independent evidence that
+    upgrades a `co_hosted_with` link to `same_operator_as`; *different* ids on co-hosted sites
+    SPLIT them. Reach for this whenever you'd otherwise be tempted to merge on shared hosting alone.
   - `email` → `holehe` (accounts) + `hudsonrock_email` (breach) → usernames/names.
 - **Avoid loops & noise:** don't re-collect an entity already collected; don't pivot on
   generic/false-positive `possible` hits just because a tool exists.
@@ -410,8 +427,10 @@ commit it as the *infra fact* it is, not as an ownership claim:
 that ties the parties specifically, not just "they're in the same building":
 - a shared *registrant* identity (same org/email/phone in WHOIS, when not privacy-masked);
 - a shared **tracker / analytics ID** (Google Analytics / AdSense, Meta Pixel, a Salesforce
-  org ID, Brevo/Yandex code) — the gold standard (see backlog G14; not yet automated — pull
-  it from page source by hand / web-search when you can);
+  org ID, Brevo/Yandex code) — the gold standard. **Now automated:** dispatch the active-collection
+  line (`web_tech_fingerprint` to extract IDs from each site, `tracker_reverse` to find other domains
+  embedding the same id). A shared STRONG id corroborates common ownership; different ids on co-hosted
+  sites refute it;
 - a unique shared contact (a non-generic email, phone, support handle);
 - an explicit cross-reference (one site's legal page names the other; shared mail backbone
   serving BOTH parties' own domains).

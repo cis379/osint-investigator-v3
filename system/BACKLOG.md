@@ -85,12 +85,21 @@ with operator first; mandate given.
 - [R1] (architectural/report/open) — Report-writer overhaul: report.md/html must be a NARRATIVE STORY
   of the investigation (how we got there; key pivots + decisions + when), structured data -> APPENDICES.
   BLUF -> Narrative -> Key findings -> Appendices. The share-with-humans product. (B5 fix done; this is bigger.)
-- [G14] (gap/HIGH/open) — WEB-TECH tracker-ID fingerprinting: active extractor (GA/AdSense/Pixel/Salesforce/
+- [G14] (gap/HIGH/done) — WEB-TECH tracker-ID fingerprinting: active extractor (GA/AdSense/Pixel/Salesforce/
   Brevo/Yandex IDs -> identifier entities) + reverse-lookup (PublicWWW/SpyOnWeb/web-search). The reused-infra
   unlock; ALSO gives D1 its independent corroborator. Would have linked cluster-2 via its Salesforce org ID.
-- [A1] (architectural/new-agent/open) — ACTIVE COLLECTION skill (skills/active_collector.md), SEPARATE from
+  **DONE 2026-06-25 (with A1):** built `web_tech_fingerprint` (in-house extractor; 15 id kinds + favicon
+  mmh3) + `tracker_reverse` (PublicWWW free + optional SpyOnWeb key, degrades to guide). New umbrella type
+  `tracker_id` (id_kind in metadata) + `favicon_hash`; survey said BUILD extraction / WIRE reverse. mmh3 dep;
+  TOOL_FLOOR 55->57. Guide: guides/tracker-id-reverse-lookup.md.
+- [A1] (architectural/new-agent/done) — ACTIVE COLLECTION skill (skills/active_collector.md), SEPARATE from
   web_searcher: actively touches the target's (potentially malicious) infra (live source, web-tech extractor);
   bespoke + OPSEC-aware (leaves logs on target; build room for future proxy/sandbox; NOT cyber/hacking; scams ok now).
+  **DONE 2026-06-25 (user sign-off, built with G14):** the THIRD collection line. OPSEC posture: passive-first
+  (Wayback) auto-escalating to a single minimal live GET, generic UA, no crawl, `OSINT_PROXY` seam (unset),
+  fraud/scam scope-guard. Runs web_tech_fingerprint + tracker_reverse via collect.py (raw/analysis split — no
+  graph). Wired into supervisor.md (3rd line, the ownership-corroborator pivot chain, and the red-team
+  `demand_corroborator` -> go-get-the-tracker loop). Locked in CAPABILITY-LOCK.
 - [G15] (gap/med/open) — outside-in TTP playbook in web_searcher.md (adversary-pattern checks by category:
   fraud=ad-transparency+reviews+is-it-official; influence=syndication; phishing=lookalikes). TTP-keyed, repeatable.
 - [G16] (gap/med/open) — traffic/reach analytics (SimilarWeb-style) + app-store scale signals (harm sizing).
