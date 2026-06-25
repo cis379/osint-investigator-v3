@@ -11,6 +11,9 @@ SELECTOR_PATTERNS = {
     "hash_md5": re.compile(r'^[a-fA-F0-9]{32}$'),
     "hash_sha1": re.compile(r'^[a-fA-F0-9]{40}$'),
     "hash_sha256": re.compile(r'^[a-fA-F0-9]{64}$'),
+    # Only the DISTINCTIVE prefixed tracker formats (won't collide with domain/phone/
+    # username). Bare numeric IDs (Pixel/Salesforce) are ambiguous -> require explicit type.
+    "tracker_id": re.compile(r'^(UA-\d{4,10}-\d{1,4}|G-[A-Z0-9]{6,12}|GTM-[A-Z0-9]{4,9}|AW-\d{9,12}|ca-pub-\d{16})$', re.I),
     "url": re.compile(r'^https?://[^\s/$.?#].[^\s]*$'),
     "domain": re.compile(r'^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$'),
     "telegram_handle": re.compile(r'^@?[a-zA-Z][a-zA-Z0-9_]{4,31}$'),
@@ -27,6 +30,7 @@ DETECTION_ORDER = [
     "hash_sha256",
     "hash_sha1",
     "hash_md5",
+    "tracker_id",
     "url",
     "phone",
     "domain",

@@ -17,6 +17,8 @@ from . import cli_tools
 from . import extra_tools
 from . import infra_tools
 from . import sf_derived_tools
+from . import web_tech_tools
+from . import tracker_reverse_tools
 
 ALL_TOOL_MODULES = [
     username_tools,
@@ -34,6 +36,8 @@ ALL_TOOL_MODULES = [
     extra_tools,
     infra_tools,
     sf_derived_tools,
+    web_tech_tools,
+    tracker_reverse_tools,
 ]
 
 _tool_instances: dict[str, BaseTool] = {}

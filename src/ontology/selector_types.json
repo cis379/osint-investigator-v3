@@ -1745,6 +1745,14 @@
       "category": "identity",
       "tool_count": 0,
       "yields_to": []
+    },
+    "tracker_id": {
+      "description": "Embedded third-party tracker/analytics/ownership ID (GA/AdSense/Pixel/Salesforce/Yandex/...)",
+      "category": "infrastructure",
+      "tool_count": 1,
+      "yields_to": [
+        "domain"
+      ]
     }
   }
 }

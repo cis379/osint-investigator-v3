@@ -521,7 +521,8 @@
         "ext_0996_spiderfoot",
         "ext_0997_maltego",
         "ext_0998_recon-ng",
-        "ext_0999_osint_framework"
+        "ext_0999_osint_framework",
+        "web_tech_fingerprint"
       ],
       "yields": [
         "analytics",
@@ -547,6 +548,7 @@
         "domains",
         "email",
         "emails",
+        "favicon_hash",
         "file",
         "github_profile",
         "hash_md5",
@@ -580,6 +582,7 @@
         "technologies",
         "text",
         "tool_links",
+        "tracker_id",
         "traffic",
         "url",
         "urls",
@@ -590,7 +593,7 @@
         "vulnerability",
         "whois"
       ],
-      "tool_count": 70,
+      "tool_count": 71,
       "description": "Domain name",
       "implemented_tools": [
         "certspotter",
@@ -607,9 +610,10 @@
         "http_headers",
         "google_dork_generator",
         "urlscan",
-        "threatfox"
+        "threatfox",
+        "web_tech_fingerprint"
       ],
-      "implemented_count": 15
+      "implemented_count": 16
     },
     "url": {
       "tools": [
@@ -760,7 +764,8 @@
         "ext_0980_wayback_machine",
         "ext_0982_urlscan.io",
         "ext_0983_unfurl",
-        "ext_0984_checkshorturl"
+        "ext_0984_checkshorturl",
+        "web_tech_fingerprint"
       ],
       "yields": [
         "analytics",
@@ -793,6 +798,7 @@
         "emails",
         "exif",
         "facebook_id",
+        "favicon_hash",
         "file",
         "files",
         "frames",
@@ -828,6 +834,7 @@
         "text",
         "timestamp",
         "timestamps",
+        "tracker_id",
         "traffic",
         "transcript",
         "trends",
@@ -851,7 +858,7 @@
         "whois",
         "youtube_tags"
       ],
-      "tool_count": 145,
+      "tool_count": 146,
       "description": "Full URL",
       "implemented_tools": [
         "http_title",
@@ -860,9 +867,10 @@
         "wayback",
         "http_headers",
         "urlscan",
-        "threatfox"
+        "threatfox",
+        "web_tech_fingerprint"
       ],
-      "implemented_count": 7
+      "implemented_count": 8
     },
     "ip_v4": {
       "tools": [
@@ -3397,6 +3405,31 @@
       ],
       "tool_count": 1,
       "description": "Autonomous System Number",
+      "implemented_tools": [],
+      "implemented_count": 0
+    },
+    "tracker_id": {
+      "tools": [
+        "tracker_reverse"
+      ],
+      "yields": [
+        "domain"
+      ],
+      "tool_count": 1,
+      "description": "Embedded third-party tracker/analytics/ownership ID (GA UA-/G-, GTM-, AdSense ca-pub-, Meta Pixel, Salesforce org, Yandex, etc.); id_kind in entity metadata. A SHARED tracker id is an independent corroborator of common ownership.",
+      "implemented_tools": [
+        "tracker_reverse"
+      ],
+      "implemented_count": 1
+    },
+    "favicon_hash": {
+      "tools": [],
+      "yields": [
+        "domain",
+        "ip_v4"
+      ],
+      "tool_count": 0,
+      "description": "Shodan/FOFA favicon mmh3 hash; pivot http.favicon.hash / icon_hash to co-template hosts (keyed/manual).",
       "implemented_tools": [],
       "implemented_count": 0
     }

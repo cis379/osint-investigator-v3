@@ -50,10 +50,11 @@ def check(cond, msg):
 #   "all"  -> run every tool for the type (fast for domain/name)
 #   "dork" -> run only google_dork_generator (fast username plumbing check)
 #   exclude -> tool names skipped in "all" mode; this suite tests the split PLUMBING,
-#              not coverage, so network-heavy tools (cloud_buckets fires ~80 probes)
-#              are excluded to keep the gate fast. Their plumbing is identical to peers.
+#              not coverage, so network-heavy tools (cloud_buckets fires ~80 probes;
+#              web_tech_fingerprint does a passive+live target fetch) are excluded to keep
+#              the gate fast. Their plumbing is identical to peers.
 CASES = [
-    ("domain",   "example.com",  "domain",   "all",  {"cloud_buckets"}),
+    ("domain",   "example.com",  "domain",   "all",  {"cloud_buckets", "web_tech_fingerprint"}),
     ("name",     "Robin Grieff", "name",     "all",  set()),
     ("username", "allthespills", "username", "dork", set()),
 ]
