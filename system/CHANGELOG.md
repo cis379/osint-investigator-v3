@@ -2,6 +2,20 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-26 (doctrine D2 — flexible seed-driven pivoting; infra-first; no anchoring; no bespoke collection)
+- Watching INV-20260626-001 (a re-run of the INV-001 scam seed) exposed a decision-logic failure: the
+  supervisor OVER-INDEXED on the prior case — it tunneled on the new tracker-ID tooling (`tracker_reverse` 84×,
+  `web_tech_fingerprint` 22×, plus a hand-written urlscan scraper `_arch_step1.py`) and **never ran
+  `reverse_ip`/`robtex`**, so the IP→co-hosted-domain estate engine (which produced ~21 siblings in INV-001)
+  was skipped → 32 nodes/15 domains vs INV-001's 79/40+.
+- Fixed `supervisor.md` pivot doctrine (D2): (1) **EXHAUST the seed's options** — run all `plan_collection`
+  pivots, no cherry-picking; (2) **every investigation is INDEPENDENT** — don't anchor on a prior case's
+  framing/conclusion; (3) **INFRA-FIRST** — build the network (domain→IP→`reverse_ip`/`robtex` co-hosts→
+  subdomains) THEN attribute (trackers/registrant are corroborators, not the map); non-skippable IP→reverse_ip;
+  (4) **collect ONLY through the three lines — no bespoke collection scripts/sub-agents** (bypasses the
+  raw/analysis split, audit log, OPSEC, typed output — if a tool seems missing, check plan_collection then log
+  a GAP); (5) brief the path as a coherent **seed→infra→estate→attribution ARC**. Health + 3 suites GREEN.
+
 ## 2026-06-26 (intake: user_scanner — better email enumerator)
 - Intake **user-scanner** (kaifcodec, PyPI, free/no-key). Validated hands-on in an isolated venv via a
   sub-agent: on the same email it returned a determinate verdict on ~80% of ~100 sites vs **holehe's ~37%

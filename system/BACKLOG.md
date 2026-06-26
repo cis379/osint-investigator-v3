@@ -121,6 +121,17 @@ with operator first; mandate given.
   fraud/scam scope-guard. Runs web_tech_fingerprint + tracker_reverse via collect.py (raw/analysis split — no
   graph). Wired into supervisor.md (3rd line, the ownership-corroborator pivot chain, and the red-team
   `demand_corroborator` -> go-get-the-tracker loop). Locked in CAPABILITY-LOCK.
+- [D2] (doctrine/HIGH/done) — FLEXIBLE SEED-DRIVEN PIVOTING. Triggered by watching INV-20260626-001 (re-run
+  of the INV-001 scam seed): the supervisor OVER-INDEXED on the prior case — it tunneled on the new tracker-ID
+  tooling (tracker_reverse 84×, web_tech_fingerprint 22× + a hand-written urlscan scraper `_arch_step1.py`) and
+  NEVER ran reverse_ip/robtex, skipping the IP→co-hosted-domain estate engine that built ~21 siblings last time
+  → 32 nodes/15 domains vs INV-001's 79/40+. **DONE 2026-06-26:** supervisor.md pivot doctrine now mandates
+  (1) EXHAUST the seed's options via plan_collection (no cherry-picking); (2) every investigation is
+  INDEPENDENT — no anchoring on a prior case's framing/conclusion; (3) INFRA-FIRST (build the network:
+  domain→IP→**reverse_ip/robtex** co-hosts→subdomains, THEN attribute; trackers are corroborators not the map;
+  never leave a discovered IP un-reversed); (4) COLLECT ONLY through the 3 lines — **no bespoke collection
+  scripts/sub-agents** (bypasses raw/analysis split + audit + OPSEC); (5) brief the path as a coherent
+  seed→infra→estate→attribution ARC. — operator observation 2026-06-26.
 - [G15] (gap/med/open) — outside-in TTP playbook in web_searcher.md (adversary-pattern checks by category:
   fraud=ad-transparency+reviews+is-it-official; influence=syndication; phishing=lookalikes). TTP-keyed, repeatable.
 - [G16] (gap/med/open) — traffic/reach analytics (SimilarWeb-style) + app-store scale signals (harm sizing).

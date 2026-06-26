@@ -179,6 +179,10 @@ for input without it; never make the user reconstruct the path from raw logs.
    compress resolved/dead branches to one line and keep detail on the live thread. This is how
    the user learns the method — the "why it mattered" on each PAST step is the tradecraft, shown
    on real moves, so they understand how you got here.
+   Tell it as a coherent **ARC** — `seed → infrastructure → estate → attribution` — not a
+   scattered tool log. If the path doesn't read as a clear story, that's usually a signal the
+   pivots themselves were scattered (you tunneled on one capability or skipped the infra spine) —
+   fix the exploration, not just the prose.
 
 **2. Where that leaves us** — the synthesized current picture by tier (highly likely / probable /
    possible), plus the KEY OPEN QUESTIONS (what we still don't know).
@@ -310,6 +314,37 @@ If `plan_collection` returns structured tools or `web_searchable: true` for a ne
 discovered entity, it is a **candidate pivot**. The pivot_map `yields` for a type also
 tells you what a pivot will likely PRODUCE — use it to plan chains several hops ahead.
 
+**Two disciplines that OVERRIDE everything else in this section:**
+
+1. **EXHAUST THE SEED'S OPTIONS — take all of them.** For the seed AND every new entity,
+   run `plan_collection` and treat EVERY runnable tool it returns as a pivot you owe the
+   investigation. Work them as a checklist. Do NOT conclude, brief "done," or move on to
+   attribution while obvious high-yield pivots sit unrun. **Cherry-picking a few tools —
+   especially the new/shiny ones — and skipping the rest is the #1 failure mode; it leaves
+   half the estate undiscovered.** If you skip a runnable pivot, it's a deliberate, stated
+   choice ("not worth it because X"), never an oversight.
+
+2. **EVERY INVESTIGATION IS INDEPENDENT — do NOT anchor on a prior case.** A previous
+   investigation tells you which TECHNIQUES exist; it never tells you what THIS seed's estate
+   contains. Derive findings ONLY from this seed's own data. Never pattern-match the new seed
+   to an earlier case's framing, entities, or conclusion, and never pre-decide the answer and
+   reverse-engineer toward it. Start at the seed and let the data lead — the shape of THIS
+   network may be completely different.
+
+**Sequence: build the NETWORK first, ATTRIBUTE second (infra-first).**
+Map the infrastructure estate before reasoning about ownership:
+`domain → IP(s) → co-hosted domains → registrar/NS fingerprint → subdomains`, looping each
+new domain back through the domain pivots — and ONLY THEN cluster/attribute with registrant +
+trackers. Tracker IDs and favicon hashes are **corroborators that confirm or split an
+already-enumerated estate — not the primary map.** Leading with tracker-ID correlation before
+you've enumerated the hosting is what leaves the estate tiny and the story incoherent.
+
+**Non-skippable for a domain / url / IP seed** (run before concluding): seed → its IP(s)
+(`dns_lookup`/`rdap`); **EACH discovered IP → `reverse_ip` + `robtex_ip`** (co-hosted domains);
+seed → `crtsh`/`certspotter` (subdomains + cert history); registrar/NS via `rdap`. THEN
+`web_tech_fingerprint`/`tracker_reverse` + registrant for attribution. **Never leave a
+discovered IP un-reversed** — that single pivot is how one scam domain becomes the whole network.
+
 **How to choose pivots (reason each round, don't follow a fixed script):**
 - **Confidence-gate:** pivot from `highly_likely`/`probable` entities first; a `possible`
   entity is a weaker lead — pivot only if it's the only thread.
@@ -323,15 +358,29 @@ tells you what a pivot will likely PRODUCE — use it to plan chains several hop
     (accounts) and `hudsonrock_email` (breach). (We currently leave these unverified —
     don't.)
   - `username` → `maigret`/`github_user` → linked email/real name → pivot those.
-  - `domain` → `dns_lookup` → IP → `ripestat_network`/`greynoise_community` (ASN/noise).
+  - `domain` → `dns_lookup`/`rdap` → **IP(s)** → **`reverse_ip` + `robtex_ip` (co-hosted
+    domains — THE estate-expansion engine; how one scam domain becomes the whole network)** →
+    `ripestat_network`/`greynoise_community` (ASN/noise). Loop each new co-hosted domain back
+    through the domain pivots until it stops yielding new hosts.
+  - `domain` → `crtsh`/`certspotter` (subdomains + CT cert history) → more hosts/infra.
   - `domain`/`url` → **`web_tech_fingerprint`** (active line) → `tracker_id` → **`tracker_reverse`**
     → other domains embedding the SAME id. This is the **ownership-corroborator chain**: a shared
     strong tracker id (GA `UA-`/`G-`, AdSense `ca-pub-`, Yandex) is the independent evidence that
     upgrades a `co_hosted_with` link to `same_operator_as`; *different* ids on co-hosted sites
     SPLIT them. Reach for this whenever you'd otherwise be tempted to merge on shared hosting alone.
   - `email` → `holehe` (accounts) + `hudsonrock_email` (breach) → usernames/names.
-- **Avoid loops & noise:** don't re-collect an entity already collected; don't pivot on
-  generic/false-positive `possible` hits just because a tool exists.
+- **Avoid loops, noise & tunnel-vision:** don't re-collect an entity already collected;
+  don't pivot on generic/false-positive `possible` hits just because a tool exists; and don't
+  HAMMER one tool (e.g. reverse-looking-up every tracker id dozens of times) while standard
+  pivots like `reverse_ip` go unrun — that's the tunnel-vision failure mode.
+- **Collect ONLY through the three lines — NEVER hand-write bespoke collection.** All data
+  collection goes through the registered tools via the gatherer (`collect.py`), the
+  active-collector, or the web-searcher. Do NOT (and do not let a sub-agent) write ad-hoc
+  Python/`requests` scripts to scrape urlscan/APIs/sites yourself — that bypasses the
+  raw/analysis split, the audit log, the OPSEC posture, and the typed output. If a capability
+  seems missing, FIRST check `plan_collection` for a registered tool; if there genuinely is
+  none, log it as a GAP for the System Manager (don't improvise a one-off scraper). A
+  dispatched collector runs a SKILL (gatherer/active/web), not bespoke code.
 
 **Drive the loop:** each round, (1) collect, (2) analyze + tier, (3) commit, (4) list
 the new entities and the pivots the ontology offers for each, (5) recommend the best
