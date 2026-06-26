@@ -2,6 +2,18 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-26 (intake analysis: OSINT Navigator + Spotlight — backlogged, key stored)
+- Reviewed two external OSINT projects (analysis only, no wiring yet). **OSINT Navigator** (Indicator/Tom
+  Vaillant): RAG tool-discovery over ~7,500 tools, MCP for Claude Code, member API/MCP (~50/day). Operator has
+  a subscription — key stored in **`.env` as `OSINT_NAVIGATOR_API_KEY` (gitignored, NOT committed)**, verified
+  readable via `credentials.get_key()`. Decision: integrate at the **Manager** (intake/tool-discovery — best via
+  the HF dataset https://huggingface.co/datasets/tomvaillant/osint-tool-database, diffed against our ontology)
+  and the **Red Team** (independent gap-covering/coverage challenges via the live MCP) — deliberately NOT the
+  supervisor (keep it on our own ontology). **Spotlight** (buriedsignals): journalist editorial CMS; overlaps us;
+  NO OSS license → borrow methodology IDEAS only (readiness checklist, cycle-targeting, provenance hashing) into
+  the red-team/report gates; reject code/tools. Both logged as INTAKE-20260626-* (approved; wire next). No
+  functional change this entry — backlog + secure key storage only.
+
 ## 2026-06-26 (D2 refine — analytic principles over source mandates + coverage check; OV-1 tweak)
 - The completed INV-20260626-001 (re-run of the INV-001 seed) VALIDATED D1+RT1+R1 end-to-end: 81 nodes/51
   domains (after the operator's IP prompt), NO over-merge (split Walker vs a separate "Operator-2" on per-site

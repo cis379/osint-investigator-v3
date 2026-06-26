@@ -18,7 +18,8 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 - **Unproven / to test:** end-to-end report-writer + red-team grounding loop (live); `tracker_reverse`
   live PublicWWW/SpyOnWeb lookup. Health: GREEN · 58 tools · 8 skills. Baseline tag: v3-baseline-2026-06-26.
 - **Recent intake:** `user_scanner` wired (email-only, structured) 2026-06-26 — better email enumerator than
-  holehe (mitigates B4). See INTAKE QUEUE.
+  holehe (mitigates B4). **Queued (approved, not yet wired):** OSINT Navigator → Manager-discovery + Red-Team
+  gap-covering (subscription key in `.env`); Spotlight → borrow methodology only. See INTAKE QUEUE.
 
 ## BUGS — system (addressable; Manager can fix test-gated)
 - [B1] (bug/med/done) — `collect.py` output schema inconsistent: single-tool returns `{tool,...}`,
@@ -167,6 +168,36 @@ with operator first; mandate given.
   input() → would hang), `--allow-loud` (OPSEC: emails the target). Wrapper `src/tools/userscanner_tools.py`
   (email-only, --no-nsfw, positives-only, `possible`). Dep: pip `user-scanner` (httpx, light). TOOL_FLOOR
   57→58. Live-tested. — user 2026-06-26.
+
+- [INTAKE-20260626-osint-navigator] (intake/**approved — design+wire next**) — OSINT Navigator (Indicator
+  Media / Tom Vaillant): a RAG tool-DISCOVERY engine over ~7,500 OSINT tools (9 toolkits, weekly-refreshed,
+  deprecated-flagged; LLM recommends ONLY tools in the DB — no hallucinated tools). MCP supports Claude Code;
+  API/MCP for members (~50 queries/day). **Operator has a subscription; key stored in `.env` as
+  `OSINT_NAVIGATOR_API_KEY` (gitignored, NOT committed).** Underlying dataset:
+  https://huggingface.co/datasets/tomvaillant/osint-tool-database. **Decision: integrate at TWO targets
+  (NOT the supervisor — keep it on our own ontology):**
+  (1) **MANAGER / intake-discovery** — I use Navigator to find new best-in-class tools to wire + keep our
+      ontology honest/fresh (flag deprecated, surface per-selector gaps). Best impl: pull the **HF dataset
+      locally** (free, no rate-limit, bulk) and diff against our `tools_registry`/`pivot_map`; refresh periodically.
+  (2) **RED TEAM (gap-covering)** — the red team queries Navigator for tools/angles/CATEGORIES the
+      investigation didn't cover and raises them as INDEPENDENT completeness challenges ("you didn't check
+      category X"). Best impl: the **live MCP/API** (per-case, low volume — fits the 50/day budget; query once
+      by category, not per-entity). Findings → coverage challenges + Manager GAP log (most surfaced tools won't
+      be wired — that's fine, they become manual leads / wiring candidates).
+  Caveats: 50/day rate limit (red team must query sparingly); external dependency on an agent that's currently
+  self-contained; recommends tools, doesn't pull data (strengthens COMPLETENESS challenges, not factual
+  refutation). Next: design the MCP config + a small Manager-side dataset-diff helper, then wire (health-gated).
+  — operator 2026-06-26.
+- [INTAKE-20260626-spotlight] (intake/**borrow-methodology, reject code**) — buriedsignals/spotlight: a
+  journalist editorial case-management system (Python multi-agent CLI, skills/agents/AGENTS.md). Overlaps us
+  heavily (confidence grounding ≈ our tiering; independent fact-check ≈ our red team; report gen). Tools are
+  keyed/newsroom (Firecrawl/Mycroft/Junkipedia) — not for us. **NO explicit OSS license stated → do NOT copy
+  files/code; LEARN from the methodology only.** Borrow these IDEAS into our red-team/report gates: (a) a
+  READINESS CHECKLIST before shipping (their 6 editorial checks — esp. "≥2 independent sources", "no
+  unresolved disputes", "known gaps explicitly stated", "primary documents cited"); (b) CYCLE-TARGETING (a
+  failed check makes the NEXT round target that specific gap — complements our coverage check); (c) PROVENANCE
+  discipline (cite only locally-traceable material + source hashes — hardens grounding). Reject the
+  workflow/tooling. Effort: small doctrine edits to red_team.md (Mode 2) + supervisor coverage loop. — operator 2026-06-26.
 
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
