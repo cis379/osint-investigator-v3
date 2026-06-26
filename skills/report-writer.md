@@ -83,8 +83,13 @@ Authoring rules:
 - **Match wording to tier.** Use "is / confirmed / proves" ONLY for `highly_likely` findings; use
   "likely / appears / suggests / possible" for `probable`/`possible`. The graph's tier is the ceiling
   on your certainty.
-- **`kind`** in the OV-1: `seed` / `cluster` / `finding` / `entity`. Keep the OV-1 to the few nodes
-  that tell the headline story.
+- **`kind`** in the OV-1: `seed` / `cluster` / `finding` / `entity`. The OV-1 must center the
+  **KEY FINDINGS** — the headline ANSWER (who/what, the operator split, the load-bearing
+  corroborators), not the pivot plumbing. A reader who sees ONLY the OV-1 should grasp the
+  conclusion: start from the seed, show the few `finding`/`cluster` nodes that ARE the answer,
+  and label edges with the evidence that earned them (e.g. "shared GA4 → same operator (highly
+  likely)"). Keep it to ~5–8 nodes; push intermediate infrastructure to the story sections.
+  It is a conclusions diagram, not a process diagram.
 - **Cite everything.** Findings and tool-returns reference the specific tool/source.
 
 ## Step 3 — Build the report + refresh graph & bibliography

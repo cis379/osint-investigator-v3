@@ -331,19 +331,33 @@ tells you what a pivot will likely PRODUCE — use it to plan chains several hop
    reverse-engineer toward it. Start at the seed and let the data lead — the shape of THIS
    network may be completely different.
 
-**Sequence: build the NETWORK first, ATTRIBUTE second (infra-first).**
-Map the infrastructure estate before reasoning about ownership:
-`domain → IP(s) → co-hosted domains → registrar/NS fingerprint → subdomains`, looping each
-new domain back through the domain pivots — and ONLY THEN cluster/attribute with registrant +
-trackers. Tracker IDs and favicon hashes are **corroborators that confirm or split an
-already-enumerated estate — not the primary map.** Leading with tracker-ID correlation before
-you've enumerated the hosting is what leaves the estate tiny and the story incoherent.
+**Confidence comes from CONVERGENCE, not from any one source.** This is the analytic core, and
+it catches BOTH failure modes — skipping a category AND tunneling on one:
+- A SINGLE signal — one tracker id, one shared kit, one shared host, one footer — is a LEAD, not
+  a conclusion. Raise a finding's tier only when MULTIPLE INDEPENDENT source-types agree (e.g.
+  shared registrant + shared analytics property; co-hosting + a unique shared contact). Two reads
+  of the SAME underlying fact are one source, not two.
+- Don't OVER-INVEST in one technique. If you've run the same tool dozens of times (reverse-looking-
+  up every tracker, hashing every asset) while whole categories of evidence sit untouched, stop and
+  broaden. No single signal should dominate the picture.
 
-**Non-skippable for a domain / url / IP seed** (run before concluding): seed → its IP(s)
-(`dns_lookup`/`rdap`); **EACH discovered IP → `reverse_ip` + `robtex_ip`** (co-hosted domains);
-seed → `crtsh`/`certspotter` (subdomains + cert history); registrar/NS via `rdap`. THEN
-`web_tech_fingerprint`/`tracker_reverse` + registrant for attribution. **Never leave a
-discovered IP un-reversed** — that single pivot is how one scam domain becomes the whole network.
+**Cover the evidence CATEGORIES the seed affords (breadth before depth).** Don't prescribe specific
+tools — prescribe the QUESTIONS, and use whatever registered tools answer them for this seed:
+- **Registration / ownership** — who registered it; what org, contacts, identifiers?
+- **Hosting / estate** — where does it live, and what else lives there? An IP or shared host is a
+  high-value EXPANSION HUB — enumerate its neighborhood with whatever co-host sources exist
+  (reverse_ip, robtex, urlscan passive-DNS…) and corroborate across more than one.
+- **Content / identifiers** — embedded trackers, kits, favicons, branding (the active line), used as
+  CORROBORATORS to cluster or SPLIT an estate you've enumerated — not as the primary map.
+- **Reputation / behavior** — scam reports, breach exposure, reviews.
+Generally build the network (registration + hosting/estate) before reasoning hard about ownership,
+then corroborate/split with content+identifier signals. A category you COULD run but didn't is a hole.
+
+**Coverage check before you conclude.** Before you brief "done" or launch the report, sweep every
+discovered entity: does `plan_collection` offer a runnable tool you have NOT run on it? If so, either
+run it or state why it isn't worth it. **Don't conclude with available-but-unrun pivots sitting on
+real (`highly_likely`/`probable`) entities** — that is the "left half the estate undiscovered" failure,
+caught before it reaches the user.
 
 **How to choose pivots (reason each round, don't follow a fixed script):**
 - **Confidence-gate:** pivot from `highly_likely`/`probable` entities first; a `possible`

@@ -2,6 +2,25 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-26 (D2 refine — analytic principles over source mandates + coverage check; OV-1 tweak)
+- The completed INV-20260626-001 (re-run of the INV-001 seed) VALIDATED D1+RT1+R1 end-to-end: 81 nodes/51
+  domains (after the operator's IP prompt), NO over-merge (split Walker vs a separate "Operator-2" on per-site
+  GA4/UA properties; correctly graded shared Google Ads `AW-` as medium→caps at probable vs GA4/UA property
+  as strong/ownership-grade), and BOTH red-team gates fired — analysis (×2 rounds, down-tiered museivaticani/
+  notredame) AND report-grounding Mode 2 (`_report_review.json` caught 2 over-claims — "shell company"→
+  "Delaware LLC" + a tier mismatch — writer fixed → `grounded` before ship). The narrative report is strong.
+- BUT it OVER-INVESTED in website-kit fingerprinting (web_tech_fingerprint 132×, tracker_reverse 86×, plus
+  bespoke `_arch_*` JS/asset scrapers) — the tunnel-vision failure, inverted (last time it skipped infra; this
+  time it skipped breadth for kits). Per operator guidance, REFINED D2 in supervisor.md: replaced the HARD
+  source-specific mandates ("never leave an IP un-reversed", non-skippable named-tool list) with FLEXIBLE
+  ANALYTIC PRINCIPLES — (a) confidence comes from CONVERGENCE of multiple INDEPENDENT source-types, a single
+  signal (tracker/kit/host) is a lead not a conclusion, don't over-invest in one technique; (b) cover the
+  evidence CATEGORIES the seed affords (registration / hosting-estate / content-identifiers / reputation) via
+  whatever registered tools fit; (c) a **coverage check** before concluding — don't finish while
+  `plan_collection` offers unrun tools on real entities. Kept no-bespoke-collection + no-anchoring.
+- Refined `report-writer.md`: the BLUF OV-1 must center the KEY FINDINGS (a conclusions diagram, ~5-8 nodes,
+  edges labeled with the evidence) — not the pivot plumbing. Health + 3 suites GREEN.
+
 ## 2026-06-26 (doctrine D2 — flexible seed-driven pivoting; infra-first; no anchoring; no bespoke collection)
 - Watching INV-20260626-001 (a re-run of the INV-001 scam seed) exposed a decision-logic failure: the
   supervisor OVER-INDEXED on the prior case — it tunneled on the new tracker-ID tooling (`tracker_reverse` 84×,

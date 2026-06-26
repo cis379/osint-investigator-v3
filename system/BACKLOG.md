@@ -132,6 +132,17 @@ with operator first; mandate given.
   never leave a discovered IP un-reversed); (4) COLLECT ONLY through the 3 lines — **no bespoke collection
   scripts/sub-agents** (bypasses raw/analysis split + audit + OPSEC); (5) brief the path as a coherent
   seed→infra→estate→attribution ARC. — operator observation 2026-06-26.
+  **REFINED 2026-06-26 (full INV-20260626-001 result):** the completed run VALIDATED D1+RT1+R1 — 81 nodes/51
+  domains (after the IP prompt), it did NOT over-merge (split Walker vs a separate "Operator-2" on per-site
+  GA4/UA; calibrated Ads `AW-`=medium→probable vs GA4/UA property=strong), and BOTH red-team gates ran
+  (analysis ×2 + report-grounding Mode 2 caught 2 over-claims → fixed → `grounded` before ship). BUT it
+  OVER-INVESTED in website-kit fingerprinting (web_tech 132×, tracker_reverse 86×, bespoke `_arch_*` JS/asset
+  scrapers) — same tunnel-vision failure, inverted. Per operator: replaced D2's HARD source-specific mandates
+  with FLEXIBLE ANALYTIC PRINCIPLES — confidence from CONVERGENCE of multiple INDEPENDENT sources (no single
+  signal dominates); cover evidence CATEGORIES (registration/hosting/content/reputation) via whatever
+  registered tools fit, not named-tool mandates; + a **coverage check** (don't conclude while plan_collection
+  offers unrun tools on real entities). Kept no-bespoke + no-anchoring. Also refined report-writer OV-1: the
+  BLUF graphic must center KEY FINDINGS (a conclusions diagram, ~5-8 nodes), not the pivot plumbing.
 - [G15] (gap/med/open) — outside-in TTP playbook in web_searcher.md (adversary-pattern checks by category:
   fraud=ad-transparency+reviews+is-it-official; influence=syndication; phishing=lookalikes). TTP-keyed, repeatable.
 - [G16] (gap/med/open) — traffic/reach analytics (SimilarWeb-style) + app-store scale signals (harm sizing).
