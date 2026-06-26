@@ -132,6 +132,17 @@ with operator first; mandate given.
   Passive-first worked (C1 from Wayback, zero live touch; only live C2 sites escalated). tracker_reverse's live
   PublicWWW/SpyOnWeb lookup still unproven against the network.
 
+## INTAKE QUEUE (resources to assess — Manager classifies: wire / backlog / guide / reject)
+- [INTAKE-20260626-user-scanner] (intake/open) — github.com/kaifcodec/user-scanner (PyPI `user-scanner`
+  v1.4.0, 2.4k★, free/no-key, Python CLI **and** library). Email+username enumeration across 285+ vectors
+  (100+ email / 185+ username) + "profile data extraction" (scrapes metadata) + Hudson Rock breach.
+  **Assessment:** the username side DUPLICATES our locked best-in-class (sherlock/maigret/naminter/linkook);
+  Hudson Rock already wired (`hudsonrock_email`). Novel value = (a) EMAIL enumeration breadth (100+ sites)
+  vs our `holehe` (B4: rate-limited, lead-only), and (b) profile-data scraping (fragile — cf. socid_extractor
+  B2; 285 live HTTP checks = slow + OPSEC). **Recommend:** do NOT wire wholesale; VALIDATE the email mode vs
+  holehe (coverage + rate-limit). If it materially beats holehe, wire EMAIL-ONLY as a 2nd free email
+  enumerator (graceful degrade); else backlog. Don't add a 4th username enumerator. — user 2026-06-26.
+
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
 YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on when keyed.
