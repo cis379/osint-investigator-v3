@@ -6,6 +6,18 @@ The System Manager triages + fixes from here (test-gated). Supervisor sessions A
 
 Format: `[ID] (type/priority/status) — description — source`. status: open | in-progress | done | wontfix.
 
+## CURRENT STATUS (as of 2026-06-26) — where to pick up
+- **Bugs:** all closed (B1–B6, B8–B10 done; B7 wontfix-ish). No open bugs.
+- **Operator brief (2026-06-24): COMPLETE** — D1 ✅ · RT1 ✅ · G14 ✅ · A1 ✅ · R1 ✅.
+- **Open worklist (free, buildable next):** G15 (TTP playbook in web_searcher), G16 (traffic/reach +
+  app-store harm-sizing), F1 (standing supervisor-quality eval), G8 (Telegram/Instagram session runner),
+  G12 (dark-web via local Tor proxy). **G3** partly eased by `web_tech_fingerprint` (reads full JS source).
+- **Open (structural / need keys or $, document don't fake):** G4 people last-mile · G5 phone→owner ·
+  G6 reverse-image · G7 deep breach · G9 non-US/UAE registries · GAP-20260624-01 reverse-WHOIS (the big
+  one; G14 partly routes around it via shared tracker IDs) · the Tier-2 keyed tools.
+- **Unproven / to test:** end-to-end report-writer + red-team grounding loop (live); `tracker_reverse`
+  live PublicWWW/SpyOnWeb lookup. Health: GREEN · 57 tools · 8 skills. Baseline tag: v3-baseline-2026-06-26.
+
 ## BUGS — system (addressable; Manager can fix test-gated)
 - [B1] (bug/med/done) — `collect.py` output schema inconsistent: single-tool returns `{tool,...}`,
   `--run-all` returns `{"results":[...]}`. Unify to one shape. — design review.
