@@ -20,7 +20,11 @@ regress the capabilities below. A change that breaks a lock item is reverted, no
    MECHANISM (3 tiers, re-grade, never-drop) is locked; the labels were renamed 2026-06-24.
 5. **Honest ontology** — implemented-vs-catalog flags stay consistent (annotate_implemented).
 6. **Declarative runners** — HttpTool / CliTool: a new tool is a spec, not bespoke plumbing.
-7. **Report last-mile** — graph.json/html + bibliography + report.md/html generate.
+7. **Report last-mile** — graph.json/html + bibliography + report.md/html generate. The report is a
+   NARRATIVE product (BLUF+OV-1 → investigation story → key findings → appendices) built from
+   `_report.json`+graph.json (diagrams generated from the graph, so they can't depict absent links),
+   and it ships only after the red-team report-grounding gate (Mode 2) returns `grounded`. Don't
+   regress the narrative structure, the grounded-diagram property, or the grounding gate without sign-off.
 8. **Red-team gate** (`skills/red_team.md`) — adversarial, READ-ONLY review that runs before
    every report (and on demand mid-investigation). It challenges merges/inferences; the supervisor
    reconciles (relabel/down-tier/split, keep-don't-drop). The process control for #4's "no over-merge"

@@ -2,6 +2,28 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-26 (R1 — narrative report overhaul + report-grounding gate)
+- **R1 done (architectural, user sign-off):** rebuilt the report last-mile as the share-with-humans
+  NARRATIVE product. Flow: report-writer authors `_report.json` -> `python -m src.report.build` renders
+  `report.md` + styled `report.html`. Structure: **BLUF (+ an OV-1 overview diagram) -> the Investigation
+  STORY** (one section per pivot, semi-instructional tone for non-experts, showing **what each tool
+  returned** + a graph of what the pivot added) **-> Key Findings -> Appendices** (full entity + relationship
+  tables, raw-output pointer, glossary).
+- **Visuals = Mermaid, generated FROM graph.json** (`src/report/diagram.py`): `subgraph_for_values` draws
+  only the real edges among a pivot's entities (a picture can't depict a link the data lacks);
+  `overview_ov1` renders the editorial BLUF schematic. Tier-styled (solid/dashed/faint). Renders in
+  report.html via mermaid.js (CDN), degrades to code-fence in report.md, prints to PDF. No Node/browser/
+  graphviz dependency. `cti_report.py`/`html_report.py` rewritten to consume the spec + graph; `build.py`
+  orchestrates. Smoke-tested on INV-001's real 79-node graph.
+- **Red-team gains Mode 2 (report grounding)** in `skills/red_team.md`: checks the DRAFT report against
+  graph.json + investigation.md for hallucinations / over-claims-vs-tier / phantom data / citation drift /
+  diagram mismatch, writes `_report_review.json`, and loops with the report-writer until `verdict: grounded`.
+  The report ships ONLY when 100% grounded — the report-stage mirror of the Phase 5.5 analysis gate.
+  Wired into report-writer.md + supervisor.md Phase 6. Locked as CAPABILITY-LOCK item 7. Health GREEN.
+- Logged the **INV-001 G14/A1 validation** as an F1 data point: web_tech_fingerprint recovered the shared
+  Google Ads (C1) and Salesforce org (C2) IDs and showed the two clusters share none — the new toolchain
+  reaches the correct two-operator answer the original run missed.
+
 ## 2026-06-25 (A1 + G14 — active collection + tracker-ID fingerprinting)
 - Preceded by an off-the-shelf survey (build vs buy): off-the-shelf fingerprinters (Wappalyzer family,
   webanalyze) throw away the RAW id and/or need Go/Node; maintained reverse-lookup is paid/flaky.

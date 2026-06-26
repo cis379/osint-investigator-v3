@@ -63,9 +63,13 @@ State: **57 runnable tools · 20/92 selector types runnable · 8 skills · 3 sys
    │                   ── challenges over-merges / single-source "highly likely" / verb drift
    │                   ── writes _redteam.json; SUPERVISOR reconciles (relabel/down-tier/split,
    ▼                      keep-don't-drop) and re-commits via graph_commit; ~2 rounds
- [skill: report-writer.md]  → report.md (report/cti_report.py)
-                              + report.html (report/html_report.py)
-                              + bibliography.html (report/bibliography.py)
+ [skill: report-writer.md]  → authors _report.json (BLUF+OV-1 → pivot-by-pivot STORY with
+   │   what each tool returned + a grounded Mermaid subgraph per pivot → key findings → appendices)
+   │   → python -m src.report.build → report.md + report.html (mermaid diagrams from graph.json)
+   ▼   + bibliography.html
+ [skill: red_team.md MODE 2]  ── REPORT-GROUNDING GATE: checks the DRAFT vs graph.json+log for
+   hallucinations/over-claims/phantom-data/citation-drift → _report_review.json → writer fixes →
+   re-review until verdict=grounded. Report ships only when 100% grounded.
 
  OUTPUTS per case in investigations/INV-YYYYMMDD-NNN/:
    investigation.md (raw audit) · graph.json/.html · bibliography.html · state.json · report.md/.html
@@ -116,8 +120,10 @@ State: **57 runnable tools · 20/92 selector types runnable · 8 skills · 3 sys
   `export_for_visualization` with tier styling). **graph/visualizer.py** — vis.js HTML.
 - **logger/investigation_log.py** — `InvestigationLogger` (init_log, log_step, log_tool_execution,
   log_analysis) — the markdown audit trail.
-- **report/cti_report.py** (`generate_cti_report` → report.md), **html_report.py**
-  (`generate_html_report` → report.html), **bibliography.py** (`generate_bibliography`).
+- **report/cti_report.py** (`generate_cti_report` → narrative report.md), **html_report.py**
+  (`generate_html_report` → styled report.html w/ mermaid.js), **diagram.py** (grounded Mermaid
+  OV-1 + per-pivot subgraphs from graph.json), **build.py** (`build_reports` orchestrator: reads
+  `_report.json`+graph+state → both reports), **bibliography.py** (`generate_bibliography`).
 
 ### Tests (`tests/`)
 - **replay_baseline.py** (split invariants across domain/name/username), **test_ontology_honesty.py**
@@ -134,8 +140,8 @@ State: **57 runnable tools · 20/92 selector types runnable · 8 skills · 3 sys
 | **gatherer.md** | Structured collector | skilled OPERATOR: run `collect.py` with judgment (pick tools, slow→individual, retry-once transient), return raw; NO analysis/graph |
 | **web_searcher.md** | Web-search collector | WebSearch/WebFetch; **snippet IS evidence** (blocked page ≠ missing finding); relatives/public-records queries; cite everything; log via web_collect; NO graph |
 | **active_collector.md** | Active collector (3rd line) | ACTIVELY touches the target's own infra: `web_tech_fingerprint` (live source → tracker/analytics/ownership IDs + favicon hash) + `tracker_reverse` (id → co-using domains) — the **independent ownership corroborator**. OPSEC-aware (passive-first, proxy seam, fraud-scope). Logs raw via collect.py; NO graph |
-| **red_team.md** | Adversarial reviewer | READ-ONLY pre-report gate (+ on-demand mid-investigation); challenges every merge/inference (over-merges, single-source "highly likely", attribution-verb drift, missed cluster splits); returns down-tier/relabel/split recs in `_redteam.json`; supervisor reconciles. Process control for the anti-over-merge doctrine. NO graph writes |
-| **report-writer.md** | CTI product | read graph+log → report.md/html + bibliography; evidence-based, BLUF-first; runs only AFTER the red-team pass |
+| **red_team.md** | Adversarial reviewer (2 modes) | **Mode 1** READ-ONLY pre-report gate (+ on-demand): challenges merges/inferences (over-merges, single-source "highly likely", verb drift, cluster splits) → `_redteam.json`. **Mode 2** report-grounding gate: checks the DRAFT report vs graph+log for hallucinations/over-claims/phantom-data/citation-drift → `_report_review.json`. NO graph/report writes — supervisor/report-writer reconcile |
+| **report-writer.md** | CTI product (narrative) | authors `_report.json` (BLUF+OV-1 → pivot-by-pivot STORY, semi-instructional, with what each tool returned + a grounded Mermaid subgraph per pivot → key findings → appendices) → `src.report.build` → report.md/html; collaborates with red_team Mode 2 until **100% grounded** |
 
 (`.claude/commands/investigate.md` is the slash-command entry that mirrors investigate.md.)
 

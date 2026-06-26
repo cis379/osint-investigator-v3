@@ -282,7 +282,14 @@ print('Graph HTML generated')
 "
 ```
 
-2. Spawn the report writer agent to produce the CTI report.
+2. Spawn the **report writer** agent (`skills/report-writer.md`) to produce the narrative report.
+   It authors `{CASE_DIR}/_report.json` (BLUF + OV-1, the pivot-by-pivot STORY with what each tool
+   returned + a grounded subgraph per pivot, key findings, glossary), renders report.md/html via
+   `python -m src.report.build`, then runs the **red-team GROUNDING loop** (red_team.md Mode 2):
+   the red team checks the draft against graph.json + investigation.md for hallucinations/over-claims/
+   phantom data/citation drift and hands back `_report_review.json`; the writer fixes each and
+   re-reviews until the verdict is `grounded`. The report ships only when 100% grounded. (This is the
+   report-stage mirror of the Phase 5.5 analysis gate.)
 
 3. **Give the user a Methodology Debrief** (the durable lesson). After the report, present a
    final recap: the FULL path (every pivot -> what it revealed -> why it mattered), the 2-3 key

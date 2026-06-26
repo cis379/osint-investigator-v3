@@ -82,9 +82,16 @@ with operator first; mandate given.
   supervisor reconciles via graph_commit (relabel/down-tier/split, KEEP-don't-drop) over ~2 rounds.
   Wired into supervisor.md Phase 5.5; locked in CAPABILITY-LOCK. Next: G14 gives it a real tracker-ID
   corroborator to test merges against.
-- [R1] (architectural/report/open) — Report-writer overhaul: report.md/html must be a NARRATIVE STORY
+- [R1] (architectural/report/done) — Report-writer overhaul: report.md/html must be a NARRATIVE STORY
   of the investigation (how we got there; key pivots + decisions + when), structured data -> APPENDICES.
-  BLUF -> Narrative -> Key findings -> Appendices. The share-with-humans product. (B5 fix done; this is bigger.)
+  BLUF -> Narrative -> Key findings -> Appendices. The share-with-humans product. **DONE 2026-06-26
+  (user sign-off):** new flow — report-writer authors `_report.json`; `src/report/build.py` renders
+  report.md + styled report.html (mermaid.js). BLUF carries an **OV-1** diagram; each pivot section is
+  semi-instructional (teaches the technique), shows **what each tool returned**, and a **grounded
+  Mermaid subgraph** (src/report/diagram.py — drawn from graph.json, can't depict an absent link); all
+  data -> appendices. **Red-team Mode 2 (report grounding)** checks the draft vs graph+log for
+  hallucinations/over-claims/phantom-data/citation-drift and loops with the writer until `grounded`.
+  Visuals = Mermaid (no Node/browser/graphviz dep). Locked in CAPABILITY-LOCK item 7.
 - [G14] (gap/HIGH/done) — WEB-TECH tracker-ID fingerprinting: active extractor (GA/AdSense/Pixel/Salesforce/
   Brevo/Yandex IDs -> identifier entities) + reverse-lookup (PublicWWW/SpyOnWeb/web-search). The reused-infra
   unlock; ALSO gives D1 its independent corroborator. Would have linked cluster-2 via its Salesforce org ID.
@@ -105,6 +112,13 @@ with operator first; mandate given.
 - [G16] (gap/med/open) — traffic/reach analytics (SimilarWeb-style) + app-store scale signals (harm sizing).
 - [F1] (standing/open) — supervisor analysis-quality evaluation: compare more runs to ground truth; tighten
   merge/precision/tiering doctrine from findings.
+  **Data point 2026-06-26 (G14/A1 validation vs INV-20260624-001 ground truth):** ran `web_tech_fingerprint`
+  on 4 real ticket-scam domains. Cluster 1 (Walker/Feel-the-City) sites share **Google Ads `AW-16724105870`**;
+  Cluster 2 (My Top Tour/Al Andalus) sites share **Salesforce org `00D8b000001358R`** (the exact corroborator
+  the Indicator/Maldita journalists used); the two clusters share NO IDs → the tool would have SPLIT them into
+  two operators, refuting INV-001's over-merge. Confirms D1+RT1+A1/G14 reach the correct two-operator answer.
+  Passive-first worked (C1 from Wayback, zero live touch; only live C2 sites escalated). tracker_reverse's live
+  PublicWWW/SpyOnWeb lookup still unproven against the network.
 
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
