@@ -385,7 +385,8 @@
         "ext_0996_spiderfoot",
         "ext_0997_maltego",
         "ext_0998_recon-ng",
-        "ext_0999_osint_framework"
+        "ext_0999_osint_framework",
+        "user_scanner"
       ],
       "yields": [
         "address",
@@ -430,7 +431,7 @@
         "validation",
         "visualizations"
       ],
-      "tool_count": 58,
+      "tool_count": 59,
       "description": "Email address",
       "implemented_tools": [
         "pgp_keyserver",
@@ -439,9 +440,10 @@
         "disify",
         "hudsonrock_email",
         "holehe",
-        "google_dork_generator"
+        "google_dork_generator",
+        "user_scanner"
       ],
-      "implemented_count": 7
+      "implemented_count": 8
     },
     "domain": {
       "tools": [

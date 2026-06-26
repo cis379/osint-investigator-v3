@@ -16,7 +16,9 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
   G6 reverse-image · G7 deep breach · G9 non-US/UAE registries · GAP-20260624-01 reverse-WHOIS (the big
   one; G14 partly routes around it via shared tracker IDs) · the Tier-2 keyed tools.
 - **Unproven / to test:** end-to-end report-writer + red-team grounding loop (live); `tracker_reverse`
-  live PublicWWW/SpyOnWeb lookup. Health: GREEN · 57 tools · 8 skills. Baseline tag: v3-baseline-2026-06-26.
+  live PublicWWW/SpyOnWeb lookup. Health: GREEN · 58 tools · 8 skills. Baseline tag: v3-baseline-2026-06-26.
+- **Recent intake:** `user_scanner` wired (email-only, structured) 2026-06-26 — better email enumerator than
+  holehe (mitigates B4). See INTAKE QUEUE.
 
 ## BUGS — system (addressable; Manager can fix test-gated)
 - [B1] (bug/med/done) — `collect.py` output schema inconsistent: single-tool returns `{tool,...}`,
@@ -133,15 +135,16 @@ with operator first; mandate given.
   PublicWWW/SpyOnWeb lookup still unproven against the network.
 
 ## INTAKE QUEUE (resources to assess — Manager classifies: wire / backlog / guide / reject)
-- [INTAKE-20260626-user-scanner] (intake/open) — github.com/kaifcodec/user-scanner (PyPI `user-scanner`
-  v1.4.0, 2.4k★, free/no-key, Python CLI **and** library). Email+username enumeration across 285+ vectors
-  (100+ email / 185+ username) + "profile data extraction" (scrapes metadata) + Hudson Rock breach.
-  **Assessment:** the username side DUPLICATES our locked best-in-class (sherlock/maigret/naminter/linkook);
-  Hudson Rock already wired (`hudsonrock_email`). Novel value = (a) EMAIL enumeration breadth (100+ sites)
-  vs our `holehe` (B4: rate-limited, lead-only), and (b) profile-data scraping (fragile — cf. socid_extractor
-  B2; 285 live HTTP checks = slow + OPSEC). **Recommend:** do NOT wire wholesale; VALIDATE the email mode vs
-  holehe (coverage + rate-limit). If it materially beats holehe, wire EMAIL-ONLY as a 2nd free email
-  enumerator (graceful degrade); else backlog. Don't add a 4th username enumerator. — user 2026-06-26.
+- [INTAKE-20260626-user-scanner] (intake/**WIRED 2026-06-26**) — github.com/kaifcodec/user-scanner.
+  **Validated hands-on (isolated venv) + adopted EMAIL-ONLY as `user_scanner` (structured line).**
+  Benchmark vs holehe on the same email: user-scanner ~80% determinate over ~100 sites vs holehe ~37%
+  (holehe ~63% rate-limited) — a materially more reliable email enumerator with a complementary site mix;
+  **mitigates B4** (holehe lead-only). Categorization: STRUCTURED line (queries third-party platforms about
+  the selector, like holehe; does NOT touch the target's infra → not active-line). NOT wired: username mode
+  (duplicates sherlock/maigret/naminter/linkook), `--hudson` (redundant with hudsonrock_email + it calls
+  input() → would hang), `--allow-loud` (OPSEC: emails the target). Wrapper `src/tools/userscanner_tools.py`
+  (email-only, --no-nsfw, positives-only, `possible`). Dep: pip `user-scanner` (httpx, light). TOOL_FLOOR
+  57→58. Live-tested. — user 2026-06-26.
 
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
@@ -153,6 +156,7 @@ YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on 
 - [GAP-20260624-02] (gap/med/open) — threatfox tool returns `{"error":"Unauthorized"}` (needs ABUSE_CH_API_KEY). No IOC-reputation verdict available for domains/IPs. — INV-20260624-001
 - [GAP-20260624-03] (gap/low/open) — crt.sh (404) and wayback (503) both failed this run; transient but recurrent. CT-history fell back to certspotter; no archive snapshots retrieved. — INV-20260624-001
 - [GAP-20260624-04] (gap/med/open) — `reverse_ip` (HackerTarget) quota exhausted after ~2 IPs; the 3rd/4th network IPs (18.190.207.230, 143.47.57.203) had NO co-host enumeration except robtex+urlscan (incomplete). Reinforces G1 — a keyed/rotating reverse-IP source is needed to fully enumerate multi-IP scam estates. — INV-20260624-001
+- [GAP-20260626-01] (gap/high/open) — `tracker_reverse` PublicWWW path returns PARSER-ARTIFACT NOISE (asset filenames + JS tokens like `favicon.ico`, `bootstrap.min.css`, `document.cookie`, `math.random` returned as "domains") instead of real co-using domains, even when it reports `publicwww_hits>0` / `strong_ownership_signal=True`. SpyOnWeb path needs SPYONWEB_API_KEY (skipped). Net: reverse-tracker enumeration is effectively non-functional automatically — could not enumerate other domains carrying GA4 G-6PLNK76P14 / Ads AW-16724105870. Needs (a) a real domain-extraction parser for PublicWWW results, and/or (b) a keyed source. This is the automation of the anti-over-merge corroborator chain — high value. Note: this case re-hit the SAME operator as INV-20260624-001 (Walker Tours, EIN 37-2091569). — INV-20260626-001
 - [GAP-20260624-05] (gap/low/open) — `shodan_internetdb` returned "No information available" for all three AWS EC2 IPs (only the Oracle IP had data) — AWS-hosted hosts give no port/service fingerprint via InternetDB. — INV-20260624-001
 - [GAP-20260624-06] (gap/low/open) — `bgpview_ip` DNS resolution failed ("getaddrinfo failed" for api.bgpview.io) on this run; ASN data came from urlscan/robtex instead. Transient network/DNS issue. — INV-20260624-001
 

@@ -49,7 +49,7 @@ re-run on the daily audit / before a release):
 sherlock, maigret, naminter, linkook, holehe, theharvester, whois/rdap, dns_lookup/dnsrecon,
 crtsh, urlscan, shodan_internetdb, ripestat, greynoise, reverse_ip, tls_cert, http_title,
 gleif_lei, sec_edgar, hudsonrock_email, xposedornot, blockstream_btc, exiftool, phonenumbers,
-email_header_analyzer, web_tech_fingerprint, tracker_reverse + the web-search line.
+email_header_analyzer, web_tech_fingerprint, tracker_reverse, user_scanner + the web-search line.
 
 ## Change protocol (Manager)
 1. health_check GREEN before starting. 2. Work on a branch. 3. Make the scoped change.

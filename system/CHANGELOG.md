@@ -2,6 +2,18 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-26 (intake: user_scanner — better email enumerator)
+- Intake **user-scanner** (kaifcodec, PyPI, free/no-key). Validated hands-on in an isolated venv via a
+  sub-agent: on the same email it returned a determinate verdict on ~80% of ~100 sites vs **holehe's ~37%
+  (holehe ~63% rate-limited)** — materially more reliable, complementary site mix. **Adopted EMAIL-ONLY** as
+  `user_scanner` (new `src/tools/userscanner_tools.py`), a STRUCTURED-line tool (queries third-party
+  platforms about the selector like holehe; does NOT touch the target's infra, so NOT the active line —
+  resolved the operator's categorization question). Mitigates **B4** (holehe lead-only). NOT wired: username
+  mode (duplicates sherlock/maigret/naminter/linkook), `--hudson` (redundant + calls input() → hangs),
+  `--allow-loud` (OPSEC: emails the target). Wrapper: --no-nsfw, positives-only, conservative `possible`,
+  graceful degrade. Wired into pivot_map `email`; TOOL_FLOOR 57→58; annotate refreshed; live-tested; health
+  + 3 suites GREEN.
+
 ## 2026-06-26 (R1 — narrative report overhaul + report-grounding gate)
 - **R1 done (architectural, user sign-off):** rebuilt the report last-mile as the share-with-humans
   NARRATIVE product. Flow: report-writer authors `_report.json` -> `python -m src.report.build` renders

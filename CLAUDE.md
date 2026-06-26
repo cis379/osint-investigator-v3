@@ -117,7 +117,7 @@ tools = get_tools_for_selector('domain')
 |------|-------|-------------|
 | **domain** | whois_lookup, dns_lookup, crtsh, wayback, http_headers | WHOIS, DNS records, SSL certs, web archives, headers |
 | **ip_v4/v6** | ip_geolocation, reverse_dns, shodan_internetdb, ipinfo | Geolocation, rDNS, open ports, ASN |
-| **email** | holehe, emailrep | Account enumeration, reputation |
+| **email** | holehe, user_scanner, disify, hudsonrock, xposedornot | Account enumeration (user_scanner ~100 sites, more reliable than holehe), breach checks |
 | **username** | sherlock, maigret, google_dork_generator | Profile discovery across 400+ sites |
 | **name** | wikipedia_search, wikidata_search, gravatar_check, hibp_name_search, name_to_username, google_dork_generator | Wikipedia, Wikidata, Gravatar, email generation, GitHub/GitLab username checks |
 | **crypto_btc/eth** | blockchain_btc, etherscan | Transaction history, balance |

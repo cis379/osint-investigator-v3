@@ -4,7 +4,7 @@ The definitive "what is this and how does it work" reference. Updated 2026-06-24
 **External OSINT only.** Take a seed selector → pivot through tools → produce a cited,
 confidence-tiered intelligence graph + CTI report.
 
-State: **57 runnable tools · 20/92 selector types runnable · 8 skills · 3 system tests PASS.**
+State: **58 runnable tools · 20/92 selector types runnable · 8 skills · 3 system tests PASS.**
 
 ---
 
@@ -155,7 +155,7 @@ State: **57 runnable tools · 20/92 selector types runnable · 8 skills · 3 sys
 | **company** (11) | gleif_lei, sec_edgar, aleph, courtlistener, wikipedia, wikidata, theharvester(via domain), **cloud_buckets**… |
 | **username** (8) | sherlock, maigret, naminter, linkook, socialscan, github_user, reddit_about, google_dork |
 | **name** (8) | web-search-primary + gravatar, hibp_name_search(gen), wikipedia, wikidata, name_to_username, aleph, courtlistener |
-| **email** (7) | holehe, disify, hudsonrock, xposedornot, socialscan, gravatar, **pgp_keyserver** (alt emails/name) |
+| **email** (8) | holehe (rate-limited→lead-only), **user_scanner** (~100 sites, ~80% determinate — better than holehe; B4-mitigating), disify, hudsonrock, xposedornot, socialscan, gravatar, **pgp_keyserver** (alt emails/name) |
 | **keyword** (1) | **cloud_buckets** (S3/GCS bucket discovery) — first runnable tool for this type |
 | **tracker_id** (1) | **tracker_reverse** (shared GA/AdSense/Pixel id → other co-using domains; the independent ownership corroborator) — fed by `web_tech_fingerprint` on domain/url |
 | also | url (+**web_tech_fingerprint**), ip_v6, phone (phonenumbers/ignorant/phoneinfoga), crypto_btc/eth, hashes, coordinates, image/file, email_header/eml |
