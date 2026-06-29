@@ -300,6 +300,13 @@ print('Graph HTML generated')
    **OSINT principles** this case taught, and **what the user could do by hand** to extend it
    (point them at any `guides/` you wrote). This closes the loop on learning — they leave the
    investigation understanding both the result AND the method that produced it.
+   **Credit the grounding loop honestly — don't undersell it.** When you recap what the red-team
+   grounding pass caught, be TRANSPARENT and EXPLANATORY: name each correction, that it was caught
+   BEFORE shipping, and why it mattered. Distinguish the two things plainly — "none were
+   hallucinations (nothing was invented)" is the honest reassurance, but a caught over-claim,
+   over-asserted named individual, stale superseded reading, or a precision error is a MATERIAL save,
+   not "cosmetic." The artifact is trustworthy *because* the gate caught real issues — say that, rather
+   than minimizing the catches as trivial. Honest crediting reads as more credible than downplaying.
 
 ## Pivoting (the engine of the investigation)
 

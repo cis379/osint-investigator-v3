@@ -130,6 +130,14 @@ unsupported claim — then re-run Step 3 (`src.report.build`) and re-dispatch th
 the red team returns `verdict: grounded` (empty issues) — usually ≤2 rounds. Tell the user what the
 red team flagged and how you fixed it.
 
+**A short "Calibration" note belongs IN the report** (a final story section or a closing method note) —
+it's explanatory and transparent, and it builds trust. **Credit the grounding loop honestly, don't
+undersell it:** name each thing the gate caught, that it was caught BEFORE shipping, and why it mattered.
+State plainly that "none were hallucinations (nothing invented)" — that's the honest reassurance — but do
+NOT describe a caught over-claim, an over-asserted named individual, a stale superseded reading, or a
+precision/date error as "cosmetic" or "a small crack." Those are MATERIAL saves; the artifact is
+trustworthy *because* the gate caught them. Honest crediting reads as more credible than minimizing.
+
 ## Report Quality Rules
 1. **Evidence-based ONLY** — every sentence traces to tool output / cited source / the graph.
 2. **No speculation** — if unsure, omit it or note it as a gap; never fill a hole with a plausible guess.
