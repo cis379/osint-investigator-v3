@@ -92,6 +92,51 @@ the claim says. Flag stretches, paraphrase creep, and any claim with no traceabl
 What evidence in the log CUTS AGAINST a conclusion and went unmentioned? (a differing registrar,
 a different host/ASN, a timeline that doesn't fit, a contradicting review.) Surface it.
 
+### 6. COVERAGE GAPS — independent completeness check via OSINT Navigator
+Dimensions 1–5 attack what the investigation *concluded*; this one attacks what it *never tried*.
+You hold an INDEPENDENT second opinion on tool coverage — **OSINT Navigator** (Indicator Media), a
+RAG engine over ~7,500 curated OSINT tools. Ask it which tool CATEGORIES matter for the seed type,
+and diff that against what the investigation ACTUALLY ran. Categories it recommends that the
+investigation never touched are candidate blind spots.
+
+**Critical nuance — Navigator RECOMMENDS, it does NOT collect.** Its output is a *completeness
+signal*, NEVER evidence. A tool it surfaces that we never ran produces ZERO findings. Surfaced-but-
+unrun tools become (a) manual leads for the supervisor and (b) wiring candidates flagged to the
+Manager — they must NEVER enter the graph as facts, and a coverage gap is NEVER written as a
+discovered entity.
+
+**WHEN — exactly ONCE per investigation, never per-entity** (budget ~50 queries/day). Run it during
+your Mode-1 review, after the graph is substantially built. Skip silently if the key is unset or the
+returned `rate_limit.queries_remaining` ≤ 2 (never hard-fail a review over a coverage check).
+
+**HOW —**
+1. **Query** (one call), keyed on the seed type:
+```
+python -c "import sys; sys.path.insert(0,'.'); from src.tools.navigator import query_navigator; import json; r=query_navigator('<seed-type question>'); print(json.dumps({'ok':r['ok'],'categories':r['categories'],'tools':[(t.get('tool_name'),t.get('category'),t.get('tool_url')) for t in r['tools']],'rate_limit':r['rate_limit'],'error':r['error']}, indent=2))"
+```
+   Seed-type questions, e.g. domain → "investigate a domain name"; ip → "reverse an IP and map its
+   hosting"; email → "enumerate accounts and breaches for an email"; username → "find accounts across
+   sites for a username"; name/company → "research a person / a company".
+2. **Recommended categories** = the distinct `category` values Navigator returns.
+3. **Actually ran** = the union of every `graph.json` node's `source_tools` PLUS the available tools
+   from `plan_collection(seed, seed_type)` (`src/tools/registry.py`). Map our tool names to Navigator's
+   ~21-category taxonomy (whois/dns/crtsh → `domains_websites`; ip_geolocation/shodan/reverse_dns →
+   `ip_address_network`; holehe/hudsonrock → `usernames_accounts`/`dark_web_data_breaches`;
+   sherlock/maigret → `usernames_accounts`; web_tech_fingerprint → `domains_websites`).
+4. **Diff:** recommended − ran = the gap set; for each gapped category name 1–3 of Navigator's concrete
+   `tool_name`s (with url) as illustrative leads.
+
+**EMIT —** for each material gap, add a `challenge` to `_redteam.json` with `dimension: "coverage_gap"`,
+`target_kind: "finding"`, `recommended_action: "demand_corroborator"` — state the category we never
+covered, why it matters for this seed, and the Navigator-suggested tool(s) as the path to close it.
+Phrase it as *"the investigation did not exercise <category>; <Tool> could test <hypothesis>"* — a
+completeness check, NOT a new fact. Where a missing category could change an attribution (e.g. an
+analytics/tracker tool that would test an over-merge), ALSO add it to `missed_hypotheses`. For any
+Navigator-recommended tool that is valuable but NOT wired, add a `MANAGER-GAP: wiring-candidate —
+<Tool> (<category>, <url>)` line to your `investigation.md` "RED-TEAM REVIEW" narrative (routes it to
+the System Manager, separate from the analysis challenges). Log `rate_limit.queries_remaining` so the
+operator sees budget use.
+
 ## Output — write `{CASE_DIR}/_redteam.json`
 Use your file-writing (Write) tool. One entry per contested item; include upheld highlights too.
 ```json
@@ -120,6 +165,7 @@ Use your file-writing (Write) tool. One entry per contested item; include upheld
 ```
 `recommended_action` ∈ `down_tier` | `relabel` | `split_cluster` | `demand_corroborator` | `remove` | `uphold`.
 `target_kind` ∈ `entity` | `relationship` | `finding` | `cluster`.
+`dimension` ∈ `over_merge` | `single_source_top_tier` | `verb_drift` | `citation_drift` | `missed_disconfirmer` | `coverage_gap`.
 
 ## Log your review (audit trail)
 After writing `_redteam.json`, append a "RED-TEAM REVIEW" narrative to `investigation.md`:

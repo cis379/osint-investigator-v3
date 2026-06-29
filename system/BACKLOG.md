@@ -186,8 +186,26 @@ with operator first; mandate given.
       be wired — that's fine, they become manual leads / wiring candidates).
   Caveats: 50/day rate limit (red team must query sparingly); external dependency on an agent that's currently
   self-contained; recommends tools, doesn't pull data (strengthens COMPLETENESS challenges, not factual
-  refutation). Next: design the MCP config + a small Manager-side dataset-diff helper, then wire (health-gated).
-  — operator 2026-06-26.
+  refutation). — operator 2026-06-26.
+  **WIRED 2026-06-29 (red team):** verified the live REST API (`POST navigator.indicator.media/api/query`,
+  Bearer auth) — chose it over the MCP (red team needs ONE structured headless query/case, not a conversational
+  session; MCP URL is login-gated). New `src/tools/navigator.py` (`query_navigator()` — keyed via
+  `OSINT_NAVIGATOR_API_KEY`, graceful degrade, NOT registered/routed so the supervisor can't reach it). Added
+  red_team.md **dimension 6 (COVERAGE GAPS)**: one query/case by seed-type, diff recommended categories vs the
+  graph's `source_tools`+`plan_collection`, emit `coverage_gap` challenges + `missed_hypotheses` +
+  `MANAGER-GAP` wiring candidates; Navigator output is a completeness signal, NEVER a finding. Self-throttles on
+  `rate_limit.queries_remaining`. Manager-discovery via the same module. Health GREEN. (MCP path optional, not wired.)
+- [INTAKE-20260629-breadth-diff] (analysis/done) — Manager-side diff of our 58 tools vs the Navigator dataset
+  (`tomvaillant/osint-tool-database`, 11,345 rows / 21 categories; mostly a web-only link directory — only
+  ~10-20% automatable). **Verdict: our BREADTH is appropriate for the core selectors** (domain/ip/email/
+  username/company — we run best-in-class; do NOT add more there). **Confirmed real gaps** (specific tools exist):
+  dark-web/breach (=G7/G12), platform-specific social TikTok/IG/Telegram (session-gated =G8), crypto multichain
+  (BTC+ETH only), email→phone + Google-account cross-pivots, aggregated subdomain enum. **Top FREE candidates
+  that fit our stack (Manager-filtered):** `gitrecon`/GitSome (username→email+name from git commits), `Blockchair`
+  (multichain crypto, free-tier HTTP API), `Phunter` (phone carrier/line-type, Python). **Rejected on our
+  constraints:** Subfinder/mosint (Go — we have no Go toolchain, G10; certspotter+crtsh already cover CT
+  subdomains), email2phonenumber (LOUD — pings target reset oracles, OPSEC), GHunt/Instagrapi/Telethon
+  (session/cookie-gated = G8). — agent diff 2026-06-29.
 - [INTAKE-20260626-spotlight] (intake/**borrow-methodology, reject code**) — buriedsignals/spotlight: a
   journalist editorial case-management system (Python multi-agent CLI, skills/agents/AGENTS.md). Overlaps us
   heavily (confidence grounding ≈ our tiering; independent fact-check ≈ our red team; report gen). Tools are

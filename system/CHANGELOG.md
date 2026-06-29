@@ -2,6 +2,23 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-06-29 (OSINT Navigator wired to the red team + breadth diff)
+- Dispatched two sub-agents (context offload), checked + integrated both. **OSINT Navigator wired to the RED
+  TEAM** for independent gap-covering: verified the live REST API myself (`POST navigator.indicator.media/
+  api/query`, Bearer `OSINT_NAVIGATOR_API_KEY`; one real call, 46/50 left) — chose REST over MCP (red team needs
+  one structured headless query/case; MCP URL is login-gated). New `src/tools/navigator.py` `query_navigator()`
+  (keyed, graceful degrade, NOT registered so the supervisor can't route to it). red_team.md gains **dimension 6
+  COVERAGE GAPS** — one query/case by seed-type, diff Navigator's recommended categories vs the graph's
+  `source_tools`+`plan_collection`, emit `coverage_gap` challenges + `missed_hypotheses` + `MANAGER-GAP` wiring
+  candidates; output is a COMPLETENESS signal never a finding; self-throttles on `rate_limit`. Tool count
+  unchanged (58 — navigator is a red-team/Manager utility, not a collection tool). Health + 3 suites GREEN.
+- **Breadth diff** (2nd agent, read-only): our 58 tools vs the Navigator dataset (11,345 rows, mostly a web-only
+  link directory). Verdict: breadth is APPROPRIATE for core selectors (we run best-in-class — don't add more).
+  Confirmed real gaps: dark-web/breach (G7/G12), session-gated social (G8), crypto multichain, email→phone /
+  Google-account pivots, aggregated subdomain enum. Top FREE constraint-fitting candidates: gitrecon, Blockchair
+  multichain, Phunter. Rejected: Subfinder/mosint (Go — G10), email2phonenumber (loud/OPSEC), session-gated libs
+  (G8). Logged as INTAKE-20260629-breadth-diff.
+
 ## 2026-06-26 (intake analysis: OSINT Navigator + Spotlight — backlogged, key stored)
 - Reviewed two external OSINT projects (analysis only, no wiring yet). **OSINT Navigator** (Indicator/Tom
   Vaillant): RAG tool-discovery over ~7,500 tools, MCP for Claude Code, member API/MCP (~50/day). Operator has
