@@ -217,6 +217,22 @@ with operator first; mandate given.
   discipline (cite only locally-traceable material + source hashes — hardens grounding). Reject the
   workflow/tooling. Effort: small doctrine edits to red_team.md (Mode 2) + supervisor coverage loop. — operator 2026-06-26.
 
+## WIRING CANDIDATES — validated free, ready to wire (from breadth diff 2026-06-29)
+Net-new, free, no-key (or free-tier), fit our Python/HTTP stack, fill a real gap, don't duplicate locked tools.
+- [CAND-gitrecon] (candidate/med/open) — `gitrecon` (or GitSome/gitcolombo): mine a GitHub/GitLab user's COMMIT
+  HISTORY for exposed emails + real names. Selector: username (→ email/name). Free, Python CLI. Net-new
+  username→identity pivot beyond `github_user` (which only reads the profile). Wire as a CliTool; positives
+  `possible` (supervisor re-tiers). High value for the people/identity last-mile (G4-adjacent).
+- [CAND-blockchair] (candidate/med/open) — Blockchair multichain API: one free-tier HTTP endpoint covering
+  BTC/ETH/LTC/BCH/DOGE/+ address lookups (balance, tx history). Selector: crypto_btc/eth (+ new chains). Fills
+  the crypto-multichain gap (we have BTC+ETH only). Wire as an HttpTool (graceful degrade past the free tier).
+- [CAND-phunter] (candidate/low/open) — `Phunter`: phone validity + carrier + line-type + light footprint.
+  Selector: phone. Free, Python CLI. Modest enrichment beyond `phonenumbers`/`phoneinfoga` (carrier/line-type);
+  partial relief for G5 (the owner/SIM half stays paid). Lower priority than the two above.
+- REJECTED from the breadth diff (don't wire): Subfinder/mosint (Go — no toolchain, G10; certspotter+crtsh cover
+  CT subdomains); email2phonenumber (LOUD — pings target reset oracles, OPSEC); GHunt/Instagrapi/Telethon/
+  TikTokApi (session/cookie-gated — that's the G8 wall, not a quick wire).
+
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
 YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on when keyed.
