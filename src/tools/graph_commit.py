@@ -66,7 +66,7 @@ def commit(spec: dict, graph_file: str, html_file: str = "", case_id: str = "") 
     n_ent = n_rel = 0
 
     for e in spec.get("entities", []):
-        conf = _norm_conf(e.get("confidence", "probable"), f"entity {e.get('value')!r}", warnings)
+        conf = _norm_conf(e.get("confidence", "possible"), f"entity {e.get('value')!r}", warnings)
         graph.add_entity(
             e["value"], e["type"], e.get("tool", "supervisor"),
             depth=int(e.get("depth", 1)),
@@ -77,7 +77,7 @@ def commit(spec: dict, graph_file: str, html_file: str = "", case_id: str = "") 
         n_ent += 1
 
     for r in spec.get("relationships", []):
-        conf = _norm_conf(r.get("confidence", "probable"),
+        conf = _norm_conf(r.get("confidence", "possible"),
                           f"relationship {r.get('relationship')!r}", warnings)
         graph.add_relationship(
             r["source_value"], r["source_type"],

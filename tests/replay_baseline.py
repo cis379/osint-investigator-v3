@@ -128,6 +128,27 @@ def tier_render_check(workdir):
     check("badge-possible" in html, "HTML carries 3-tier badge styling")
 
 
+def retier_check(workdir):
+    """H1 regression: a re-commit must RE-GRADE an existing node — the red-team down-tier
+    and the corroboration upgrade both depend on it (was a silent no-op)."""
+    print("\n--- re-tier on re-commit (H1 regression) ---")
+    g = str(workdir / "retier.json")
+    h = str(workdir / "retier.html")
+    # corroboration UPGRADE: possible -> highly_likely
+    graph_commit.commit({"entities": [{"value": "up.x", "type": "domain", "tool": "t1",
+                                       "confidence": "possible", "citation": "first"}]}, g, h, "RT")
+    graph_commit.commit({"entities": [{"value": "up.x", "type": "domain", "tool": "t2",
+                                       "confidence": "highly_likely", "citation": "2nd indep source"}]}, g, h, "RT")
+    # red-team DOWN-tier: highly_likely -> possible
+    graph_commit.commit({"entities": [{"value": "down.x", "type": "domain", "tool": "t1",
+                                       "confidence": "highly_likely"}]}, g, h, "RT")
+    graph_commit.commit({"entities": [{"value": "down.x", "type": "domain", "tool": "t2",
+                                       "confidence": "possible", "citation": "red-team: single-source"}]}, g, h, "RT")
+    nodes = {n["value"]: n for n in json.loads(Path(g).read_text(encoding="utf-8"))["nodes"]}
+    check(nodes["up.x"]["confidence"] == "highly_likely", "corroboration upgrade re-grades (possible->highly_likely)")
+    check(nodes["down.x"]["confidence"] == "possible", "red-team down-tier re-grades (highly_likely->possible)")
+
+
 def main():
     print("=== V3 baseline regression suite (3 cases) ===")
     with tempfile.TemporaryDirectory(prefix="v3baseline_") as tmp:
@@ -135,6 +156,7 @@ def main():
         for i, (label, seed, stype, strategy, exclude) in enumerate(CASES):
             run_case(label, seed, stype, strategy, exclude, root / f"case{i}_{label}")
         tier_render_check(root / "tier")
+        retier_check(root / "retier")
 
     print("\n=== RESULT ===")
     if failures:

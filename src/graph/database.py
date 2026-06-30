@@ -31,6 +31,14 @@ class InvestigationGraph:
             existing["source_tools"] = sources
             if metadata:
                 existing.setdefault("metadata", {}).update(metadata)
+            # Honor a re-commit's RE-GRADE. The supervisor (the only caller of add_entity via
+            # graph_commit) re-tiers deliberately — a corroboration UPGRADE or a red-team
+            # DOWN-tier. Without this the re-grade was a silent no-op, defeating both the
+            # red-team gate (CAPABILITY-LOCK #4/#8) and the corroboration chain G14/A1 exist for.
+            existing["confidence"] = confidence
+            if citation:
+                existing["citation"] = citation
+            existing["depth"] = min(existing.get("depth", depth), depth)
             return node_id
 
         self.graph.add_node(node_id, **{
