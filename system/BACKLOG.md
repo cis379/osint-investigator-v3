@@ -59,7 +59,7 @@ noise filters + no-key degradation good). Findings:
   honors the supervisor's re-grade; added `retier_check` regression. Verified by repro.
 - [B12] (bug/med/**DONE 2026-06-30**) — graph_commit defaulted missing-confidence to `probable` (one notch
   too strong); changed to conservative `possible`. (entity + relationship)
-- [B13] (bug/med/open) — tools that dress EMPTY/garbage as `success=True` with no signal: `disify` +
+- [B13] (bug/med/**DONE 2026-06-30**) — tools that dress EMPTY/garbage as `success=True` with no signal: `disify` +
   `blockstream_btc` (any HTTP 200=success, no verdict surfaced), `cloud_buckets` (unconditional success even
   on total network failure), `http_title` (404 page with a `<title>` emits branding), `pgp_keyserver` (404
   same shape as hit). Fix: parse the key verdict into metadata; gate http_title branding on 2xx; cloud_buckets
@@ -95,6 +95,19 @@ noise filters + no-key degradation good). Findings:
   **OnionSearch** (Tor dark-web, Python — needs the G12 Tor proxy first); verify-first: EU e-Justice/BRIS +
   OpenOwnership (G9, may be web-line/dataset not API), LeakCheck public (G7 free metadata?). CONFIRMED PAID
   WALLS (no free fill): G5 phone→owner, G7 deep cracked-creds. Adds to CAND-gitrecon/blockchair/phunter.
+
+## ARCHITECTURE — queued for deeper exploration
+- [ARCH-collection-mode] (architectural/open — **needs operator sign-off; deeper exploration**) — PASSIVE vs
+  ACTIVE separation is enforced at the AGENT/skill level (active_collector has the OPSEC posture: passive-first,
+  proxy seam, scope-guard) but "active vs passive" is really a property of the TOOL. So the structured/gatherer
+  line (conceptually passive third-party collection) can fire ACTIVE target-touching tools with NONE of the
+  active line's OPSEC: **`http_title`** (live GET of the target home page), **`tls_cert`** (live TLS handshake
+  to target :443), **`cloud_buckets`** (probes the target's own S3/GCS/Azure assets). Proposed direction: tag
+  every tool with `collection_mode` (passive|active); make the OPSEC posture (passive-first via Wayback/urlscan,
+  `OSINT_PROXY` seam) apply to ANY active tool regardless of which line runs it; gatherer = passive-only; active
+  touches routed/flagged to the active line. A full pass must enumerate ALL active-touching tools (start:
+  http_title, tls_cert, cloud_buckets, web_tech_fingerprint[already active], http_headers?). Touches the locked
+  3-line model + pivot_map routing → design + sign-off first. — operator 2026-06-30.
 
 ## GAPS — intel (capability; many are structural/paid)
 - [G1] (gap/high/partly-mitigated) — reverse_ip free quota (HackerTarget ~2 calls) too small.

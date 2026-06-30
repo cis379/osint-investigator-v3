@@ -327,6 +327,31 @@ def _ex_courtlistener(sel, d):
 
 
 # ---------------- Tier-1 tool specs (free / no key) ----------------
+def _ex_disify(sel, d):
+    # Surface the email verdict that was previously buried in raw (extract was None).
+    if not isinstance(d, dict) or "format" not in d:
+        return []
+    disposable = bool(d.get("disposable"))
+    cite = (f"disify: {'DISPOSABLE/throwaway address' if disposable else 'not disposable'}; "
+            f"format={'valid' if d.get('format') else 'INVALID'}; mx={'yes' if d.get('dns') else 'no'}")
+    return [_E(sel, "email", "possible", cite,
+               {"disposable": disposable, "valid_format": bool(d.get("format")),
+                "has_mx": bool(d.get("dns")), "free_provider": bool(d.get("free"))})]
+
+
+def _ex_blockstream(sel, d):
+    # Surface the BTC address activity verdict (extract was None).
+    if not isinstance(d, dict):
+        return []
+    cs, ms = d.get("chain_stats") or {}, d.get("mempool_stats") or {}
+    tx = (cs.get("tx_count") or 0) + (ms.get("tx_count") or 0)
+    bal = (cs.get("funded_txo_sum") or 0) - (cs.get("spent_txo_sum") or 0)  # satoshis
+    cite = (f"blockstream: {tx} tx, balance {bal/1e8:.8f} BTC" if tx
+            else "blockstream: address has NO on-chain activity (0 tx)")
+    return [_E(sel, "crypto_btc", "possible", cite,
+               {"tx_count": tx, "balance_sat": bal, "balance_btc": bal / 1e8, "active": tx > 0})]
+
+
 TOOLS = [
     HttpTool(name="rdap", description="RDAP domain registration (structured WHOIS)",
              input_types=["domain"], output_types=["domain", "company", "email"],
@@ -338,8 +363,8 @@ TOOLS = [
              extract=_ex_hudson),
 
     HttpTool(name="disify", description="Email validity / disposable / MX check (free)",
-             input_types=["email"], output_types=[],
-             url="https://www.disify.com/api/email/{selector}", extract=None),
+             input_types=["email"], output_types=["email"],
+             url="https://www.disify.com/api/email/{selector}", extract=_ex_disify),
 
     HttpTool(name="greynoise_community", description="GreyNoise scanner-noise classification (free, low quota)",
              input_types=["ip_v4"], output_types=["company"],
@@ -356,8 +381,8 @@ TOOLS = [
              url="https://api.bgpview.io/ip/{selector}", extract=_ex_bgpview),
 
     HttpTool(name="blockstream_btc", description="Blockstream Esplora BTC address stats (free, no key)",
-             input_types=["crypto_btc"], output_types=[],
-             url="https://blockstream.info/api/address/{selector}", extract=None),
+             input_types=["crypto_btc"], output_types=["crypto_btc"],
+             url="https://blockstream.info/api/address/{selector}", extract=_ex_blockstream),
 
     HttpTool(name="gleif_lei", description="GLEIF: company legal entity (LEI) lookup (free)",
              input_types=["company"], output_types=["lei", "company"],

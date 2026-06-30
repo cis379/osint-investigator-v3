@@ -213,7 +213,10 @@ class CloudBucketsTool(BaseTool):
         try:
             r = requests.get(url, timeout=self.TIMEOUT, headers={"User-Agent": DEFAULT_UA})
         except requests.RequestException:
-            return None  # DNS/conn failure (incl. Azure NXDOMAIN) = absent
+            # Azure host is {account}.blob... so NXDOMAIN = account ABSENT (a valid negative).
+            # S3/GCS/DO hosts always resolve, so a failure there is a GENUINE network error —
+            # flag it so an all-errored run can't masquerade as a clean "no buckets".
+            return None if provider == "azure" else "ERROR"
         sc, body = r.status_code, (r.text or "")[:300]
         if provider == "azure":
             # the host resolving means the storage ACCOUNT exists; 200 = public listing.
@@ -234,11 +237,17 @@ class CloudBucketsTool(BaseTool):
         candidates = self._candidates(bases)
         targets = self._targets(candidates, bases)
 
-        hits = []
+        hits, errors = [], 0
         with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
             for res in ex.map(self._probe_target, targets):
-                if res:
+                if res == "ERROR":
+                    errors += 1
+                elif res:
                     hits.append(res)
+        # If most S3/GCS/DO probes couldn't even connect, the run is DEGRADED — a 0-hit result
+        # then means "couldn't check," NOT "no buckets." Don't let that read as a clean negative.
+        non_azure = sum(1 for p, _l, _u in targets if p != "azure") or 1
+        degraded = not hits and errors >= non_azure * 0.5
 
         entities = []
         for provider, label, url, sc, state in hits:
@@ -251,11 +260,14 @@ class CloudBucketsTool(BaseTool):
 
         raw = (f"bases={bases}\ncandidates={len(candidates)} · targets_probed={len(targets)} "
                f"(S3+GCS per candidate; Azure+DO[{','.join(self.DO_REGIONS)}] on bases)\n"
-               f"buckets_found={len(hits)}\n" +
+               f"buckets_found={len(hits)} · probe_errors={errors}\n" +
                "\n".join(f"  [{st}] HTTP {sc} {self.PROVIDER_LABELS[prov]}: {url}"
                          for prov, lbl, url, sc, st in hits) +
-               ("" if hits else "  (no existing buckets matched the permutations)"))
-        return self.make_result(selector, selector_type, raw, entities, success=True)
+               ("" if hits else
+                ("  DEGRADED: most probes failed to connect — this is 'could not check', NOT 'no buckets'."
+                 if degraded else "  (no existing buckets matched the permutations)")))
+        return self.make_result(selector, selector_type, raw, entities, success=not degraded,
+                                error="" if not degraded else f"{errors} probe network errors — check degraded")
 
 
 # ============================ pgp_keyserver (custom) ============================
@@ -289,8 +301,10 @@ class PgpKeyserverTool(BaseTool):
 
         body = resp.text or ""
         if resp.status_code == 404 or body.lower().startswith("no key found"):
-            return self.make_result(selector, selector_type, body[:500], [], True,
-                                    "")  # success: a definitive "no PGP key" answer
+            # Definitive negative — make it explicit so it can't be mistaken for a hit (0 entities + clear raw).
+            return self.make_result(selector, selector_type,
+                                    f"no PGP key found for {sel} (definitive negative)\n{body[:400]}",
+                                    [], True, "")
         if resp.status_code != 200:
             return self.make_result(selector, selector_type, body[:500], [], False,
                                     f"HTTP {resp.status_code}")

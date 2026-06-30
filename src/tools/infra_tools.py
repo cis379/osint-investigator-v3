@@ -209,20 +209,24 @@ class HttpTitleTool(BaseTool):
         except Exception:
             pass
 
+        # Only treat branding as REAL on a 2xx success page. A 4xx/5xx page often still has a
+        # <title> ("404 Not Found", "Error") — emitting that as the site's brand is a false
+        # finding, so we suppress branding entities on non-2xx (the status stays in raw).
+        is_2xx = 200 <= status < 300
         entities = []
-        if title:
+        if is_2xx and title:
             entities.append(EntityFound(value=title, entity_type="keyword", confidence="possible",
                                         source_citation=f"http_title: {title} at {final_url}",
                                         metadata={"final_url": final_url, "status": status, "server": server}))
-        if og_site:
+        if is_2xx and og_site:
             entities.append(EntityFound(value=og_site, entity_type="company", confidence="possible",
                                         source_citation=f"http_title og:site_name: {og_site} at {final_url}",
                                         metadata={"final_url": final_url}))
-        if app_name and app_name.lower() != (og_site or "").lower():
+        if is_2xx and app_name and app_name.lower() != (og_site or "").lower():
             entities.append(EntityFound(value=app_name, entity_type="company", confidence="possible",
                                         source_citation=f"http_title application-name: {app_name} at {final_url}",
                                         metadata={"final_url": final_url}))
-        if generator:
+        if is_2xx and generator:
             entities.append(EntityFound(value=generator, entity_type="keyword", confidence="possible",
                                         source_citation=f"http_title generator: {generator} at {final_url}",
                                         metadata={"final_url": final_url}))
@@ -230,14 +234,17 @@ class HttpTitleTool(BaseTool):
         # A 200 with no <title> usually means a JS-rendered SPA (BeautifulSoup sees no
         # static title) — flag it so the supervisor doesn't read "no title" as "no brand".
         js_note = ""
-        if not title and 200 <= status < 400:
+        if not title and is_2xx:
             js_note = "\nnote=title empty at status 200; likely JS-rendered (SPA) — branding not in static HTML"
+        elif not is_2xx:
+            js_note = f"\nnote=HTTP {status} (non-2xx) — branding NOT extracted (error/redirect page, not the site)"
         raw = (f"final_url={final_url}\nstatus={status}\nserver={server or '-'}\n"
                f"x_powered_by={powered_by or '-'}\ntitle={title or '-'}\n"
                f"og:site_name={og_site or '-'}\napplication-name={app_name or '-'}\ngenerator={generator or '-'}{js_note}")
-        ok = 200 <= status < 400 or bool(title)
+        # Honest success: a real page (2xx). A 4xx/5xx is a response, not a usable branding result.
+        ok = is_2xx
         return self.make_result(selector, selector_type, raw, entities, success=ok,
-                                error="" if ok else f"HTTP {status}")
+                                error="" if ok else f"HTTP {status} (non-2xx)")
 
 
 TOOLS = [ReverseIpTool(), TlsCertTool(), HttpTitleTool()]
