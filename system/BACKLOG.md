@@ -47,6 +47,52 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
   Healthy now, but heavy investigations / repeated gate runs will see it degrade. Add a free Cert Spotter
   token to Tier-2 (graceful) or cache per-domain. — review 2026-06-24.
 
+## SYSTEM AUDIT 2026-06-30 (adversarial self-audit sub-agent + tool-scout + doctrine review)
+Three sub-agents audited the system. The core is sound (raw/analysis split structurally enforced;
+noise filters + no-key degradation good). Findings:
+- [B11] (bug/HIGH/**DONE 2026-06-30**) — RE-TIER NO-OP: `add_entity` short-circuited on existing nodes,
+  never updating confidence — so red-team down-tiers AND corroboration upgrades were SILENT no-ops at the
+  graph level (defeated CAPABILITY-LOCK #4/#8 + the whole G14/A1 corroborator chain). Fixed: re-commit now
+  honors the supervisor's re-grade; added `retier_check` regression. Verified by repro.
+- [B12] (bug/med/**DONE 2026-06-30**) — graph_commit defaulted missing-confidence to `probable` (one notch
+  too strong); changed to conservative `possible`. (entity + relationship)
+- [B13] (bug/med/open) — tools that dress EMPTY/garbage as `success=True` with no signal: `disify` +
+  `blockstream_btc` (any HTTP 200=success, no verdict surfaced), `cloud_buckets` (unconditional success even
+  on total network failure), `http_title` (404 page with a `<title>` emits branding), `pgp_keyserver` (404
+  same shape as hit). Fix: parse the key verdict into metadata; gate http_title branding on 2xx; cloud_buckets
+  track probe failures. — self-audit M2.
+- [B14] (bug/med/open) — `theharvester`/`dnsrecon` write temp JSON keyed only on selector + extractor globs
+  first match and does NOT delete it → same-selector RERUNS (re-investigations, golden re-tests) can silently
+  read the PREVIOUS run's stale JSON. Fix: delete before+after (as socialscan does) or namespace per-run. — self-audit M4.
+- [B15] (bug/med/open) — ONTOLOGY HONESTY blind spot: `test_ontology_honesty` only checks catalog entries'
+  flags, never asserts every implemented tool IS catalogued; 40/58 implemented tools are absent from the
+  1031-catalog (so "58 of 1031" framing is untrue + the WARN is not a gate). Fix: add reverse assertion +
+  reframe/catalog. — self-audit H2.
+- [B16] (bug/low/open) — `crtsh`/`wayback`/`urlscan` 200-but-empty = success (can't tell "source empty" from
+  "filtered to nothing"); HttpTool/CliTool swallow extractor exceptions to `entities=[]` (broken extractor ==
+  "no findings"). Fix: surface row-count/exception in metadata. — self-audit M5/L2.
+- [AUDIT-L] (low/open) — health gate runs only 3 selector types + excludes network tools → tool-rot invisible
+  between manual golden audits (add a periodic non-blocking live-smoke); phone-regex national-format edge (L3);
+  no concurrency lock on multi-commit (latent — single-committer invariant, L4).
+- [DOCTRINE-TRIM] (doctrine/med/open — **needs operator approach-nod**) — doctrine review: the analytic
+  principles are right but the same few are restated 5-6× across files (over-prescription). CONSOLIDATE: one
+  canonical anti-over-merge block + pointers (O1); collapse the convergence/coverage/exhaust cluster to 2
+  principles (O2); make "no bespoke collection" a MECHANICAL bright-line not a self-granted exception (C1 — the
+  failure that already happened); state honest-crediting ONCE + conditional calibration note (O4); demote the
+  45-line Navigator dim-6 mechanics to a helper/docstring, keep the 4-line principle (O5). Cheap ADDS:
+  evidence-preservation (snapshot+date for load-bearing findings — active line already fetches Wayback; G1);
+  fold person-merges into the anti-merge rule (G7); one-line ACH framing; source-reliability qualifier in
+  citations (NOT a 6×6 matrix); temporal category. NET = shorter, sharper doctrine.
+- [GATE-STAKES] (architectural/open — **needs operator sign-off**) — scale the MANDATORY red-team gate to
+  stakes (lightweight grounding-only pass for small, no-attribution graphs). Touches CAPABILITY-LOCK's
+  "mandatory gate" — sign-off required. — doctrine review C3/O4.
+- [TOOL-CANDS-20260630] (candidate/open) — tool scout (Navigator + web), free/no-Go/non-loud net-new:
+  **BlockCypher** (multichain crypto, no-key HTTP, 200/hr) + **Orbit** (BTC wallet clustering, Python) = the
+  top crypto net-new (but crypto seeds haven't appeared in casework — wire only if crypto becomes in-scope);
+  **OnionSearch** (Tor dark-web, Python — needs the G12 Tor proxy first); verify-first: EU e-Justice/BRIS +
+  OpenOwnership (G9, may be web-line/dataset not API), LeakCheck public (G7 free metadata?). CONFIRMED PAID
+  WALLS (no free fill): G5 phone→owner, G7 deep cracked-creds. Adds to CAND-gitrecon/blockchair/phunter.
+
 ## GAPS — intel (capability; many are structural/paid)
 - [G1] (gap/high/partly-mitigated) — reverse_ip free quota (HackerTarget ~2 calls) too small.
   **2026-06-24: added `robtex_ip` as a 2nd free passive-DNS/reverse-IP source.** Still no key;
