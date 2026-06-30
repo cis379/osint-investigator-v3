@@ -149,6 +149,17 @@ def retier_check(workdir):
     check(nodes["down.x"]["confidence"] == "possible", "red-team down-tier re-grades (highly_likely->possible)")
 
 
+def cli_cleanup_check():
+    """B14 regression: file-writing CLI tools must set a pre-run cleanup so a failed/timed-out
+    rerun can't read a previous run's leftover temp file as fresh data."""
+    print("\n--- file-writing CLI tools have stale-read cleanup (B14) ---")
+    from src.tools.cli_tools import TOOLS as _CLI
+    file_writers = {"theharvester", "dnsrecon", "socialscan"}
+    have = {t.name for t in _CLI if getattr(t, "_cleanup", None)}
+    missing = file_writers - have
+    check(not missing, f"file-writing CLI tools set cleanup (missing: {sorted(missing)})")
+
+
 def main():
     print("=== V3 baseline regression suite (3 cases) ===")
     with tempfile.TemporaryDirectory(prefix="v3baseline_") as tmp:
@@ -157,6 +168,7 @@ def main():
             run_case(label, seed, stype, strategy, exclude, root / f"case{i}_{label}")
         tier_render_check(root / "tier")
         retier_check(root / "retier")
+        cli_cleanup_check()
 
     print("\n=== RESULT ===")
     if failures:

@@ -20,7 +20,7 @@ class CliTool(BaseTool):
 
     def __init__(self, *, name, description, input_types, output_types, binary,
                  install_command, command, timeout=180, extract=None,
-                 success_substrings=None):
+                 success_substrings=None, cleanup=None):
         self.name = name
         self.description = description
         self.input_types = input_types
@@ -31,6 +31,7 @@ class CliTool(BaseTool):
         self._timeout = timeout
         self._extract = extract
         self._success_substrings = success_substrings
+        self._cleanup = cleanup          # optional fn(selector): delete stale output files pre-run (B14)
 
     def check_installed(self) -> bool:
         if shutil.which(self._binary):
@@ -47,6 +48,13 @@ class CliTool(BaseTool):
                                     f"{self.name} not installed. Install: {self.install_command}")
 
         cmd = [tok.replace("{selector}", selector) for tok in self._command]
+        # B14: delete any stale output BEFORE the run, so a failed/timed-out rerun for the same
+        # selector can't read a previous run's leftover file and present it as fresh data.
+        if self._cleanup:
+            try:
+                self._cleanup(selector)
+            except Exception:
+                pass
         out, err, code = self.run_command(cmd, timeout=self._timeout)
         raw = (out + err)[:8000]
 
@@ -173,6 +181,7 @@ def _theharvester_extract(selector, stdout):
                 break
             except Exception:
                 continue
+    _th_cleanup(selector)  # B14: remove the file(s) we just read (and any leftovers)
     if not isinstance(data, dict):
         return []
 
@@ -377,6 +386,7 @@ def _dnsrecon_extract(selector, stdout):
                 break
             except Exception:
                 continue
+    _dr_cleanup(selector)  # B14: remove the file(s) we just read (and any leftovers)
     if not isinstance(data, list):
         return []
 
@@ -420,6 +430,27 @@ def _dnsrecon_extract(selector, stdout):
     return out[:300]
 
 
+# ---- B14: pre/post-run cleanup of selector-named temp outputs (avoid stale reads) ----
+def _remove_glob(pattern):
+    for f in _glob.glob(pattern):
+        try:
+            _os.remove(f)
+        except OSError:
+            pass
+
+
+def _th_cleanup(selector):
+    _remove_glob(_th_outbase(selector) + "*")                          # theharvester_<sel>.thv[.json|.xml]
+
+
+def _dr_cleanup(selector):
+    _remove_glob(_dnsrecon_outpath(selector).rsplit(".", 1)[0] + "*")  # dnsrecon_<sel>*.json
+
+
+def _ss_cleanup(selector):
+    _remove_glob(_ss_jsonpath(selector).rsplit(".", 1)[0] + "*")       # socialscan_<sel>*.json
+
+
 TOOLS = [
     CliTool(
         name="theharvester",
@@ -431,7 +462,7 @@ TOOLS = [
                  "-b", "crtsh,duckduckgo,otx,rapiddns,hackertarget,certspotter",
                  "-l", "200", "-n",
                  "-f", _os.path.join(_TH_OUTDIR, "theharvester_{selector}.thv")],
-        timeout=180, extract=_theharvester_extract),
+        timeout=180, extract=_theharvester_extract, cleanup=_th_cleanup),
 
     CliTool(
         name="socialscan",
@@ -441,7 +472,8 @@ TOOLS = [
         binary="socialscan", install_command="pip install socialscan",
         command=["socialscan", "{selector}", "--show-urls",
                  "--json", _os.path.join(_SS_OUTDIR, "socialscan_{selector}.json")],
-        timeout=120, extract=_socialscan_extract, success_substrings=["Completed", "queries in"]),
+        timeout=120, extract=_socialscan_extract, cleanup=_ss_cleanup,
+        success_substrings=["Completed", "queries in"]),
 
     CliTool(
         name="ignorant",
@@ -461,7 +493,8 @@ TOOLS = [
         binary="dnsrecon", install_command="pip install dnsrecon",
         command=["dnsrecon", "-d", "{selector}", "-t", "std", "--lifetime", "5",
                  "-j", _os.path.join(_TH_OUTDIR, "dnsrecon_{selector}.json")],
-        timeout=120, extract=_dnsrecon_extract, success_substrings=["Records Found", "Performing"]),
+        timeout=120, extract=_dnsrecon_extract, cleanup=_dr_cleanup,
+        success_substrings=["Records Found", "Performing"]),
 
     CliTool(
         name="linkook",

@@ -64,7 +64,7 @@ noise filters + no-key degradation good). Findings:
   on total network failure), `http_title` (404 page with a `<title>` emits branding), `pgp_keyserver` (404
   same shape as hit). Fix: parse the key verdict into metadata; gate http_title branding on 2xx; cloud_buckets
   track probe failures. — self-audit M2.
-- [B14] (bug/med/open) — `theharvester`/`dnsrecon` write temp JSON keyed only on selector + extractor globs
+- [B14] (bug/med/**DONE 2026-06-30**) — `theharvester`/`dnsrecon` write temp JSON keyed only on selector + extractor globs
   first match and does NOT delete it → same-selector RERUNS (re-investigations, golden re-tests) can silently
   read the PREVIOUS run's stale JSON. Fix: delete before+after (as socialscan does) or namespace per-run. — self-audit M4.
 - [B15] (bug/med/open) — ONTOLOGY HONESTY blind spot: `test_ontology_honesty` only checks catalog entries'
