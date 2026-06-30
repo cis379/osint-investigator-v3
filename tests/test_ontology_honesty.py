@@ -55,6 +55,15 @@ def main():
             flag_mismatch += 1
     check(flag_mismatch == 0, f"{flag_mismatch} tools_registry entries have a stale 'implemented' flag")
 
+    # Option B: the live registry is the source of truth. Every live tool must be ACCOUNTED FOR —
+    # either catalogued (in tools_registry) or recorded in the built_beyond_roadmap ledger that
+    # annotate_implemented keeps current. Catches a live tool that's invisible to the bookkeeping.
+    cat_ids = {t.get("id") for t in tr["tools"]}
+    ledger = set(tr.get("built_beyond_roadmap", []))
+    drift = (impl - cat_ids) ^ ledger  # tools live-but-unledgered, or ledgered-but-not-live
+    check(not drift, f"built_beyond_roadmap ledger accounts for every live tool "
+                     f"(re-run annotate_implemented; drift: {sorted(drift)})")
+
     n_impl_types = sum(1 for e in pm.values() if e.get("implemented_count"))
     print(f"  {len(pm)} selector types checked; {n_impl_types} have >=1 runnable tool")
     print(f"  {sum(t.get('implemented') for t in tr['tools'])}/{len(tr['tools'])} catalog tools flagged implemented")

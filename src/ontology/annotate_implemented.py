@@ -44,6 +44,12 @@ def main():
         t["implemented"] = is_impl
         n_impl += is_impl
     tr["implemented_total"] = n_impl
+    # Option B: the live registry is the source of truth; tools_registry is a ROADMAP of candidates.
+    # Record tools BUILT BEYOND the roadmap explicitly so the bookkeeping accounts for every live
+    # tool (no invisibles) and the "X runnable" framing is honest.
+    reg_ids = {t.get("id") for t in tr["tools"]}
+    tr["built_beyond_roadmap"] = sorted(implemented - reg_ids)
+    tr["built_beyond_roadmap_count"] = len(tr["built_beyond_roadmap"])
     _dump(tr, tr_path)
 
     # --- pivot_map.json ---

@@ -26,11 +26,15 @@ Multi-agent OSINT investigation system. Takes a seed selector, pivots through OS
 - `ontology_viz/ontology.html` - Interactive ontology visualization of the full catalog
 - `src/ontology/annotate_implemented.py` - Flags which catalog tools are actually implemented (re-run after wiring tools)
 
-> **Ontology honesty:** the ontology is a large *catalog* (1,031 tools / 90 selector
-> types) but only ~25 are implemented. `pivot_map.json` records `implemented_tools` /
-> `implemented_count` per type; `tools_registry.json` records `"implemented": bool`
-> per tool. Use `registry.get_selector_capability(type)` for the truthful view of what
-> actually runs. Only 13/90 selector types currently have any runnable tool.
+> **Ontology honesty (source of truth = the live registry).** What actually RUNS is the live
+> `registry.py` (58 runnable tools) routed by `pivot_map.json` — always query
+> `registry.get_selector_capability(type)` / `plan_collection` for the truthful view. The big
+> `tools_registry.json` (1,031 entries) is a **roadmap of candidate tools**, NOT the registry of
+> what's built: of the 58 runnable tools, ~18 were implemented FROM the roadmap and ~40 were
+> **built beyond it** (recorded in `tools_registry.json` → `built_beyond_roadmap` so no live tool
+> is invisible to the bookkeeping; `annotate_implemented` keeps it current, the honesty test gates
+> it). ~20 of 90 selector types have a dedicated structured tool; the rest are covered by the
+> web-search line (the universal fallback) or the general-username fallback, else logged as a GAP.
 - `investigations/` - Output directory for investigation cases
 
 ## How to Run an Investigation

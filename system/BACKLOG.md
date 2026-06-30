@@ -67,7 +67,7 @@ noise filters + no-key degradation good). Findings:
 - [B14] (bug/med/**DONE 2026-06-30**) — `theharvester`/`dnsrecon` write temp JSON keyed only on selector + extractor globs
   first match and does NOT delete it → same-selector RERUNS (re-investigations, golden re-tests) can silently
   read the PREVIOUS run's stale JSON. Fix: delete before+after (as socialscan does) or namespace per-run. — self-audit M4.
-- [B15] (bug/med/open) — ONTOLOGY HONESTY blind spot: `test_ontology_honesty` only checks catalog entries'
+- [B15] (bug/med/**DONE 2026-06-30**, Option B) — ONTOLOGY HONESTY blind spot: `test_ontology_honesty` only checks catalog entries'
   flags, never asserts every implemented tool IS catalogued; 40/58 implemented tools are absent from the
   1031-catalog (so "58 of 1031" framing is untrue + the WARN is not a gate). Fix: add reverse assertion +
   reframe/catalog. — self-audit H2.

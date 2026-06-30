@@ -90,8 +90,11 @@ State: **58 runnable tools · 20/92 selector types runnable · 8 skills · 3 sys
 
 ### Ontology (`src/ontology/`) — the routing brain (data + helpers in registry)
 - **pivot_map.json** — 90 selector types → `tools`, `yields`, `implemented_tools`, `implemented_count`.
-- **tools_registry.json** — 1031-tool catalog (metadata: method, command_template, install,
-  in/out types) + per-tool `implemented` flag. Mostly a reference/roadmap.
+- **tools_registry.json** — a 1031-entry **roadmap of candidate tools** (metadata + per-tool
+  `implemented` flag), NOT the registry of what's built. Source of truth for what RUNS = the live
+  registry. Of the 58 runnable tools, ~18 came FROM this roadmap; ~40 were **built beyond it** and
+  are recorded in the `built_beyond_roadmap` ledger (so the bookkeeping accounts for every live
+  tool — `annotate_implemented` maintains it, `test_ontology_honesty` gates it).
 - **web_search.json** — per-type web-search profiles (strategy, query templates, fetch_priority,
   extract targets) for the web-search line.
 - **selector_types.json**, **tool_buckets.json** (execution-class buckets).
