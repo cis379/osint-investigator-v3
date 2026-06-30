@@ -285,6 +285,11 @@ Net-new, free, no-key (or free-tier), fit our Python/HTTP stack, fill a real gap
 ## TIER-2 keyed tools — TODO (need free API keys; user not provisioning now)
 threatfox(ABUSE_CH_API_KEY), VirusTotal, AlienVault OTX, AbuseIPDB, Etherscan v2, Netlas,
 YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on when keyed.
+- **SpyOnWeb (`SPYONWEB_API_KEY`, FREE key)** — the real automated reverse-tracker path (the free
+  PublicWWW HTTP path is JS-rendered → unusable; confirmed 2026-06-30). `tracker_reverse` already has the
+  SpyOnWeb adapter; provisioning the free key makes the anti-over-merge corroborator chain self-serve.
+  **High value — recommend provisioning this one** (like the OSINT Navigator key).
+- PublicWWW API (PAID) — full source-code reverse-search; the paid alternative to SpyOnWeb.
 
 ## Supervisor-logged gaps (appended by investigation sessions)
 <!-- The supervisor appends `[GAP-<date>-NN] (gap/priority/open) — <what it needed and couldn't do> — INV-<case> -->
@@ -292,7 +297,18 @@ YouTube Data, Companies House, HIBP(paid). Coded to degrade gracefully; flip on 
 - [GAP-20260624-02] (gap/med/open) — threatfox tool returns `{"error":"Unauthorized"}` (needs ABUSE_CH_API_KEY). No IOC-reputation verdict available for domains/IPs. — INV-20260624-001
 - [GAP-20260624-03] (gap/low/open) — crt.sh (404) and wayback (503) both failed this run; transient but recurrent. CT-history fell back to certspotter; no archive snapshots retrieved. — INV-20260624-001
 - [GAP-20260624-04] (gap/med/open) — `reverse_ip` (HackerTarget) quota exhausted after ~2 IPs; the 3rd/4th network IPs (18.190.207.230, 143.47.57.203) had NO co-host enumeration except robtex+urlscan (incomplete). Reinforces G1 — a keyed/rotating reverse-IP source is needed to fully enumerate multi-IP scam estates. — INV-20260624-001
-- [GAP-20260626-01] (gap/high/open) — `tracker_reverse` PublicWWW path returns PARSER-ARTIFACT NOISE (asset filenames + JS tokens like `favicon.ico`, `bootstrap.min.css`, `document.cookie`, `math.random` returned as "domains") instead of real co-using domains, even when it reports `publicwww_hits>0` / `strong_ownership_signal=True`. SpyOnWeb path needs SPYONWEB_API_KEY (skipped). Net: reverse-tracker enumeration is effectively non-functional automatically — could not enumerate other domains carrying GA4 G-6PLNK76P14 / Ads AW-16724105870. Needs (a) a real domain-extraction parser for PublicWWW results, and/or (b) a keyed source. This is the automation of the anti-over-merge corroborator chain — high value. Note: this case re-hit the SAME operator as INV-20260624-001 (Walker Tours, EIN 37-2091569). — INV-20260626-001
+- [GAP-20260626-01] (gap/high/**FIXED 2026-06-30** — see note below) — `tracker_reverse` PublicWWW path returns PARSER-ARTIFACT NOISE (asset filenames + JS tokens like `favicon.ico`, `bootstrap.min.css`, `document.cookie`, `math.random` returned as "domains") instead of real co-using domains, even when it reports `publicwww_hits>0` / `strong_ownership_signal=True`. SpyOnWeb path needs SPYONWEB_API_KEY (skipped). Net: reverse-tracker enumeration is effectively non-functional automatically — could not enumerate other domains carrying GA4 G-6PLNK76P14 / Ads AW-16724105870. Needs (a) a real domain-extraction parser for PublicWWW results, and/or (b) a keyed source. This is the automation of the anti-over-merge corroborator chain — high value. Note: this case re-hit the SAME operator as INV-20260624-001 (Walker Tours, EIN 37-2091569). — INV-20260626-001
+  **FIX NOTE 2026-06-30:** root cause was deeper than parsing — PublicWWW results are JS-RENDERED, so a no-JS
+  HTTP fetch returns only page chrome; the old whole-page regex scraped PublicWWW's own nav/footer/asset refs as
+  "domains." Now: scope-parse only real result-row anchors + a strict domain validator (reject file-ext "TLDs");
+  on the JS/empty page return CLEAN-EMPTY + an honest note (no junk). The FREE path can't deliver automated
+  results; the WORKING path is keyed SpyOnWeb (Tier-2, recommend provisioning). Verified 0 junk on G-/AW- ids.
+- [IDEA-20260630-corroboration-loop] (doctrine/note/open) — operator idea: when reverse_ip (or any pivot)
+  surfaces NEW co-hosted domains, fingerprint THEIR trackers too (active line) and compare → shared id corroborates
+  same-operator, different ids split. **Largely ALREADY covered** by D2 "exhaust the seed's options / pivot every
+  new entity" (a co-hosted domain is a new entity; plan_collection offers web_tech_fingerprint for it). Keep it
+  PRINCIPLE-based (gather corroboration on new entities), NOT a hardcoded "fingerprint all co-hosts" rule. Consider
+  one explicit example in the DOCTRINE-TRIM pass. — operator 2026-06-30.
 - [GAP-20260624-05] (gap/low/open) — `shodan_internetdb` returned "No information available" for all three AWS EC2 IPs (only the Oracle IP had data) — AWS-hosted hosts give no port/service fingerprint via InternetDB. — INV-20260624-001
 - [GAP-20260624-06] (gap/low/open) — `bgpview_ip` DNS resolution failed ("getaddrinfo failed" for api.bgpview.io) on this run; ASN data came from urlscan/robtex instead. Transient network/DNS issue. — INV-20260624-001
 
