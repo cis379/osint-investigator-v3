@@ -50,6 +50,9 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 ## SYSTEM AUDIT 2026-06-30 (adversarial self-audit sub-agent + tool-scout + doctrine review)
 Three sub-agents audited the system. The core is sound (raw/analysis split structurally enforced;
 noise filters + no-key degradation good). Findings:
+> **Bucket-2 items below are QUEUED FOR DEEPER EXPLORATION** (operator 2026-06-30): `DOCTRINE-TRIM`,
+> `GATE-STAKES`, and `TOOL-CANDS-20260630` each need a fuller design/explanation pass before any action —
+> do NOT execute them off this summary; scope each properly first.
 - [B11] (bug/HIGH/**DONE 2026-06-30**) — RE-TIER NO-OP: `add_entity` short-circuited on existing nodes,
   never updating confidence — so red-team down-tiers AND corroboration upgrades were SILENT no-ops at the
   graph level (defeated CAPABILITY-LOCK #4/#8 + the whole G14/A1 corroborator chain). Fixed: re-commit now
