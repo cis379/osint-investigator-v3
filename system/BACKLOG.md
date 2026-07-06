@@ -6,7 +6,20 @@ The System Manager triages + fixes from here (test-gated). Supervisor sessions A
 
 Format: `[ID] (type/priority/status) — description — source`. status: open | in-progress | done | wontfix.
 
-## CURRENT STATUS (as of 2026-06-26) — where to pick up
+## CURRENT STATUS (as of 2026-07-06) — where to pick up
+- **MIGRATION PREP COMPLETE (2026-07-06):** system is now Mac-portable + agent-agnostic (Codex or Claude
+  Code) + self-rebuilding, WITHOUT engine changes. New files: `requirements.txt`, `bootstrap.sh`,
+  `SETUP.md`, `AGENTS.md`, `MIGRATION.md`, `.gitattributes`, `codex/prompts/*`. V3 frozen as tag
+  `v3-windows-final-2026-07-06`. Verified by a clean fresh-clone rebuild (health GREEN). **Operator's
+  next action: create a private git remote + `git push -u origin master` + `git push origin --tags`**
+  (see MIGRATION.md Part A). Then on the Mac: clone → `./bootstrap.sh` → copy `.env` back.
+- **Bugs: ALL closed (B1–B16).** B16 (honest empty results) closed 2026-07-06.
+- **No `main` branch** — `master` is the working baseline; all migration work merged there.
+- Health: GREEN · 58 tools · 8 skills. Baseline tags: v3-baseline-2026-06-26, **v3-windows-final-2026-07-06**.
+- Still-open worklist below is unchanged (G15/G16/F1 buildable; structural gaps need keys/$; Bucket-2
+  items still need operator sign-off before action).
+
+## CURRENT STATUS (as of 2026-06-26) — historical
 - **Bugs:** all closed (B1–B6, B8–B10 done; B7 wontfix-ish). No open bugs.
 - **Operator brief (2026-06-24): COMPLETE** — D1 ✅ · RT1 ✅ · G14 ✅ · A1 ✅ · R1 ✅.
 - **Open worklist (free, buildable next):** G15 (TTP playbook in web_searcher), G16 (traffic/reach +

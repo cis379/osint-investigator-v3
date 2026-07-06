@@ -2,6 +2,33 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-07-06 (MIGRATION PREP — Mac-portable + agent-agnostic, self-rebuilding; V3 frozen)
+- Operator is changing machines (Windows → **Mac**) and may swap the driving agent (Claude Code →
+  **Codex**). Directive: preserve what works, make it portable + AI-vendor-agnostic + fast to stand up,
+  with build guides anyone could follow. **No under-the-hood/engine changes** — same architecture, only
+  the machine + the thin agent-entry layer differ. Executed in 5 health-gated phases (all GREEN):
+  - **Phase 0 — froze V3**: tag `v3-windows-final-2026-07-06` (recoverable known-good baseline).
+    Decision: "V4" is NOT a fork — same repo goes forward; a divergent copy would be pure maintenance
+    burden with no under-the-hood difference. (operator agreed.)
+  - **Phase 1 — self-rebuild kit**: `requirements.txt` (was MISSING — the #1 standup blocker; the broad
+    `*.txt` gitignore rule had also been silently excluding it — fixed), `bootstrap.sh` (one-command
+    macOS/Linux build: venv, core deps, naminter/ignorant into venv, pipx CLI tools best-effort, exiftool,
+    .env scaffold, health gate), `SETUP.md` (assume-nothing build bible).
+  - **Phase 2 — portability**: removed 4 hardcoded `C:\Users\cis37` paths (naminter/ignorant shims →
+    `_REPO_ROOT`; exiftool install hint OS-aware; 2 ontology scripts' BASE_DIR from `__file__`);
+    `.gitattributes` forces LF on `*.sh`/`*.py` (CRLF shebang would break bootstrap.sh on Mac).
+  - **Phase 3 — agent-agnostic driver**: `AGENTS.md` (Codex reads it automatically — how to launch
+    investigate/system-manager/daily-review via the same `skills/*.md`) + `codex/prompts/*.md` (optional
+    literal slash commands). Made the instruction layer portable: `sys.path.insert(0,'.')` + relative refs
+    across 5 skills + CLAUDE.md (plumbing only, doctrine untouched); replaced the stale
+    `.claude/commands/investigate.md` (12 hardcoded paths + legacy execute.py) with a thin portable pointer.
+  - **Phase 4 — transport + PROOF**: `MIGRATION.md` (push-to-remote steps + Mac day-one runbook +
+    carry-secrets note). **Verified by a fresh-clone rebuild**: bare clone → clean venv from only
+    requirements.txt → health GREEN, with current wheels resolving NEWER than the pins (networkx 3.6.1
+    not 2.8.8) and still passing — validating the `>=` floors; naminter path resolved INSIDE the clone.
+  - Also closed **B16** this session (see next entry). No `main` branch exists — work continues on `master`
+    (which is the baseline); the remote/push is the operator's next step (gh not installed here).
+
 ## 2026-07-06 (B16 — honest empty results; last open self-audit bug)
 - Closed **B16**, the remaining open bug from the 2026-06-30 self-audit. Two silent-false-negative
   failure modes fixed: (1) HttpTool/CliTool **swallowed a crashing extractor to `entities=[]`** — a code
