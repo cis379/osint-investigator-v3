@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import shutil
 import tempfile
 from pathlib import Path
@@ -8,6 +9,14 @@ import requests
 
 from .base import BaseTool, ToolResult, EntityFound
 
+# OS-aware install hint so the "not installed" message + BaseTool.install() are correct
+# on whatever platform we're running (macOS: brew, Linux: apt, Windows: winget user-scope).
+_SYS = platform.system()
+_EXIFTOOL_INSTALL = {
+    "Darwin": "brew install exiftool",
+    "Linux": "sudo apt-get install -y libimage-exiftool-perl",
+}.get(_SYS, "winget install OliverBetz.ExifTool --scope user")  # Windows default
+
 
 class ExifToolWrapper(BaseTool):
     name = "exiftool"
@@ -15,12 +24,12 @@ class ExifToolWrapper(BaseTool):
     input_types = ["image", "file", "url"]
     output_types = ["coordinates", "date"]
     method = "cli"
-    # choco needs elevation; winget user-scope works without it (G11).
-    install_command = "winget install OliverBetz.ExifTool --scope user"
+    install_command = _EXIFTOOL_INSTALL
 
-    # Known install locations so we resolve the binary even when a freshly-installed
-    # exiftool isn't yet on the *current* process's PATH (winget updates user PATH, but
-    # already-running processes keep the stale one until restart) — G11.
+    # Windows-only fallback locations so we resolve the binary even when a freshly winget/choco-
+    # installed exiftool isn't yet on the *current* process's PATH (G11). Harmless elsewhere:
+    # on macOS/Linux brew/apt put exiftool on PATH immediately, so shutil.which() finds it and
+    # these paths are simply skipped (isfile == False).
     _CANDIDATE_PATHS = [
         os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "ExifTool", "ExifTool.exe"),
         r"C:\ProgramData\chocolatey\bin\exiftool.exe",

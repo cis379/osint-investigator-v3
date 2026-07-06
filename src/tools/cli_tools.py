@@ -164,6 +164,10 @@ def _extract_linkook(selector, stdout):
 # =================== theHarvester (domain -> emails/hosts/ips) ===================
 import os as _os, re as _re, glob as _glob, json as _json, tempfile as _tempfile
 
+# Repo root, resolved from this file's location (portable — no hardcoded absolute path).
+# <repo>/src/tools/cli_tools.py -> up three dirs == <repo>.
+_REPO_ROOT = _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+
 _TH_OUTDIR = _tempfile.gettempdir()
 
 
@@ -235,7 +239,7 @@ def _theharvester_extract(selector, stdout):
 
 
 # =================== naminter (username -> profile URLs, anti-bot) ===================
-NAMINTER_LAUNCHER = r"C:\Users\cis37\osint-investigator-v3\.naminter_shims\naminter_run.py"
+NAMINTER_LAUNCHER = _os.path.join(_REPO_ROOT, ".naminter_shims", "naminter_run.py")
 _NAMINTER_LINE = re.compile(r"^\+\s*\[(?P<site>[^\]]+)\]\s+(?P<url>https?://\S+)")
 
 
@@ -313,7 +317,7 @@ def _socialscan_extract(selector, stdout):
 
 
 # =================== ignorant (phone -> registered accounts; "holehe for phone") ===================
-IGNORANT_SHIM_DIR = r"C:\Users\cis37\osint-investigator-v3\.ignorant_shims"
+IGNORANT_SHIM_DIR = _os.path.join(_REPO_ROOT, ".ignorant_shims")
 IGNORANT_LAUNCHER = _os.path.join(IGNORANT_SHIM_DIR, "ignorant_run.py")
 _IGNORANT_SHIM_SRC = r'''
 import sys, re

@@ -1,0 +1,16 @@
+# Cross-platform line-ending normalization. Critical for the Windows -> macOS migration:
+# a shell script stored/checked-out with CRLF breaks on macOS/Linux because the shebang
+# becomes "#!/usr/bin/env bash\r" -> "bash\r: no such file or directory".
+
+* text=auto
+
+# Force LF for things that run on macOS/Linux (or are safest as LF everywhere)
+*.sh   text eol=lf
+*.py   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# Keep CRLF for Windows-only scripts
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf

@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-BASE_DIR = Path(r"C:\Users\cis37\osint-investigator-v3")
+BASE_DIR = Path(__file__).resolve().parents[2]  # <repo>/src/tools/ -> <repo>
 DOCS_DIR = BASE_DIR / "docs"
 ONTOLOGY_DIR = BASE_DIR / "src" / "ontology"
 

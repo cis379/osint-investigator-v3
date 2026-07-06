@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-BASE_DIR = Path(r"C:\Users\cis37\osint-investigator-v3")
+BASE_DIR = Path(__file__).resolve().parents[2]  # <repo>/src/tools/ -> <repo>
 ONTOLOGY_DIR = BASE_DIR / "src" / "ontology"
 
 # Load expanded data
