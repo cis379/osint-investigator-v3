@@ -11,6 +11,23 @@ same behavior via `.claude/commands/` and the skills — **the engine is identic
 
 ---
 
+## FIRST-TIME SETUP — do this first if the system isn't built yet
+If a user points you at this repo and says "get it up and running" (fresh clone, no `.venv/`):
+1. **Run the bootstrap** from the repo root: `./bootstrap.sh`
+   (creates `.venv/`, installs deps + OSINT CLI tools, scaffolds `.env`, runs the health gate).
+   If `bash` isn't available, follow the manual steps in `SETUP.md §2`.
+2. **Confirm health:** the bootstrap ends by running `python scripts/health_check.py` — you need
+   `=== HEALTHY ===`. If it's RED, the fix is almost always core deps: with `.venv` active,
+   `pip install -r requirements.txt`, then re-run the gate.
+3. **Restore secrets (optional):** if the user carried a `.env`, have them drop it in the repo root
+   (it's gitignored and did not travel in git). Tools degrade gracefully without keys.
+4. **You're ready.** Report health + tool count (`58`), then wait for the user's first investigation,
+   or start the one they named. Do NOT begin collecting until the health gate is green.
+
+That's the whole standup. Everything below is how you then DRIVE the system.
+
+---
+
 ## Ground rules (always)
 1. **Run every command from the repository root.** Skills use `sys.path.insert(0, '.')` and relative
    paths — they only resolve when the working directory is the repo root.

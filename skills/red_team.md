@@ -178,7 +178,8 @@ logger = InvestigationLogger(r'{LOG_FILE}')
 logger.log_analysis('''RED-TEAM REVIEW\n\n{YOUR_SUMMARY_AND_KEY_CHALLENGES}''')
 "
 ```
-(Wrap Windows paths as raw strings `r'...'` — a bare `'C:\Users\...'` raises `unicodeescape`.)
+(If a path with backslashes gets fiddly in a one-liner, wrap it as a raw string `r'...'`, or write
+a small temp `.py` with your file-writing tool and run that instead.)
 
 ## Return to the supervisor
 Return the critique JSON (the supervisor reconciles it). Be specific and actionable: each

@@ -2,6 +2,12 @@
 
 Multi-agent OSINT investigation system. Takes a seed selector, pivots through OSINT data sources, builds a graph, and produces a CTI report.
 
+## Setup on a new machine (do this first if not built yet)
+Fresh clone with no `.venv/`? Run `./bootstrap.sh` from the repo root (venv + deps + OSINT CLI tools
++ `.env` scaffold + health gate), then confirm `python scripts/health_check.py` prints `=== HEALTHY ===`.
+Run everything from the repo root. Full detail: `SETUP.md`. Moving machines: `MIGRATION.md`.
+This system is agent-vendor-agnostic (Claude Code or Codex) — the vendor-neutral driver is `AGENTS.md`.
+
 ## Project Structure
 
 - `src/core/selector.py` - Selector type detection (email, username, IP, domain, name, etc.)
