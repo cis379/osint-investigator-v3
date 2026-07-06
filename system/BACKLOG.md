@@ -10,9 +10,11 @@ Format: `[ID] (type/priority/status) — description — source`. status: open |
 - **MIGRATION PREP COMPLETE (2026-07-06):** system is now Mac-portable + agent-agnostic (Codex or Claude
   Code) + self-rebuilding, WITHOUT engine changes. New files: `requirements.txt`, `bootstrap.sh`,
   `SETUP.md`, `AGENTS.md`, `MIGRATION.md`, `.gitattributes`, `codex/prompts/*`. V3 frozen as tag
-  `v3-windows-final-2026-07-06`. Verified by a clean fresh-clone rebuild (health GREEN). **Operator's
-  next action: create a private git remote + `git push -u origin master` + `git push origin --tags`**
-  (see MIGRATION.md Part A). Then on the Mac: clone → `./bootstrap.sh` → copy `.env` back.
+  `v3-windows-final-2026-07-06`. Verified by a clean fresh-clone rebuild (health GREEN). **PUSHED
+  2026-07-06 to private remote `https://github.com/cis379/osint-investigator-v3` (master + all tags;
+  origin/master in sync).** Repo strategy: SEPARATE repo per tool (osint vs PRIZICONU) — prizy is being
+  prepped by another agent. **On the Mac (day one): clone → `./bootstrap.sh` → copy `.env` back** (see
+  MIGRATION.md Part B). `.env` is gitignored so it did NOT travel — carry it by hand.
 - **Bugs: ALL closed (B1–B16).** B16 (honest empty results) closed 2026-07-06.
 - **No `main` branch** — `master` is the working baseline; all migration work merged there.
 - Health: GREEN · 58 tools · 8 skills. Baseline tags: v3-baseline-2026-06-26, **v3-windows-final-2026-07-06**.
