@@ -1,0 +1,22 @@
+# ============================================================================
+# OSINT Investigator v3 — Python dependencies (the CORE engine)
+# ============================================================================
+# These are the libraries the system itself imports. Installing them makes the
+# registry load and every HTTP/API tool work, and makes `scripts/health_check.py`
+# pass. The external OSINT *CLI* tools (sherlock, maigret, holehe, theHarvester,
+# exiftool, ...) are installed separately — see bootstrap.sh / SETUP.md — and the
+# system degrades gracefully when any of them is absent.
+#
+# Validated on Python 3.13 (Windows). Floors are chosen so a fresh macOS install
+# (Homebrew python3) resolves current wheels. If a specific version ever breaks,
+# pin to the exact validated version noted in the comment.
+# Install:  python3 -m pip install -r requirements.txt
+# ============================================================================
+
+requests>=2.31          # HTTP client for all API tools           (validated 2.34.2)
+networkx>=2.8,<4        # the investigation graph                  (validated 2.8.8; Graph API used is stable 2.x–3.x)
+python-whois>=0.9       # WHOIS lookups            imports as `whois`   (validated 0.9.6)
+dnspython>=2.4          # DNS records              imports as `dns`     (validated 2.7.0)
+beautifulsoup4>=4.12    # HTML parsing             imports as `bs4`     (validated 4.12.3)
+mmh3>=4.0               # favicon mmh3 hash (web_tech_fingerprint; optional-degrading)  (validated 5.2.1)
+phonenumbers>=8.13      # phone parsing/validation (+ used by the ignorant shim)         (validated 9.0.33)

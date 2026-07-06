@@ -3,6 +3,9 @@ investigations/
 
 # Personal investigation notes
 *.txt
+# ...but keep project files that legitimately use .txt (the broad rule above would
+# otherwise silently exclude them — this is how requirements.txt got left out).
+!requirements.txt
 
 # Python
 __pycache__/
