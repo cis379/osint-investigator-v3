@@ -98,7 +98,7 @@ python src/tools/execute.py --run-all --selector example.com --type domain \
 ### Via Python API:
 ```python
 import sys
-sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
+sys.path.insert(0, '.')  # run from the repo root
 from src.tools.registry import run_tool, get_tools_for_selector, check_tool_availability
 
 availability = check_tool_availability()

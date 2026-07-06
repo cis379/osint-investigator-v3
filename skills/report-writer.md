@@ -29,7 +29,7 @@ Read `{CASE_DIR}/investigation.md` (the raw audit trail — what each tool retur
 ```
 python -c "
 import sys, json
-sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3')
+sys.path.insert(0, '.')
 g = json.load(open(r'{CASE_DIR}/graph.json', encoding='utf-8'))
 print('nodes', len(g['nodes']), 'edges', len(g['edges']))
 print(json.dumps(g['nodes'][:200], indent=2)[:4000])
@@ -100,7 +100,7 @@ python -m src.report.build --case-dir "{CASE_DIR}"
 interactive graph and the bibliography:
 ```
 python -c "
-import sys; sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3')
+import sys; sys.path.insert(0, '.')
 from src.graph.database import InvestigationGraph
 from src.graph.visualizer import generate_investigation_html
 from src.report.bibliography import generate_bibliography
@@ -115,9 +115,9 @@ print('graph + bibliography refreshed')
 The report does not ship until the red team confirms every sentence is backed by data. Dispatch the
 red team in **report-grounding mode** (a background Agent):
 ```
-You are the OSINT RED TEAM. Read C:/Users/cis37/osint-investigator-v3/skills/red_team.md and follow MODE 2 (report grounding) EXACTLY.
+You are the OSINT RED TEAM. Read skills/red_team.md and follow MODE 2 (report grounding) EXACTLY.
 
-Working directory: C:\Users\cis37\osint-investigator-v3
+Working directory: the repository root (run all commands from there)
 Investigation: {CASE_ID} | case_dir: {CASE_DIR}
 Review the DRAFT report ({CASE_DIR}/report.md + {CASE_DIR}/_report.json) against the ground truth
 ({CASE_DIR}/graph.json + {CASE_DIR}/investigation.md). Flag every hallucination, over-claim vs. tier,

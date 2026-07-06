@@ -84,7 +84,7 @@ For each collection round:
 You are an OSINT data gatherer. Run the following tools and return RAW results only.
 Do NOT analyze, interpret, or build the graph. Just execute and return structured output.
 
-Working directory: C:\Users\cis37\osint-investigator-v3
+Working directory: the repository root (run all commands from there)
 Investigation: {CASE_ID}
 
 Run this and return the full output (one --tool call per tool, or --run-all for the whole type):
@@ -98,9 +98,9 @@ Report back the complete raw JSON output for each tool.
    search, fetch, and extract CITED findings, logs via `web_collect.py`, and returns
    findings. It never builds the graph.
 ```
-You are the OSINT web-search collector. Read C:/Users/cis37/osint-investigator-v3/skills/web_searcher.md and follow it EXACTLY.
+You are the OSINT web-search collector. Read skills/web_searcher.md and follow it EXACTLY.
 
-Working directory: C:\Users\cis37\osint-investigator-v3
+Working directory: the repository root (run all commands from there)
 Investigation: {CASE_ID} | case_dir: {CASE_DIR} | log file: {LOG_FILE}
 Selector: "{SELECTOR}"   Type: {SELECTOR_TYPE}
 
@@ -152,14 +152,12 @@ Then run:
 python -m src.tools.graph_commit --graph "{GRAPH_FILE}" --regen-html "{GRAPH_HTML}" --case {CASE_ID} --input "{CASE_DIR}/_commit.json"
 ```
 
-Then log your analysis narrative (the reasoning, corroborations, and gaps). NOTE: wrap
-the Windows path in a RAW string `r'...'` — a bare `'C:\Users\...'` raises
-`SyntaxError: unicodeescape` because `\U` is read as an escape. (Or write a small temp
-`.py` with the Write tool if the snippet is fiddly.)
+Then log your analysis narrative (the reasoning, corroborations, and gaps). (If a snippet
+gets fiddly with quoting, write a small temp `.py` with the Write tool and run that instead.)
 ```python
 python -c "
 import sys
-sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3')
+sys.path.insert(0, '.')
 from src.logger.investigation_log import InvestigationLogger
 logger = InvestigationLogger(r'{LOG_FILE}')
 logger.log_analysis('''{ANALYSIS}''')
@@ -237,9 +235,9 @@ process control for the anti-over-merge doctrine — it is how the graph earns i
 1. **Dispatch the red-team agent** (background Agent) — it reads the graph + log and returns a
    structured critique. It is READ-ONLY; it never writes the graph (you do).
 ```
-You are the OSINT RED TEAM. Read C:/Users/cis37/osint-investigator-v3/skills/red_team.md and follow it EXACTLY.
+You are the OSINT RED TEAM. Read skills/red_team.md and follow it EXACTLY.
 
-Working directory: C:\Users\cis37\osint-investigator-v3
+Working directory: the repository root (run all commands from there)
 Investigation: {CASE_ID} | case_dir: {CASE_DIR}
 Graph: {GRAPH_FILE} | Log: {LOG_FILE} | Commit spec: {CASE_DIR}/_commit.json
 
@@ -277,7 +275,7 @@ run on the current graph):
 ```python
 python -c "
 import sys
-sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
+sys.path.insert(0, '.')
 from src.graph.database import InvestigationGraph
 from src.graph.visualizer import generate_investigation_html
 graph = InvestigationGraph(r'{GRAPH_FILE}')

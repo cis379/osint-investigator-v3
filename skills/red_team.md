@@ -172,7 +172,7 @@ After writing `_redteam.json`, append a "RED-TEAM REVIEW" narrative to `investig
 ```python
 python -c "
 import sys
-sys.path.insert(0, r'C:\Users\cis37\osint-investigator-v3')
+sys.path.insert(0, '.')
 from src.logger.investigation_log import InvestigationLogger
 logger = InvestigationLogger(r'{LOG_FILE}')
 logger.log_analysis('''RED-TEAM REVIEW\n\n{YOUR_SUMMARY_AND_KEY_CHALLENGES}''')

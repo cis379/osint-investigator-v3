@@ -28,14 +28,14 @@ If they say "resume", load the existing investigation state instead of creating 
 
 Run the selector detection script:
 ```
-python -c "import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3'); from src.core.selector import detect_selector_type; r = detect_selector_type('{SELECTOR}'); print(f'Type: {r.selector_type}'); print(f'Value: {r.value}'); print(f'Confidence: {r.confidence}')"
+python -c "import sys; sys.path.insert(0, '.'); from src.core.selector import detect_selector_type; r = detect_selector_type('{SELECTOR}'); print(f'Type: {r.selector_type}'); print(f'Value: {r.value}'); print(f'Confidence: {r.confidence}')"
 ```
 
 ## Step 3: Create Investigation
 
 Run the state creation script:
 ```
-python -c "import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3'); from src.core.state import create_investigation; s = create_investigation('{VALUE}', '{TYPE}'); print(f'Case: {s[\"case_id\"]}'); print(f'Dir: {s[\"case_dir\"]}')"
+python -c "import sys; sys.path.insert(0, '.'); from src.core.state import create_investigation; s = create_investigation('{VALUE}', '{TYPE}'); print(f'Case: {s[\"case_id\"]}'); print(f'Dir: {s[\"case_dir\"]}')"
 ```
 
 ## Step 4: Investigation Log (automatic)
@@ -49,7 +49,7 @@ After setup, you ARE the supervisor. Read the supervisor skill instructions and 
 
 ```
 python -c "
-import sys; sys.path.insert(0, 'C:\\Users\\cis37\\osint-investigator-v3')
+import sys; sys.path.insert(0, '.')
 from src.tools.registry import get_selector_capability
 cap = get_selector_capability('{TYPE}')
 print(f'Runnable tools: {cap[\"implemented_count\"]} of {cap[\"catalog_count\"]} cataloged')

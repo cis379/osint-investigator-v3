@@ -46,7 +46,7 @@ cloaking, takedown, or infra rotation. So:
   shared ownership.
 
 ## What you run (via collect.py — raw, no graph)
-Working directory: `C:\Users\cis37\osint-investigator-v3`. Use the gatherer's raw pipeline:
+Working directory: the repository root (run all commands from there). Use the gatherer's raw pipeline:
 
 1. **Fingerprint the target** (extract tracker IDs + favicon):
 ```
