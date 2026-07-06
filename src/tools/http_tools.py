@@ -84,18 +84,27 @@ class HttpTool(BaseTool):
         raw = resp.text[:8000]
         ok = resp.status_code in self._success_codes
         entities = []
+        # B16 diagnostics: make an empty result honest about WHY it's empty.
+        meta = {"http_status": resp.status_code, "response_bytes": len(resp.text)}
         if ok and self._extract:
+            data = None
             try:
                 data = resp.json()
             except ValueError:
-                data = None
+                meta["parse_error"] = "response was not valid JSON"
             if data is not None:
                 try:
                     entities = self._extract(selector, data) or []
-                except Exception:
-                    entities = []  # extraction is best-effort; raw is always logged
+                except Exception as e:
+                    # A crashing extractor is a CODE BUG, not a clean 'no findings'. Surface it
+                    # instead of swallowing to [] so it can't masquerade as an authoritative negative.
+                    meta["extractor_error"] = f"{type(e).__name__}: {e}"
+        meta["entities_extracted"] = len(entities)
+        if ok and not entities and "extractor_error" not in meta and "parse_error" not in meta:
+            meta["empty_reason"] = "source returned 2xx with no matching data (real negative)"
         return self.make_result(selector, selector_type, raw, entities,
-                                success=ok, error="" if ok else f"HTTP {resp.status_code}")
+                                success=ok, error="" if ok else f"HTTP {resp.status_code}",
+                                metadata=meta)
 
 
 def _E(value, etype, conf, cite, meta=None):

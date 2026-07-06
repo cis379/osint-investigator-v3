@@ -187,9 +187,12 @@ class CrtShTool(BaseTool):
             )
             raw_output = resp.text[:5000]
             entities = []
+            meta = {"http_status": resp.status_code}
+            rows_returned = 0
 
             if resp.status_code == 200:
                 certs = resp.json()
+                rows_returned = len(certs)
                 seen = set()
 
                 def _looks_like_domain(v):
@@ -224,9 +227,15 @@ class CrtShTool(BaseTool):
                                 source_citation=f"crt.sh cert ID {cert.get('id', 'unknown')}: {val}",
                                 metadata=meta))
 
+            meta["rows_returned"] = rows_returned
+            meta["entities_extracted"] = len(entities)
+            if resp.status_code == 200 and rows_returned and not entities:
+                # B16: crt.sh had certs but the domain/email gate rejected them ALL — that's a
+                # filter outcome, not "no certs". Flag it so a too-strict gate can't read as empty.
+                meta["empty_reason"] = f"{rows_returned} cert rows returned but all filtered out"
             return self.make_result(
                 selector, selector_type, raw_output, entities,
-                success=resp.status_code == 200,
+                success=resp.status_code == 200, metadata=meta,
             )
         except requests.RequestException as e:
             return self.make_result(selector, selector_type, "", [], False, str(e))
@@ -250,9 +259,11 @@ class WaybackTool(BaseTool):
             )
             raw_output = resp.text[:5000]
             entities = []
+            meta = {"http_status": resp.status_code}
 
             if resp.status_code == 200:
                 rows = resp.json()
+                meta["snapshots_returned"] = max(len(rows) - 1, 0)  # row 0 is the CDX header
                 if len(rows) > 1:
                     for row in rows[1:]:
                         timestamp, original, status, mime = row[0], row[1], row[2], row[3]
@@ -270,9 +281,12 @@ class WaybackTool(BaseTool):
                             },
                         ))
 
+            meta["entities_extracted"] = len(entities)
+            if resp.status_code == 200 and not entities:
+                meta["empty_reason"] = "no archived snapshots for this selector (real negative)"
             return self.make_result(
                 selector, selector_type, raw_output, entities,
-                success=resp.status_code == 200,
+                success=resp.status_code == 200, metadata=meta,
             )
         except requests.RequestException as e:
             return self.make_result(selector, selector_type, "", [], False, str(e))

@@ -29,6 +29,11 @@ class ToolResult:
     entities_found: list[EntityFound]
     success: bool
     error: str = ""
+    # B16: tool-level diagnostics so an EMPTY result is honest about WHY it's empty.
+    # success stays transport-level (did the fetch/command work); this channel lets the
+    # supervisor tell "source genuinely had nothing" from "rows returned but filtered to
+    # zero" from "the extractor crashed" (a code bug that used to read as 'no findings').
+    metadata: dict = field(default_factory=dict)
 
     def to_dict(self):
         return {
@@ -40,6 +45,7 @@ class ToolResult:
             "entities_found": [e.to_dict() for e in self.entities_found],
             "success": self.success,
             "error": self.error,
+            "metadata": self.metadata,
         }
 
     def to_json(self):
@@ -97,7 +103,8 @@ class BaseTool(ABC):
             return "", f"Command not found: {cmd[0]}", -1
 
     def make_result(self, query: str, query_type: str, raw_output: str,
-                    entities: list[EntityFound], success: bool, error: str = "") -> ToolResult:
+                    entities: list[EntityFound], success: bool, error: str = "",
+                    metadata: dict | None = None) -> ToolResult:
         return ToolResult(
             tool_name=self.name,
             query=query,
@@ -107,6 +114,7 @@ class BaseTool(ABC):
             entities_found=entities,
             success=success,
             error=error,
+            metadata=metadata or {},
         )
 
     @abstractmethod

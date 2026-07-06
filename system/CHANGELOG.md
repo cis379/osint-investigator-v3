@@ -2,6 +2,19 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-07-06 (B16 — honest empty results; last open self-audit bug)
+- Closed **B16**, the remaining open bug from the 2026-06-30 self-audit. Two silent-false-negative
+  failure modes fixed: (1) HttpTool/CliTool **swallowed a crashing extractor to `entities=[]`** — a code
+  bug that read as an authoritative "no findings"; now surfaced as `metadata.extractor_error`. (2) A
+  **200-but-empty** result was indistinguishable from "source returned rows but the filter dropped them
+  all." Added a `ToolResult.metadata` diagnostic channel (additive; `success` stays transport-level so the
+  health gate + downstream semantics are unchanged) carrying `entities_extracted` + an `empty_reason`;
+  crtsh/wayback/urlscan record `rows_returned`/`snapshots_returned`/`results_returned` so "filtered to zero"
+  is visible. Fix lives in the two declarative runners (covers all specs) + the 3 hand-written tools. Why:
+  upholds "no hallucination / honest about limits" on the NON-finding side — an empty pivot now says why.
+  Health + 3 suites GREEN; verified with a deterministic stub test (crash surfaced, clean-empty flagged,
+  transport-success preserved). All B-series bugs (B1–B16) now closed.
+
 ## 2026-06-29 (OSINT Navigator wired to the red team + breadth diff)
 - Dispatched two sub-agents (context offload), checked + integrated both. **OSINT Navigator wired to the RED
   TEAM** for independent gap-covering: verified the live REST API myself (`POST navigator.indicator.media/

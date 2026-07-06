@@ -59,20 +59,27 @@ class CliTool(BaseTool):
         raw = (out + err)[:8000]
 
         entities = []
+        # B16 diagnostics: an empty result must say WHY (real negative vs. crashed extractor).
+        meta = {"exit_code": code, "stdout_bytes": len(out)}
         if self._extract:
             try:
                 entities = self._extract(selector, out) or []
-            except Exception:
-                entities = []  # best-effort; raw is always logged
+            except Exception as e:
+                # A crashing extractor is a CODE BUG, not 'no findings' — surface it, don't swallow.
+                meta["extractor_error"] = f"{type(e).__name__}: {e}"
+        meta["entities_extracted"] = len(entities)
 
         if self._success_substrings:
             success = any(s in raw for s in self._success_substrings) or bool(entities)
         else:
             success = code == 0 or bool(entities)
+        if success and not entities and "extractor_error" not in meta:
+            meta["empty_reason"] = "command succeeded but extractor found no matching data (real negative)"
 
         return self.make_result(selector, selector_type, raw, entities,
                                 success=success,
-                                error="" if success else (err[:200] or f"exit {code}"))
+                                error="" if success else (err[:200] or f"exit {code}"),
+                                metadata=meta)
 
 
 def _E(value, etype, conf, cite, meta=None):

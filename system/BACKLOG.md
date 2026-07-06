@@ -71,9 +71,12 @@ noise filters + no-key degradation good). Findings:
   flags, never asserts every implemented tool IS catalogued; 40/58 implemented tools are absent from the
   1031-catalog (so "58 of 1031" framing is untrue + the WARN is not a gate). Fix: add reverse assertion +
   reframe/catalog. — self-audit H2.
-- [B16] (bug/low/open) — `crtsh`/`wayback`/`urlscan` 200-but-empty = success (can't tell "source empty" from
+- [B16] (bug/low/**DONE 2026-07-06**) — `crtsh`/`wayback`/`urlscan` 200-but-empty = success (can't tell "source empty" from
   "filtered to nothing"); HttpTool/CliTool swallow extractor exceptions to `entities=[]` (broken extractor ==
-  "no findings"). Fix: surface row-count/exception in metadata. — self-audit M5/L2.
+  "no findings"). **Fixed:** added `ToolResult.metadata` diagnostic channel (transport `success` unchanged);
+  HttpTool/CliTool now SURFACE the extractor exception (`extractor_error`) instead of swallowing it, and record
+  `entities_extracted` + an `empty_reason`; crtsh/wayback/urlscan record `rows_returned`/`snapshots_returned`/
+  `results_returned` so "filtered to zero" is distinguishable from "source empty". — self-audit M5/L2.
 - [AUDIT-L] (low/open) — health gate runs only 3 selector types + excludes network tools → tool-rot invisible
   between manual golden audits (add a periodic non-blocking live-smoke); phone-regex national-format edge (L3);
   no concurrency lock on multi-commit (latent — single-committer invariant, L4).

@@ -29,9 +29,12 @@ class UrlScanTool(BaseTool):
             )
             raw_output = resp.text[:5000]
             entities = []
+            meta = {"http_status": resp.status_code}
+            results_returned = 0
 
             if resp.status_code == 200:
                 data = resp.json()
+                results_returned = len(data.get("results", []))
                 seen = set()
                 for result in data.get("results", [])[:10]:
                     page = result.get("page", {}) or {}
@@ -74,9 +77,15 @@ class UrlScanTool(BaseTool):
                             value=asn, entity_type="asn", confidence="probable",
                             source_citation=f"urlscan ASN: {asn} ({page.get('asnname', '')})"))
 
+            meta["results_returned"] = results_returned
+            meta["entities_extracted"] = len(entities)
+            if resp.status_code == 200 and results_returned and not entities:
+                # B16: urlscan returned scans but the relevance filter dropped them ALL as
+                # unrelated infra — a filter outcome, not "no scans". Flag it, don't hide it.
+                meta["empty_reason"] = f"{results_returned} scans returned but all relevance-filtered out"
             return self.make_result(
                 selector, selector_type, raw_output, entities,
-                success=resp.status_code == 200,
+                success=resp.status_code == 200, metadata=meta,
             )
         except requests.RequestException as e:
             return self.make_result(selector, selector_type, "", [], False, str(e))
