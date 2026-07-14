@@ -2,6 +2,29 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-07-14 (PUBLIC repo + leadership/IT briefing deck + CTI-source intake + new Telegram initiative)
+- **Repo pushed to a private remote then made PUBLIC:** github.com/cis379/osint-investigator-v3
+  (master + all tags incl. v3-windows-final-2026-07-06). Pre-public safety sweep clean (no
+  investigations/ or .env tracked; 0 secret matches); fixed the last hardcoded path (inline_ontology.py).
+- **Briefing deck built** (`deck/`): 13-slide Google-Slides-importable `osint-brief.pptx` (dark theme,
+  speaker notes on every slide) for leadership/IT. Covers: reworked OV-1 (3 distinct collector AGENTS
+  each labeled with its SKILL; red team as its own stage; paid-CTI placeholder on the structured
+  collector), ontology CATEGORIES, a real-tools sample, software laydown, the scam-case use case with
+  REAL rendered graph pictures (overview/attribution/tracker from INV-20260626-001), the IT-approval
+  case (data egress + dependency/tool provenance — the two IT concerns the operator named), and an
+  install-appendix (full software footprint). `render_graphs.py` (matplotlib+networkx) + `build_deck.py`
+  (python-pptx) regenerate it; both are BUILD-ONLY (not in requirements.txt). Operator chose to publish
+  the attribution image with real individual names (flagged + confirmed). Also closed **B16** (this
+  session's start) — honest empty results; all B1–B16 now closed.
+- **CTI-source intake (operator has API access):** discussed Shodan (full keyed API — upgrade over our
+  free shodan_internetdb), **DNSlytics** (reverse-WHOIS / reverse-NS/MX / reverse-analytics — directly
+  fills GAP-20260624-01 + G1), and **Flare** (dark-web/breach/actor-chatter — fills G7/G12). All three =
+  wire-now candidates via HttpTool; DNSlytics ranked #1 (closes the reverse-WHOIS gap). Logged in BACKLOG
+  INTAKE QUEUE; NOT yet wired.
+- **New operator initiative logged:** TELEGRAM AI-GENERATED-CONTENT / foreign-influence network mapping
+  (see BACKLOG "DIRECTED INITIATIVES"). Produced an initial PLAN report (local, gitignored `planning/` —
+  NOT in the public repo). Queried OSINT Navigator (2 queries, 48 left) for Telegram + AI-detector tools.
+
 ## 2026-07-06 (MIGRATION PREP — Mac-portable + agent-agnostic, self-rebuilding; V3 frozen)
 - Operator is changing machines (Windows → **Mac**) and may swap the driving agent (Claude Code →
   **Codex**). Directive: preserve what works, make it portable + AI-vendor-agnostic + fast to stand up,

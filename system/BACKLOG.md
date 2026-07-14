@@ -153,6 +153,21 @@ noise filters + no-key degradation good). Findings:
 - [G13] (gap/low/done) — cloud_buckets covers AWS S3 + GCS; Azure Blob + DigitalOcean Spaces not yet
   probed (different account/container + region model). Extend cloud_buckets when needed. — SpiderFoot intake.
 
+## DIRECTED INITIATIVES — operator 2026-07-14 (Telegram AI-content / foreign-influence)
+- [INIT-TELEGRAM-AICONTENT] (initiative/high/open — PLAN produced, not yet executed) — Operator's new
+  role problem: adversaries generating lots of AI-generated content on **Telegram**; operator knows some
+  of the TEXT (and sometimes channels) but little else. GOAL: find that content and SHOW it is part of a
+  coordinated deception / **foreign-influence** network. Deliverable requested = a PLAN, not an
+  investigation. **Initial plan report written to `planning/telegram-ai-influence-plan.md` (LOCAL/
+  gitignored — NOT public).** Core reframe: AI-detection alone is weak/unreliable → the provable signal is
+  COORDINATION (same/near-duplicate text across many channels + forwarding graphs + timing). Arc:
+  content(seed) → discovery → near-dup clustering → network(forwarding) → coordination/attribution → tiered
+  report. Uses our web_searcher line + graph/tiering/red-team; the DEEP-Telegram collection is the **G8
+  gap** (needs a session/API runner — e.g. Telethon/TeleGraphite/Telepathy). Navigator-surfaced tools:
+  TgramSearch, TeleGraphite, Telepathy, TOsint, telegram-archive (IA); AI-detectors Copyleaks/Originality/
+  Hive (Navigator noted NONE do near-dup clustering — that's a small BUILD). Flare (intake above) indexes
+  illicit Telegram = relevant. Next: operator picks a path (see plan §Recommended next steps).
+
 ## DIRECTED INITIATIVES — operator 2026-06-24 (full brief: intake/2026-06-24-operator-directives.md)
 Source: ground-truth comparison of INV-20260624-001 vs the Indicator/Maldita "ticket trap"
 investigation. Suggested sequence: D1+RT1 → R1 → G14+A1 → G15/G16/F1. [architectural] = design-confirm
@@ -238,6 +253,23 @@ with operator first; mandate given.
   PublicWWW/SpyOnWeb lookup still unproven against the network.
 
 ## INTAKE QUEUE (resources to assess — Manager classifies: wire / backlog / guide / reject)
+- [INTAKE-20260714-shodan] (intake/**wire-now**, operator has key) — full **Shodan API** (keyed). Upgrade
+  over our free `shodan_internetdb`: full host detail (banners/certs/HTTP), and the killer feature —
+  fingerprint SEARCH/pivot (favicon hash, TLS cert, JARM, HTTP title) to find OTHER hosts sharing a
+  fingerprint + host HISTORY. Infra estate-expansion + the reverse-fingerprint corroborator. Wire as
+  HttpTool on ip_v4/domain; add SHODAN_API_KEY (graceful degrade). Ranked #2 of the 3 CTI sources.
+- [INTAKE-20260714-dnslytics] (intake/**wire-now / #1**, operator/team has key) — **DNSlytics**: reverse
+  DNS/NS/MX + **reverse-WHOIS** (all domains by registrant) + **reverse-Analytics** (domains sharing a
+  GA/AdSense ID) + domain/IP history. Directly fills **GAP-20260624-01 (reverse-WHOIS — the top blocker)**
+  and eases **G1** (reverse-IP at scale) and gives a 2nd source for the tracker corroborator (vs SpyOnWeb).
+  Highest-value of the 3 for domain/IP network mapping. Wire as HttpTool (reverse endpoints) on domain/ip_v4.
+- [INTAKE-20260714-flare] (intake/**wire-now**, operator has key) — **Flare**: threat-exposure aggregator
+  over dark-web / illicit Telegram+forums / stealer-logs / leaked creds / paste+bucket+git leaks. Net-new
+  THREAT-INTEL line; fills **G7 (deep breach)** + **G12 (dark-web)** and pushes toward ATTRIBUTION. Wire as
+  HttpTool on domain/ip_v4/email; treat hits as LEADS (`possible`/`probable`) per tiering doctrine.
+  Note: Flare indexes illicit Telegram — RELEVANT to the new Telegram initiative below.
+
+
 - [INTAKE-20260626-user-scanner] (intake/**WIRED 2026-06-26**) — github.com/kaifcodec/user-scanner.
   **Validated hands-on (isolated venv) + adopted EMAIL-ONLY as `user_scanner` (structured line).**
   Benchmark vs holehe on the same email: user-scanner ~80% determinate over ~100 sites vs holehe ~37%

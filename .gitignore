@@ -50,6 +50,9 @@ ontology_viz/ontology_data.json
 # Legacy planning docs
 PROJECT.md
 
+# Operational planning / investigation-direction notes (sensitive — keep OUT of the public repo)
+planning/
+
 # Test scripts with hardcoded paths
 test_pipeline.py
 test_name_tools.py
