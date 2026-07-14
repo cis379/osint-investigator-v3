@@ -9,15 +9,20 @@ COLLECT ONLY — returns raw output + candidate entities for the SUPERVISOR to t
 graph (the raw/analysis split). The ACTIVE tier (session/account-based collection, e.g. Telethon) is
 deliberately SEPARATE and deferred to a research account.
 
-DISCOVERY (keyword/phrase -> channels) is handled by the WEB-SEARCH line (`site:t.me "phrase"` dorks +
-google_dork_generator), NOT here: the third-party index tgramsearch.com was evaluated and rejected —
-its result cards hide the real channel behind an internal /join/<id> redirect (no @handle / t.me link),
-so clean passive extraction isn't possible (would ship display-name noise). See BACKLOG intake note.
+telegram_search: search lyzem.com (a server-rendered Telegram search engine) by keyword/phrase ->
+  candidate channels with title + description. This is the DISCOVERY entry point — turn a known
+  AI-generated phrase or a topic into a channel set to investigate, then read each with
+  telegram_channel and walk the forwarding graph.
+
+(Rejected during evaluation: tgramsearch.com hides channels behind an internal /join/<id> redirect
+— no clean handle — and xtea.io is JS-walled; both would ship noise. lyzem exposes real channels in
+`.search-result-title` anchors, cleanly separable from site chrome. The WEB-SEARCH line's
+`site:t.me "phrase"` dorks remain a complementary discovery path.)
 """
 import os
 import re
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote_plus, parse_qs
 from bs4 import BeautifulSoup
 
 from .base import BaseTool, EntityFound
@@ -96,13 +101,21 @@ class TelegramChannelTool(BaseTool):
         if not name:
             return self.make_result(selector, selector_type, "", [], False,
                                     "not a Telegram channel (expected @handle or a t.me/ URL)")
-        url = f"https://t.me/s/{name}"
+        # IN-CHANNEL SEARCH: if the selector carried a ?q=<text>, search WITHIN the channel
+        # (Telegram's own t.me/s/<channel>?q=<text> renders only matching posts).
+        search_q = None
+        if "?" in (selector or ""):
+            src = selector if "//" in selector else "https://" + selector
+            search_q = (parse_qs(urlparse(src).query).get("q") or [None])[0]
+        url = f"https://t.me/s/{name}" + (f"?q={quote_plus(search_q)}" if search_q else "")
         try:
             resp = requests.get(url, headers={"User-Agent": _UA}, proxies=_PROXIES, timeout=20)
         except requests.RequestException as e:
             return self.make_result(selector, selector_type, "", [], False, str(e))
         raw = resp.text[:8000]
         meta = {"http_status": resp.status_code, "channel": name, "source": url}
+        if search_q:
+            meta["search_query"] = search_q
         if resp.status_code != 200:
             return self.make_result(selector, selector_type, raw, [], False,
                                     f"HTTP {resp.status_code}", metadata=meta)
@@ -156,4 +169,55 @@ class TelegramChannelTool(BaseTool):
         return self.make_result(selector, selector_type, raw, entities, success=True, metadata=meta)
 
 
-TOOLS = [TelegramChannelTool()]
+_LYZEM_CHROME = {"lyzemcom", "lyzembot", "mlyzembot", "editorpost_bot", "lyzem"}
+
+
+class TelegramSearchTool(BaseTool):
+    name = "telegram_search"
+    description = ("Passive Telegram DISCOVERY: searches lyzem.com (server-rendered Telegram search "
+                   "engine) by keyword/phrase and returns candidate channels with title + description. "
+                   "Turns a known phrase/topic into a channel set to investigate (feed results to "
+                   "telegram_channel to read + map). No account/key; passive; OSINT_PROXY seam.")
+    input_types = ["keyword"]
+    output_types = ["telegram_handle"]
+    method = "api"
+
+    def query(self, selector, selector_type):
+        if selector_type not in self.input_types:
+            return self.make_result(selector, selector_type, "", [], False,
+                                    f"telegram_search doesn't accept {selector_type}")
+        url = f"https://lyzem.com/search?q={quote_plus(selector)}"
+        try:
+            resp = requests.get(url, headers={"User-Agent": _UA}, proxies=_PROXIES, timeout=20)
+        except requests.RequestException as e:
+            return self.make_result(selector, selector_type, "", [], False, str(e))
+        raw = resp.text[:8000]
+        meta = {"http_status": resp.status_code, "source": url}
+        if resp.status_code != 200:
+            return self.make_result(selector, selector_type, raw, [], False,
+                                    f"HTTP {resp.status_code}", metadata=meta)
+        entities, seen = [], set()
+        try:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            # Real results sit inside a '.search-result-title' container (the t.me anchor is within
+            # it); site chrome (bots, promo) is NOT, so this excludes the noise that sank tgramsearch.
+            for el in soup.select(".search-result-title"):
+                a = el if el.name == "a" else el.find("a", href=True)
+                ch = _channel_from_href(a.get("href", "")) if a else None
+                if not ch or ch in seen or ch.lower() in _LYZEM_CHROME:
+                    continue
+                seen.add(ch)
+                title = el.get_text(strip=True)
+                entities.append(EntityFound(
+                    value="@" + ch, entity_type="telegram_handle", confidence="possible",
+                    source_citation=f"lyzem search '{selector}': @{ch}" + (f" — {title[:50]}" if title else ""),
+                    metadata={"query": selector, "title": title}))
+        except Exception as e:
+            meta["extractor_error"] = f"{type(e).__name__}: {e}"
+        meta["entities_extracted"] = len(entities)
+        if not entities and "extractor_error" not in meta:
+            meta["empty_reason"] = f"no channel results for '{selector}'"
+        return self.make_result(selector, selector_type, raw, entities, success=True, metadata=meta)
+
+
+TOOLS = [TelegramChannelTool(), TelegramSearchTool()]

@@ -2,6 +2,20 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-07-14 (Telegram Step 1b — clean SEARCH via lyzem + in-channel search)
+- Operator (rightly) pushed back on "no discovery." Re-probed the OTHER Navigator-surfaced search
+  indexes: **lyzem.com is CLEAN** (server-rendered; real channels in `.search-result-title` containers,
+  site chrome trivially excluded) — tgstat is JS/403, xtea JS-walled (both stay rejected). Wired
+  **`telegram_search`** (lyzem: keyword/phrase → candidate channels with title; routes on `keyword`;
+  passive + OSINT_PROXY + B16 honesty). Live-validated: 'ukraine'→6 real channels, 'crypto giveaway'→8
+  (crypto_giveaway96, crypto_world90, cc_gw…). Bug caught + fixed in validation: the result class is on
+  the anchor's PARENT, so `a.search-result-title` matched 0 → switched to `.search-result-title a[href]`.
+- Added **in-channel search** to `telegram_channel`: a `t.me/s/<ch>?q=<text>` selector now searches WITHIN
+  a channel (Telegram's own server-rendered filter) and records `search_query` in metadata.
+- Net: the "search text/channels → map them" loop is now push-button — telegram_search (find) →
+  telegram_channel (read + forwards + linked domains) → domain toolchain (attribute). TOOL_FLOOR 59→60;
+  health + 3 suites GREEN. Discovery is NO LONGER a gap (I was too quick to call it one after tgramsearch).
+
 ## 2026-07-14 (Telegram initiative — Step 1: passive tool `telegram_channel` wired; tgramsearch rejected)
 - Operator approved "tools now → dedicated agent next → active later." **Step 1 (autonomous, health-gated):**
   new `src/tools/telegram_tools.py` with **`telegram_channel`** — PASSIVE fetch of Telegram's own

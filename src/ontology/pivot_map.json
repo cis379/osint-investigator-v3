@@ -1795,7 +1795,8 @@
         "ext_0990_ahmia",
         "ext_0991_torch",
         "ext_0992_grayhatwarfare",
-        "ext_0993_intelligence_x"
+        "ext_0993_intelligence_x",
+        "telegram_search"
       ],
       "yields": [
         "aircraft_data",
@@ -1924,9 +1925,10 @@
       "tool_count": 326,
       "description": "Search keyword or phrase",
       "implemented_tools": [
-        "cloud_buckets"
+        "cloud_buckets",
+        "telegram_search"
       ],
-      "implemented_count": 1
+      "implemented_count": 2
     },
     "hashtag": {
       "tools": [

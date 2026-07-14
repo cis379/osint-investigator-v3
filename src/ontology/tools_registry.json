@@ -19909,6 +19909,7 @@
     "socialscan",
     "socid_extractor",
     "telegram_channel",
+    "telegram_search",
     "theharvester",
     "tls_cert",
     "tracker_reverse",
@@ -19918,5 +19919,5 @@
     "wikipedia_search",
     "xposedornot_email"
   ],
-  "built_beyond_roadmap_count": 41
+  "built_beyond_roadmap_count": 42
 }
