@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-base = Path(r"C:\Users\cis37\osint-investigator-v3\ontology_viz")
+base = Path(__file__).resolve().parent / "ontology_viz"  # repo-relative (portable)
 
 # Load data
 with open(base / "ontology_data.json", "r", encoding="utf-8") as f:
