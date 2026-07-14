@@ -19908,6 +19908,7 @@
     "sec_edgar_fts",
     "socialscan",
     "socid_extractor",
+    "telegram_channel",
     "theharvester",
     "tls_cert",
     "tracker_reverse",
@@ -19917,5 +19918,5 @@
     "wikipedia_search",
     "xposedornot_email"
   ],
-  "built_beyond_roadmap_count": 40
+  "built_beyond_roadmap_count": 41
 }

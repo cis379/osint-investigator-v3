@@ -2556,7 +2556,8 @@
         "ext_0906_telegram_group_members_scraper",
         "ext_0907_sn0int_telegram_module",
         "ext_0910_tele_seedbot",
-        "ext_0911_telegram_channel_analyzer_bot"
+        "ext_0911_telegram_channel_analyzer_bot",
+        "telegram_channel"
       ],
       "yields": [
         "activity",
@@ -2579,8 +2580,10 @@
       ],
       "tool_count": 12,
       "description": "Telegram username",
-      "implemented_tools": [],
-      "implemented_count": 0
+      "implemented_tools": [
+        "telegram_channel"
+      ],
+      "implemented_count": 1
     },
     "audio_file": {
       "tools": [

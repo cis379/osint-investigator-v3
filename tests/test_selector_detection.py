@@ -50,11 +50,18 @@ def main():
     p = plan_collection("allthespills", "username")
     check("sherlock" in p["structured_tools"] and "maigret" in p["structured_tools"],
           "username routes to sherlock+maigret")
-    # explicit telegram_handle (no structured tools) must fall back to username
+    # telegram_handle now has a purpose-built tool (telegram_channel) -> routes to it, NO fallback.
+    # Clean type separation: `username` = cross-platform enumeration; `telegram_handle` = Telegram-specific.
     p2 = plan_collection("allthespills", "telegram_handle")
-    check(p2["fallback_applied"] and p2["effective_type"] == "username",
-          "telegram_handle falls back to general username")
-    check("maigret" in p2["structured_tools"],
+    check(not p2["fallback_applied"] and p2["effective_type"] == "telegram_handle",
+          "telegram_handle routes to its own tool (no username fallback)")
+    check("telegram_channel" in p2["structured_tools"],
+          "telegram_handle exposes telegram_channel")
+    # a STILL-toolless handle-like type must keep falling back to the username enumerators (invariant)
+    p2b = plan_collection("someuser", "discord_id")
+    check(p2b["fallback_applied"] and p2b["effective_type"] == "username",
+          "toolless handle type falls back to general username")
+    check("maigret" in p2b["structured_tools"],
           "fallback exposes the username enumerators")
     # a real type with tools must NOT fall back
     p3 = plan_collection("Robin Grieff", "name")

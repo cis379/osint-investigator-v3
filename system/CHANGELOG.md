@@ -2,6 +2,26 @@
 
 One line per change: what + why. The Manager appends here every working session. Newest first.
 
+## 2026-07-14 (Telegram initiative — Step 1: passive tool `telegram_channel` wired; tgramsearch rejected)
+- Operator approved "tools now → dedicated agent next → active later." **Step 1 (autonomous, health-gated):**
+  new `src/tools/telegram_tools.py` with **`telegram_channel`** — PASSIVE fetch of Telegram's own
+  server-rendered `t.me/s/<channel>` (no account/key, one GET, generic UA, OSINT_PROXY seam). Extracts
+  posts + **forwarded-from source channels** (the forwarding-graph edges = coordination signal) + linked
+  channels + **external domains** in posts (attribution pivots that hand off to the domain toolchain).
+  Routes on `telegram_handle` (also accepts t.me `url`); B16 empty-honesty in metadata. TOOL_FLOOR 58→59;
+  annotate refreshed; live-validated on @durov (20 posts, 11.7M subs, real domain links).
+- **Evaluated the Navigator-surfaced passive indexes with real probes:** `t.me/s` = server-rendered, clean
+  (WIRED); **tgramsearch REJECTED** (result cards hide the channel behind an internal `/join/<id>` redirect
+  — no @handle/t.me link — so clean passive extraction is impossible; shipping display-names would be the
+  parser-artifact noise banned after GAP-20260626-01); **xtea.io REJECTED** (JS-walled). DISCOVERY stays on
+  the WEB-SEARCH line (`site:t.me` dorks + google_dork_generator) — its correct home.
+- **Behavior refinement (correct, not a regression):** `telegram_handle` now has a purpose-built tool, so it
+  no longer hits the general-username fallback → clean type split (`username`=cross-platform enumeration;
+  `telegram_handle`=Telegram-specific). Updated `test_selector_detection.py` to lock this in while preserving
+  the general-fallback invariant on a still-toolless handle type (discord_id). Health + 3 suites GREEN.
+- **NEXT: Step 2 (needs sign-off)** — dedicated `telegram_collector.md` skill orchestrating the passive
+  playbook (discover→fetch→walk-forwards→pivot); **Step 3** — active tier (Telethon) on the research account.
+
 ## 2026-07-14 (PUBLIC repo + leadership/IT briefing deck + CTI-source intake + new Telegram initiative)
 - **Repo pushed to a private remote then made PUBLIC:** github.com/cis379/osint-investigator-v3
   (master + all tags incl. v3-windows-final-2026-07-06). Pre-public safety sweep clean (no

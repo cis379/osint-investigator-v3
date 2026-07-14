@@ -166,7 +166,19 @@ noise filters + no-key degradation good). Findings:
   gap** (needs a session/API runner — e.g. Telethon/TeleGraphite/Telepathy). Navigator-surfaced tools:
   TgramSearch, TeleGraphite, Telepathy, TOsint, telegram-archive (IA); AI-detectors Copyleaks/Originality/
   Hive (Navigator noted NONE do near-dup clustering — that's a small BUILD). Flare (intake above) indexes
-  illicit Telegram = relevant. Next: operator picks a path (see plan §Recommended next steps).
+  illicit Telegram = relevant.
+  **STEP 1 DONE 2026-07-14 (passive tools; operator-approved "tools now, agent next, active later"):**
+  wired **`telegram_channel`** (`src/tools/telegram_tools.py`) — passive fetch of Telegram's OWN
+  server-rendered `t.me/s/<channel>` (no account/key): extracts posts + **forwarded-from source channels
+  (forwarding-graph edges)** + linked channels + **external domains** in posts (attribution pivots →
+  domain toolchain). Routes on `telegram_handle` (+ accepts t.me `url`); passive-first + OSINT_PROXY seam
+  + B16 empty-honesty. TOOL_FLOOR 58→59; live-validated (@durov: 20 posts). Clean type split:
+  `username`=cross-platform enumeration vs `telegram_handle`=Telegram-specific (test updated; general
+  fallback invariant preserved via discord_id). **`tgramsearch` EVALUATED & REJECTED** — cards hide the
+  channel behind an internal `/join/<id>` redirect (no @handle/t.me link) → no clean passive extraction
+  (would ship display-name noise, cf. GAP-20260626-01); DISCOVERY stays on the WEB-SEARCH line
+  (`site:t.me` dorks). xtea.io also rejected (JS-walled). **NEXT (Step 2, needs sign-off):** dedicated
+  `telegram_collector.md` skill (discover→fetch→walk-forwards→pivot); then Step 3 active tier (research acct).
 
 ## DIRECTED INITIATIVES — operator 2026-06-24 (full brief: intake/2026-06-24-operator-directives.md)
 Source: ground-truth comparison of INV-20260624-001 vs the Indicator/Maldita "ticket trap"

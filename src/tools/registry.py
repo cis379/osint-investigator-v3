@@ -20,6 +20,7 @@ from . import sf_derived_tools
 from . import web_tech_tools
 from . import tracker_reverse_tools
 from . import userscanner_tools
+from . import telegram_tools
 
 ALL_TOOL_MODULES = [
     username_tools,
@@ -40,6 +41,7 @@ ALL_TOOL_MODULES = [
     web_tech_tools,
     tracker_reverse_tools,
     userscanner_tools,
+    telegram_tools,
 ]
 
 _tool_instances: dict[str, BaseTool] = {}
